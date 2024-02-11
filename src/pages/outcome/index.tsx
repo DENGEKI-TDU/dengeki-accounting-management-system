@@ -50,9 +50,10 @@ const Home: NextPage = () => {
       isClosable: true,
     });
 
-    const fileName = document
-      .getElementById("reciept")!
-      .value.split("\\")
+    const fileName = (
+      document.getElementById("reciept")! as HTMLInputElement
+    ).value
+      .split("\\")
       .slice(-1)[0];
 
     const formData = new FormData();
