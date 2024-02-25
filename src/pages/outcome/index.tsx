@@ -1,3 +1,4 @@
+"use client";
 import {
   Container,
   FormLabel,
@@ -24,6 +25,8 @@ import "swiper/css/navigation"; // スタイルをインポート
 import "swiper/css/pagination"; // スタイルをインポート
 import { UseLoginState } from "@/hooks/UseLoginState";
 import Router, { useRouter } from "next/router";
+import { supabase } from "../../../utils/supabase/supabase";
+import { v4 as uuidv4 } from "uuid";
 
 const Home: NextPage = () => {
   const toast = useToast();
@@ -35,11 +38,46 @@ const Home: NextPage = () => {
   const [name, setName] = useState("");
   const [fixture, setFixture] = useState("");
   const [memo, setMemo] = useState("");
+  const [year, setYear] = useState("");
   const [images, setImages] = useState<Blob[]>([]);
-  const inputFileRef = useRef<HTMLInputElement>(null);
-  const hookurl = process.env.NEXT_PUBLIC_HOOK_URL!;
   const [isLogin, Login, Logout] = UseLoginState(false);
   const path = router.pathname;
+  const public_url = process.env.NEXT_PUBLIC_SUPABASE_PUBLIC_URL;
+  const listAllImage = async () => {
+    const tempUrlList: string[] = [];
+    const { data, error } = await supabase.storage
+      .from("dengeki-receipt")
+      .list("img", {
+        limit: 100,
+        offset: 0,
+        sortBy: { column: "created_at", order: "desc" },
+      });
+    if (error) {
+      console.log(error);
+      return;
+    }
+
+    for (let index = 0; index < data.length; index++) {
+      if (data[index].name != ".emptyFolderPlaceholder") {
+        tempUrlList.push(data[index].name);
+      }
+    }
+  };
+
+  useEffect(() => {
+    (async () => {
+      await listAllImage();
+    })();
+  }, []);
+
+  const [file, setFile] = useState<File>();
+  const handleChangeFile = (e: any) => {
+    if (e.target.files.length !== 0) {
+      setFile(e.target.files[0]);
+    }
+    if (!e.target.files) return;
+    setImages([...e.target.files]);
+  };
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -49,12 +87,6 @@ const Home: NextPage = () => {
       duration: 9000,
       isClosable: true,
     });
-
-    const fileName = (
-      document.getElementById("reciept")! as HTMLInputElement
-    ).value
-      .split("\\")
-      .slice(-1)[0];
 
     const formData = new FormData();
 
@@ -72,29 +104,6 @@ const Home: NextPage = () => {
 
     const typeAlphabet = alphabet[types.indexOf(type)];
 
-    const valueContent: string =
-      "# 支出報告\n購入日時 : " +
-      date +
-      "\n分類 : " +
-      type +
-      "\n分類番号 : " +
-      typeAlphabet +
-      subType +
-      "\n金額 : ¥" +
-      value +
-      "\n購入者 : " +
-      name +
-      "\n備品名 : " +
-      fixture +
-      "\nメモ : " +
-      memo;
-    for await (const [i, v] of Object.entries(images)) {
-      formData.append("files", v);
-    }
-    await fetch(`/api/upload`, {
-      method: "POST",
-      body: formData,
-    });
     try {
       const body = {
         date,
@@ -103,6 +112,7 @@ const Home: NextPage = () => {
         subType,
         fixture,
         value,
+        year,
       };
       await fetch("/api/database/outcome", {
         method: "POST",
@@ -112,19 +122,54 @@ const Home: NextPage = () => {
     } catch (error) {
       console.error(error);
     }
-
-    try {
-      const body = {
-        valueContent,
-        fileName,
-      };
-      await fetch("api/discord/send", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-    } catch (error) {
-      console.error(error);
+    if (file!!.type.match("image.*")) {
+      const fileExtension = file!!.name.split(".").pop();
+      const uuid = uuidv4();
+      const inputFileName = `image/${uuid}.${fileExtension}`;
+      const ImageURL = public_url + inputFileName;
+      const { error } = await supabase.storage
+        .from("dengeki-receipt")
+        .upload(inputFileName, file!!);
+      if (error) {
+        alert("エラーが発生しました：" + error.message);
+        return;
+      }
+      setFile(undefined);
+      await listAllImage();
+      const valueContent: string =
+        "# 支出報告\n購入日時 : " +
+        date +
+        "\n会計年度 : " +
+        year +
+        "\n分類 : " +
+        type +
+        "\n分類番号 : " +
+        typeAlphabet +
+        subType +
+        "\n金額 : ¥" +
+        value +
+        "\n購入者 : " +
+        name +
+        "\n備品名 : " +
+        fixture +
+        "\nメモ : " +
+        memo +
+        "\n" +
+        ImageURL;
+      try {
+        const body = {
+          valueContent,
+        };
+        await fetch("api/discord/send", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+      } catch (error) {
+        console.error(error);
+      }
+    } else {
+      alert("画像ファイル以外はアップロード出来ません。");
     }
     toast({
       title: "アップロード完了",
@@ -136,15 +181,24 @@ const Home: NextPage = () => {
     router.push("/");
   };
 
-  const handleOnAddImage = (e: ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files) return;
-    setImages([...e.target.files]);
-  };
   if (isLogin) {
     return (
       <Container pt="10">
         <Heading>支出報告フォーム</Heading>
         <form onSubmit={onSubmit} encType="multipart/form-data">
+          <FormControl>
+            <FormLabel>会計年度</FormLabel>
+            <NumberInput
+              min={new Date().getFullYear() - 2}
+              onChange={(e) => setYear(String(Number(e)))}
+            >
+              <NumberInputField />
+              <NumberInputStepper>
+                <NumberIncrementStepper />
+                <NumberDecrementStepper />
+              </NumberInputStepper>
+            </NumberInput>
+          </FormControl>
           <FormControl>
             <FormLabel>購入日時</FormLabel>
             <Input type="date" onChange={(e) => setDate(e.target.value)} />
@@ -211,6 +265,8 @@ const Home: NextPage = () => {
                   <option value="2">庶務代</option>
                 </>
               ) : null}
+              <option value="X">その他</option>
+              <option value="Z">不明</option>
             </Select>
           </FormControl>
           <FormControl>
@@ -231,10 +287,11 @@ const Home: NextPage = () => {
             <FormLabel htmlFor="postImages">レシート画像</FormLabel>
             <Input
               type="file"
-              accept="image/*,.png,.jpg,.jpeg,.gif"
-              onChange={handleOnAddImage}
-              ref={inputFileRef}
-              id="reciept"
+              id="formFile"
+              accept="image/*"
+              onChange={(e) => {
+                handleChangeFile(e);
+              }}
             />
           </FormControl>
           <FormControl>
@@ -246,12 +303,13 @@ const Home: NextPage = () => {
             <Textarea onChange={(e) => setMemo(e.target.value)} />
           </FormControl>
           {date != "" &&
+          year != "" &&
           type != "" &&
           subType != "" &&
           value != 0 &&
           name != "" &&
           fixture != "" &&
-          images.length != 0 ? (
+          file != undefined ? (
             <Input
               type="submit"
               value="提出"

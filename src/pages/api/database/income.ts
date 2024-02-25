@@ -6,12 +6,14 @@ export default async function handle(
       date: string;
       fixture: string;
       value: number;
+      year: string;
     };
   },
   res: {
     json: (arg0: {
       id: number;
       date: Date;
+      year: string;
       type: string;
       typeAlphabet: String;
       subtype: string;
@@ -20,11 +22,12 @@ export default async function handle(
     }) => void;
   }
 ) {
-  const { date, fixture, value } = req.body;
+  const { date, fixture, value, year } = req.body;
   const buyDate = new Date(date);
   const result = await prisma.account.create({
     data: {
       date: buyDate,
+      year: year,
       type: "",
       subtype: "",
       fixture: fixture,

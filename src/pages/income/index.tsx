@@ -24,6 +24,7 @@ export default function Home() {
   const [value, setValue] = useState(0);
   const [fixture, setFixture] = useState("");
   const [memo, setMemo] = useState("");
+  const [year, setYear] = useState("");
   const toast = useToast();
   const hookurl = process.env.NEXT_PUBLIC_HOOK_URL!;
   const router = useRouter();
@@ -40,6 +41,8 @@ export default function Home() {
     const valueContent: string =
       "# 収入報告\n取得日 : " +
       date +
+      "\n会計年度 : " +
+      year +
       "\n金額 : ¥" +
       value +
       "\n収入事由 : " +
@@ -55,6 +58,7 @@ export default function Home() {
         date,
         fixture,
         value,
+        year,
       };
       await fetch("/api/database/income", {
         method: "POST",
@@ -85,6 +89,19 @@ export default function Home() {
         <Container>
           <Heading>収入報告フォーム</Heading>
           <form onSubmit={onsubmit} encType="multipart/form-data">
+            <FormControl>
+              <FormLabel>会計年度</FormLabel>
+              <NumberInput
+                min={new Date().getFullYear() - 2}
+                onChange={(e) => setYear(String(Number(e)))}
+              >
+                <NumberInputField />
+                <NumberInputStepper>
+                  <NumberIncrementStepper />
+                  <NumberDecrementStepper />
+                </NumberInputStepper>
+              </NumberInput>
+            </FormControl>
             <FormControl>
               <FormLabel>取得日</FormLabel>
               <Input type="date" onChange={(e) => setDate(e.target.value)} />
