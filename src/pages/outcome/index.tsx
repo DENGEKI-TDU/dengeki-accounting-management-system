@@ -154,8 +154,9 @@ const Home: NextPage = () => {
         fixture +
         "\nメモ : " +
         memo +
-        "\n" +
-        ImageURL;
+        "\n[レシート画像URL](" +
+        ImageURL +
+        ")";
       try {
         const body = {
           valueContent,
