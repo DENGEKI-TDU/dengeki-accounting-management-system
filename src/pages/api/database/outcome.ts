@@ -27,7 +27,7 @@ export default async function handle(
 ) {
   const { date, type, typeAlphabet, subType, fixture, value, year } = req.body;
   const buyDate = new Date(date);
-  const result = await prisma.account.create({
+  const result = await prisma.mainAccount.create({
     data: {
       year: year,
       date: buyDate,
