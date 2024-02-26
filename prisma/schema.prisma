@@ -7,7 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model account {
+model mainAccount {
   id            Int @id @default(autoincrement())
   year          String
   date          DateTime
