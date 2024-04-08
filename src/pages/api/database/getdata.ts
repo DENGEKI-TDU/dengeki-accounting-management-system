@@ -1,7 +1,7 @@
 import prisma from "@/lib/prisma";
 
 export default async function handle(res: {
-  json: (arg0: { id: number; accessHistory: Date }) => void;
+  json: (arg0: { id: number; accessData: Date }) => void;
 }) {
   var year = new Date().getFullYear();
   const month = new Date().getMonth();
