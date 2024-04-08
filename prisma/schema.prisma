@@ -18,3 +18,8 @@ model mainAccount {
   income        Int
   outcome       Int
 }
+
+model accessHistory {
+  id           Int@id @default(autoincrement())
+  accessDate   DateTime
+}
