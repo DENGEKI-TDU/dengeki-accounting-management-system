@@ -1,8 +1,10 @@
 import prisma from "@/lib/prisma";
+import type { NextApiRequest, NextApiResponse } from "next";
 
-export default async function handle(res: {
-  json: (arg0: { id: number; accessDate: Date }) => void;
-}) {
+export default async function handle(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
   var year = new Date().getFullYear();
   const month = new Date().getMonth();
   if (month < 4) {
@@ -13,5 +15,5 @@ export default async function handle(res: {
       accessDate: new Date(),
     },
   });
-  res.json(result);
+  res.status(200).json(result);
 }
