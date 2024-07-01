@@ -20,6 +20,11 @@ model mainAccount {
 }
 
 model accessHistory {
-  id           Int@id @default(autoincrement())
+  id           Int @id @default(autoincrement())
   accessDate   DateTime
+}
+
+model threadID {
+  id           Int @id @default(autoincrement())
+  threadID     String
 }

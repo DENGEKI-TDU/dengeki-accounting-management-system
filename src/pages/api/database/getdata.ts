@@ -5,12 +5,10 @@ export default async function handle(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  var year = new Date().getFullYear();
-  const month = new Date().getMonth();
-  if (month < 4) {
-    year - 1;
-  }
-  const result = await prisma.accessHistory.create({
+  const result = await prisma.accessHistory.update({
+    where: {
+      id: 1
+    },
     data: {
       accessDate: new Date(),
     },
