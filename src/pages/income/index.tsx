@@ -15,7 +15,7 @@ import {
   useToast,
   Button,
 } from "@chakra-ui/react";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/router";
 
 export default function Home() {
@@ -25,10 +25,14 @@ export default function Home() {
   const [fixture, setFixture] = useState("");
   const [memo, setMemo] = useState("");
   const [year, setYear] = useState("");
+  const [inputPass,setInputPass] = useState("")
   const toast = useToast();
   const hookurl = process.env.NEXT_PUBLIC_HOOK_URL!;
   const router = useRouter();
   const path = router.pathname;
+  useEffect(() => {
+    setInputPass(localStorage.getItem("storage_token")!)
+  },[])
 
   const onsubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -59,6 +63,7 @@ export default function Home() {
         fixture,
         value,
         year,
+        inputPass,
       };
       await fetch("/api/database/income", {
         method: "POST",
