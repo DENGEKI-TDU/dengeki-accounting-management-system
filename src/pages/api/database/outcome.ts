@@ -10,9 +10,11 @@ export default async function handle(
       fixture: string;
       value: number;
       year: string;
+      inputPass: string;
     };
   },
   res: {
+    status: any;
     json: (arg0: {
       id: number;
       date: Date;
@@ -25,19 +27,23 @@ export default async function handle(
     }) => void;
   }
 ) {
-  const { date, type, typeAlphabet, subType, fixture, value, year } = req.body;
+  const { date, type, typeAlphabet, subType, fixture, value, year, inputPass } = req.body;
   const buyDate = new Date(date);
-  const result = await prisma.mainAccount.create({
-    data: {
-      year: year,
-      date: buyDate,
-      type: type,
-      subtype: subType,
-      fixture: fixture,
-      income: 0,
-      outcome: value,
-      typeAlphabet: typeAlphabet,
-    },
-  });
-  res.json(result);
+  if(inputPass == process.env.NEXT_PUBLIC_USER_TOKEN){ 
+    const result = await prisma.mainAccount.create({
+      data: {
+        year: year,
+        date: buyDate,
+        type: type,
+        subtype: subType,
+        fixture: fixture,
+        income: 0,
+        outcome: value,
+        typeAlphabet: typeAlphabet,
+      },
+    });
+    res.json(result);
+  } else {
+    res.status(403).json("permission denied.")
+  }
 }

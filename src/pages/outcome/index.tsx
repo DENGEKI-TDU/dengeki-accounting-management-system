@@ -41,8 +41,12 @@ const Home: NextPage = () => {
   const [year, setYear] = useState("");
   const [images, setImages] = useState<Blob[]>([]);
   const [isLogin, Login, Logout] = UseLoginState(false);
+  const [inputPass,setInputPass] = useState("")
   const path = router.pathname;
   const public_url = process.env.NEXT_PUBLIC_SUPABASE_PUBLIC_URL;
+  useEffect(() => {
+    setInputPass(localStorage.getItem("storage_token")!)
+  },[])
   const listAllImage = async () => {
     const tempUrlList: string[] = [];
     const { data, error } = await supabase.storage
@@ -113,6 +117,7 @@ const Home: NextPage = () => {
         fixture,
         value,
         year,
+        inputPass
       };
       await fetch("/api/database/outcome", {
         method: "POST",
