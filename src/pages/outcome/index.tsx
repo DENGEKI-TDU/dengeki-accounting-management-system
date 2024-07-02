@@ -130,7 +130,7 @@ const Home: NextPage = () => {
     if (file!!.type.match("image.*")) {
       const fileExtension = file!!.name.split(".").pop();
       const uuid = uuidv4();
-      const inputFileName = `image/${uuid}.${fileExtension}`;
+      const inputFileName = `image/${year}/${uuid}.${fileExtension}`;
       const ImageURL = public_url + inputFileName;
       const { error } = await supabase.storage
         .from("dengeki-receipt")
