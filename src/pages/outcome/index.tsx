@@ -40,7 +40,7 @@ const Home: NextPage = () => {
   const [memo, setMemo] = useState("");
   const [year, setYear] = useState("");
   const [images, setImages] = useState<Blob[]>([]);
-  const [isLogin, Login, Logout] = UseLoginState(false);
+  const [isAdmin,isUser, Login, Logout] = UseLoginState(false);
   const [inputPass,setInputPass] = useState("")
   const path = router.pathname;
   const public_url = process.env.NEXT_PUBLIC_SUPABASE_PUBLIC_URL;
@@ -187,7 +187,7 @@ const Home: NextPage = () => {
     router.push("/");
   };
 
-  if (isLogin) {
+  if (isAdmin || isUser) {
     return (
       <Container pt="10">
         <Heading>支出報告フォーム</Heading>

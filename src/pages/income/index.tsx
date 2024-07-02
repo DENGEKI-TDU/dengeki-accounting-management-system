@@ -19,7 +19,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/router";
 
 export default function Home() {
-  const [isLogin, Login, Logout] = UseLoginState(false);
+  const [isAdmin,isUser, Login, Logout] = UseLoginState(false);
   const [date, setDate] = useState("");
   const [value, setValue] = useState(0);
   const [fixture, setFixture] = useState("");
@@ -88,7 +88,7 @@ export default function Home() {
     router.push("/");
   };
 
-  if (isLogin) {
+  if (isAdmin || isUser) {
     return (
       <>
         <Container>
