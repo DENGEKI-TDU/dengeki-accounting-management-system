@@ -19,7 +19,7 @@ export default function Home() {
   const router = useRouter();
   const serceParams = useSearchParams();
   const pageLocate = serceParams.get("pagelocate");
-  const [isLogin, Login, Logout] = UseLoginState(false);
+  const [isAdmin,isUser, Login, Logout] = UseLoginState(false);
   const [inputID, setInputID] = useState("");
   const [inputPass, setInputPass] = useState("");
   const [IP, setIP] = useState("");
@@ -42,7 +42,7 @@ export default function Home() {
   return (
     <>
       <VStack>
-        {isLogin ? (
+        {isAdmin || isUser ? (
           <Heading>ログイン済みです。</Heading>
         ) : (
           <Center>

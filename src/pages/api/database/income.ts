@@ -25,8 +25,27 @@ export default async function handle(
   }
 ) {
   const { date, fixture, value, year,inputPass } = req.body;
+  let isAdmin = false;
+  let isUser = false;
   const buyDate = new Date(date);
-  if(inputPass == process.env.NEXT_PUBLIC_USER_TOKEN){
+  const sessionToken = inputPass
+  try {
+    const data = await prisma.tokens.findFirst({
+			where:{
+				tokens:sessionToken
+			}
+		});
+    console.log(data)
+    if(data){
+      if(data.limit > new Date()){
+        isUser = data.isUser
+        isAdmin = data.isAdmin
+      }
+    }
+  } catch(error) {
+    console.error(error)
+  }
+  if(isAdmin || isUser){
     const result = await prisma.mainAccount.create({
       data: {
         date: buyDate,

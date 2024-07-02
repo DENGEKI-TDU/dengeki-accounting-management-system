@@ -5,18 +5,42 @@ export default async function handle(
   req: {
     body: {
         threadID: string,
+        inputPass: string,
     }
   } ,
   res: NextApiResponse
 ) {
-    const {threadID} = req.body;
-  const result = await prisma.threadID.update({
-    where: {
-      id: 1
-    },
-    data:{
-        threadID: threadID,
+    const {threadID,inputPass} = req.body;
+    let isAdmin = false;
+    let isUser = false;
+    const sessionToken = inputPass
+    try {
+      const data = await prisma.tokens.findFirst({
+        where:{
+          tokens:sessionToken
+        }
+      });
+      console.log(data)
+      if(data){
+        if(data.limit > new Date()){
+          isUser = data.isUser
+          isAdmin = data.isAdmin
+        }
+      }
+    } catch(error) {
+      console.error(error)
     }
-  });
-  res.status(200).json(result?.threadID);
+    if(isAdmin || isUser){
+      const result = await prisma.threadID.update({
+        where: {
+          id: 1
+        },
+        data:{
+            threadID: threadID,
+        }
+      });
+      res.status(200).json(result?.threadID);
+    } else {
+      res.status(403).json("permission denied.")
+    }
 }

@@ -28,3 +28,12 @@ model threadID {
   id           Int @id @default(autoincrement())
   threadID     String
 }
+
+model tokens {
+  id           Int @id @default(autoincrement())
+  tokens       String
+  isUser       Boolean
+  isAdmin      Boolean
+  loginDate    DateTime
+  limit        DateTime
+}

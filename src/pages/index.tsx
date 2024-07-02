@@ -4,13 +4,13 @@ import { UseLoginState } from "@/hooks/UseLoginState";
 import { useRouter } from "next/router";
 
 export default function Home() {
-  const [isLogin, Login, Logout] = UseLoginState(false);
+  const [isAdmin,isUser, Login, Logout] = UseLoginState(false);
   const router = useRouter();
   return (
     <>
       <VStack>
         <Text fontSize={"2xl"}>ホーム</Text>
-        {isLogin ? (
+        {isAdmin || isUser ? (
           <>
             <Link href={"/income"}>
               <Box borderBottom="1px solid #fc8819">収入報告</Box>
