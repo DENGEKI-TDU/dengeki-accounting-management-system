@@ -35,9 +35,6 @@ export default function Home() {
   }, []);
   function setLogin() {
     Login(inputID, inputPass, IP);
-    {
-      pageLocate ? router.push(pageLocate) : router.push("/");
-    }
   }
   return (
     <>

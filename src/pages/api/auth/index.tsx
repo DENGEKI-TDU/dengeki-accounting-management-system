@@ -16,7 +16,7 @@ export default async function Handler(
 				tokens:sessionToken
 			}
 		})
-		res.status(200).json(sessionUser)
+		res.status(200).json({"isAdmin":sessionUser?.isAdmin,"isUser":sessionUser?.isUser})
 	} else {
 		res.status(403).json("permission denied.")
 	}

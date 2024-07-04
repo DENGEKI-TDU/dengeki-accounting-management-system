@@ -37,3 +37,17 @@ model tokens {
   loginDate    DateTime
   limit        DateTime
 }
+
+model users {
+  id           Int  @id @default(autoincrement())
+  user         String
+  pass         String
+  isAdmin      Boolean
+  isUser       Boolean
+}
+
+model oneTimeToken {
+  id           Int @id @default(autoincrement())
+  token        String
+  limit        DateTime
+}
