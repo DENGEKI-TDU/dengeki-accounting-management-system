@@ -24,7 +24,7 @@ export default async function Handler(
                 limit:new Date(new Date().setMinutes(new Date().getMinutes()+3))
             }
         })
-        res.status(200).json({"token":randomToken})
+        res.status(200).json({"token":randomToken,"ip":ip.ip,"allow":allowIP})
     // } else {
     //     res.status(403).json("permission denied.")
     // }
