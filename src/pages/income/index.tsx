@@ -57,6 +57,9 @@ export default function Home() {
       username: "収入報告くん",
       content: valueContent,
     };
+    const oneTimePass = await fetch("api/auth/generatePass")
+    const passResult = await oneTimePass.json()
+    const oneTimeToken = passResult.token
     try {
       const body = {
         date,
@@ -64,6 +67,7 @@ export default function Home() {
         value,
         year,
         inputPass,
+        oneTimeToken,
       };
       await fetch("/api/database/income", {
         method: "POST",
@@ -82,7 +86,7 @@ export default function Home() {
       title: "アップロード完了",
       description: "アップロードが完了しました。アップロード日時：" + date,
       status: "success",
-      duration: 5000,
+      duration: 2500,
       isClosable: true,
     });
     router.push("/");

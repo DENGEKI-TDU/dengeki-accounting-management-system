@@ -9,6 +9,11 @@ export default function Home() {
   return (
     <>
       <VStack>
+        {isAdmin || isUser ?
+          <>
+            <Text>Log in as : {isAdmin?"管理者":"一般ユーザー"}</Text>
+          </> 
+        : null}
         <Text fontSize={"2xl"}>ホーム</Text>
         {isAdmin || isUser ? (
           <>
@@ -18,9 +23,11 @@ export default function Home() {
             <Link href={"/outcome"}>
               <Box borderBottom="1px solid #fc8819">支出報告</Box>
             </Link>
+            {isAdmin ? 
             <Link href="/generate">
               <Box borderBottom="1px solid #fc8819">excel出力</Box>
             </Link>
+            : null }
             <Button onClick={Logout}>ログアウト</Button>
           </>
         ) : (

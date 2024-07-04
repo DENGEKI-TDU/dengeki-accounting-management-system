@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
 import { createHash, randomUUID } from "crypto";
 import { useToast } from "@chakra-ui/react";
+import { useRouter } from "next/router";
 
 const STORAGE_TOKEN = "storage_token";
 const USER_ID = process.env.NEXT_PUBLIC_USER_ID;
 const USER_TOKEN = process.env.NEXT_PUBLIC_USER_TOKEN;
-const ADMIN_ID = process.env.NEXT_PUBLIC_ADMNI_ID;
+const ADMIN_ID = process.env.NEXT_PUBLIC_ADMIN_ID;
 const ADMIN_TOKEN = process.env.NEXT_PUBLIC_ADMIN_TOKEN;
 const acceptIP = process.env.NEXT_PUBLIC_HOST_IP!;
 
@@ -27,22 +28,7 @@ export function UseLoginState(
   const [isAdminInternal,setIsAdminInternal] = useState(defaultValue)
 
   const toast = useToast();
-  // const sessionToken = localStorage.getItem(STORAGE_TOKEN)
-
-  async function loginAuth(isAdmin:boolean,isUser:boolean,tokens:string){
-    const loginDate = new Date()
-    const body = {
-      tokens,
-      loginDate,
-      isAdmin,
-      isUser,
-    }
-    await fetch("/api/auth/login",{
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    })
-  }
+  const router = useRouter();
 
   async function logoutAuth(tokens:string){
     const body = {
@@ -53,6 +39,51 @@ export function UseLoginState(
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     })
+  }
+
+  async function loginAuth(id:string,pass:string,token:string){
+    toast({
+      title: "ログイン中",
+      status: "loading",
+      duration: 2000,
+      isClosable: true,
+    });
+    const oneTimePass = await fetch("api/auth/generatePass")
+    const passResult = await oneTimePass.json()
+    const oneTimeToken = passResult.token
+    const body = {
+      id,
+      pass,
+      token,
+      oneTimeToken,
+    }
+    const response = await fetch("/api/auth/login",{
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    })
+    const result = await response.json()
+    if(result){
+      if(result.status == "success"){
+        localStorage.setItem(STORAGE_TOKEN,token);
+        toast({
+          title: "ログイン完了",
+          description:"ログイン日時：" + new Date(),
+          status: "success",
+          duration: 2500,
+          isClosable: true,
+        });
+        router.push("/")
+      } else {
+        toast({
+          title: "ログインエラー",
+          description:"ID又はパスワードが異なります。",
+          status: "error",
+          duration: 2500,
+          isClosable: true,
+        });
+      }
+    }
   }
 
   const getAuth = async () => {
@@ -85,49 +116,15 @@ export function UseLoginState(
   const Login = useCallback(
     (id: string, pass: string, lIP: string) => {
       const hashPass = encryptSha256(pass);
-      const date = new Date();
       const uuidToken = crypto.randomUUID()
-
-      if ((id == USER_ID && hashPass == USER_TOKEN) || (id == ADMIN_ID &&hashPass == ADMIN_TOKEN)) {
-        if (lIP.includes(acceptIP)) {
-          localStorage.setItem(STORAGE_TOKEN, uuidToken);
-          loginAuth((id == ADMIN_ID &&hashPass == ADMIN_TOKEN),(id == USER_ID && hashPass == USER_TOKEN),uuidToken)
-          setIsAdminInternal((id == ADMIN_ID &&hashPass == ADMIN_TOKEN))
-          setIsUserInternal((id == USER_ID && hashPass == USER_TOKEN));
-          if(isAdminInternal){
-            toast({
-              title: "ログイン完了",
-              description:
-                "一般ユーザーとしてログインしましたログイン日時：" + date,
-              status: "success",
-              duration: 5000,
-              isClosable: true,
-            });
-          } else if(isUserInternal){
-            toast({
-              title: "ログイン完了",
-              description:
-                "一般ユーザーとしてログインしましたログイン日時：" + date,
-              status: "success",
-              duration: 5000,
-              isClosable: true,
-            })
-          }
-        } else {
-          toast({
-            title: "認証エラー",
-            description: "ログインには学内ネットワークへの接続が必要です。",
-            status: "error",
-            duration: 5000,
-            isClosable: true,
-          });
-        }
+      if (lIP.includes(acceptIP)) {
+        loginAuth(id,hashPass,uuidToken)
       } else {
         toast({
-          title: "ログインエラー",
-          description: "IDまたはPASSWORDが異なります。",
+          title: "認証エラー",
+          description: "ログインには学内ネットワークへの接続が必要です。",
           status: "error",
-          duration: 5000,
+          duration: 2500,
           isClosable: true,
         });
       }
@@ -138,7 +135,12 @@ export function UseLoginState(
     const sessionToken = localStorage.getItem(STORAGE_TOKEN)
     logoutAuth(sessionToken!)
     localStorage.removeItem(STORAGE_TOKEN);
-    setIsUserInternal(false);
+    setIsUserInternal(false);toast({
+      title: "ログアウトしました",
+      status: "success",
+      duration: 2500,
+      isClosable: true,
+    })
   }, []);
-  return [isUserInternal,isAdminInternal, Login, Logout];
+  return [isAdminInternal,isUserInternal, Login, Logout];
 }

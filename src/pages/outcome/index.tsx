@@ -107,7 +107,9 @@ const Home: NextPage = () => {
     const alphabet: string[] = ["A", "B", "C", "D", "E", "F", "X"];
 
     const typeAlphabet = alphabet[types.indexOf(type)];
-
+    const oneTimePass = await fetch("api/auth/generatePass")
+    const passResult = await oneTimePass.json()
+    const oneTimeToken = passResult.token
     try {
       const body = {
         date,
@@ -117,7 +119,8 @@ const Home: NextPage = () => {
         fixture,
         value,
         year,
-        inputPass
+        inputPass,
+        oneTimeToken,
       };
       await fetch("/api/database/outcome", {
         method: "POST",
@@ -181,7 +184,7 @@ const Home: NextPage = () => {
       title: "アップロード完了",
       description: "アップロードが完了しました。アップロード日時：" + date,
       status: "success",
-      duration: 5000,
+      duration: 2500,
       isClosable: true,
     });
     router.push("/");
