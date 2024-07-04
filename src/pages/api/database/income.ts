@@ -38,7 +38,7 @@ export default async function handle(
   const { date, fixture, value, year,inputPass, oneTimeToken, hostname } = req.body;
   let isAdmin = false;
   let isUser = false;
-  const allowHOST = process.env.ALLOW_HOSTNAME!
+  const allowHOST = process.env.NEXT_PUBLIC_ALLOW_HOSTNAME!
   const buyDate = new Date(date);
   const sessionToken = inputPass
 	const passResult = await prisma.oneTimeToken.findFirst({

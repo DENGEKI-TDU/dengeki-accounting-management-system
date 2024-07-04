@@ -57,7 +57,9 @@ export default function Home() {
       username: "収入報告くん",
       content: valueContent,
     };
-    const hostname = await fetch("https://ipinfo.io/hostname")
+    const getHost = await fetch("https://ipapi.co/json")
+    const res = await getHost.json()
+    const hostname = res.ip
     const authBody = {
       hostname
     }

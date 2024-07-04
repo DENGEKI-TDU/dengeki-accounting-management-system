@@ -45,7 +45,7 @@ export default async function handle(
 			token:encryptSha256(oneTimeToken),
 		}
 	})
-  const allowHOST = process.env.ALLOW_HOSTNAME!
+  const allowHOST = process.env.NEXT_PUBLIC_ALLOW_HOSTNAME!
   const buyDate = new Date(date);
   const sessionToken = inputPass
   if(passResult && hostname.includes(allowHOST)){

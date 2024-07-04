@@ -48,7 +48,9 @@ export default class Test extends React.Component<IProps> {
     const token = await fetch("/api/auth/generatePass")
     const getToken = await token.json()
     const oneTimeToken = getToken.token
-    const hostname = await fetch("https://ipinfo.io/hostname")
+    const getHost = await fetch("https://ipapi.co/json")
+    const res = await getHost.json()
+    const hostname = res.ip
     const inputPass = localStorage.getItem("storage_token")
     const body = {
       year,

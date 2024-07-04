@@ -21,7 +21,7 @@ export default async function handle(
   res: NextApiResponse
 ) {
   const { year,inputPass, oneTimeToken, hostname } = req.body;
-  const allowHOST = process.env.ALLOW_HOSTNAME!
+  const allowHOST = process.env.NEXT_PUBLIC_ALLOW_HOSTNAME!
   let isAdmin = false;
   const sessionToken = inputPass
 	const passResult = await prisma.oneTimeToken.findFirst({

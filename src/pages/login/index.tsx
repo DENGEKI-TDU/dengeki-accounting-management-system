@@ -73,7 +73,7 @@ export default function Home() {
             </VStack>
           </Center>
         )}
-        <p>{IP}</p>
+        <p>Your IP : {IP}</p>
       </VStack>
     </>
   );

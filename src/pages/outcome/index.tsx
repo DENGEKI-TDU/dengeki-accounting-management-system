@@ -107,7 +107,9 @@ const Home: NextPage = () => {
     const alphabet: string[] = ["A", "B", "C", "D", "E", "F", "X"];
 
     const typeAlphabet = alphabet[types.indexOf(type)];
-    const hostname = await fetch("https://ipinfo.io/hostname")
+    const getHost = await fetch("https://ipapi.co/json")
+    const res = await getHost.json()
+    const hostname = res.ip
     const authBody = {
       hostname
     }

@@ -17,7 +17,7 @@ export default async function Handler(
 	res: NextApiResponse
 	){
     const {hostname} = req.body;
-    const allowHOST = process.env.ALLOW_HOSTNAME!
+    const allowHOST = process.env.NEXT_PUBLIC_ALLOW_HOSTNAME!
     if(hostname.includes(allowHOST)){
         const randomToken = randomUUID()
         const result = await prisma.oneTimeToken.create({

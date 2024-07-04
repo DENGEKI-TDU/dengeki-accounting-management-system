@@ -21,7 +21,7 @@ export default async function Handler(
 	res: NextApiResponse
 	){
     const {id,pass,token,oneTimeToken,hostname} = req.body;
-    const allowHOST = process.env.ALLOW_HOSTNAME!
+    const allowHOST = process.env.NEXT_PUBLIC_ALLOW_HOSTNAME!
     const loginDate = new Date()
     var limit = new Date()
     limit = new Date(limit.setDate(limit.getDate()+3))
