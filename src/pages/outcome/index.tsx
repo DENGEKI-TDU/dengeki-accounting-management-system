@@ -107,7 +107,17 @@ const Home: NextPage = () => {
     const alphabet: string[] = ["A", "B", "C", "D", "E", "F", "X"];
 
     const typeAlphabet = alphabet[types.indexOf(type)];
-    const oneTimePass = await fetch("api/auth/generatePass")
+    const getHost = await fetch("https://ipapi.co/json")
+    const res = await getHost.json()
+    const hostname = res.ip
+    const authBody = {
+      hostname
+    }
+    const oneTimePass = await fetch("api/auth/generatePass",{
+      method:"POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify(authBody)
+    })
     const passResult = await oneTimePass.json()
     const oneTimeToken = passResult.token
     try {
@@ -121,6 +131,7 @@ const Home: NextPage = () => {
         year,
         inputPass,
         oneTimeToken,
+        hostname,
       };
       await fetch("/api/database/outcome", {
         method: "POST",

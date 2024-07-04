@@ -1,5 +1,6 @@
 import prisma from "@/lib/prisma";
 import { createHash } from "crypto";
+import { hostname } from "os";
 
 const encryptSha256 = (str: string) => {
 	const hash = createHash("sha256");
@@ -17,6 +18,7 @@ export default async function handle(
       year: string;
       inputPass: string;
       oneTimeToken: string;
+      hostname:string
     };
   },
   res: {
@@ -33,11 +35,10 @@ export default async function handle(
     }) => void;
   }
 ) {
-  const { date, fixture, value, year,inputPass, oneTimeToken } = req.body;
+  const { date, fixture, value, year,inputPass, oneTimeToken, hostname } = req.body;
   let isAdmin = false;
   let isUser = false;
-  const data = await fetch("https://ipapi.co/json")
-  const ip = await data.json()
+  const allowHOST = process.env.NEXT_PUBLIC_ALLOW_HOSTNAME!
   const buyDate = new Date(date);
   const sessionToken = inputPass
 	const passResult = await prisma.oneTimeToken.findFirst({
@@ -64,7 +65,7 @@ export default async function handle(
       } catch(error) {
         console.error(error)
       }
-      if((isAdmin || isUser) && ip.ip.includes(process.env.NEXT_PUBLIC_HOST_IP)){
+      if((isAdmin || isUser) && hostname.includes(allowHOST)){
         const result = await prisma.mainAccount.create({
           data: {
             date: buyDate,

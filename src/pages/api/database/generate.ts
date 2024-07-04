@@ -15,22 +15,21 @@ export default async function handle(
       year:string
       inputPass: string;
       oneTimeToken: string;
+      hostname:string
     };
   },
   res: NextApiResponse
 ) {
-  const { year,inputPass, oneTimeToken } = req.body;
-  console.log(year,inputPass,oneTimeToken)
+  const { year,inputPass, oneTimeToken, hostname } = req.body;
+  const allowHOST = process.env.NEXT_PUBLIC_ALLOW_HOSTNAME!
   let isAdmin = false;
-  const data = await fetch("https://ipapi.co/json")
-  const ip = await data.json()
   const sessionToken = inputPass
 	const passResult = await prisma.oneTimeToken.findFirst({
 		where: {
 			token:encryptSha256(oneTimeToken),
 		}
 	})
-  if(passResult){
+  if(hostname.includes(allowHOST) &&passResult){
 		const tokenLimit = passResult.limit
 		if(new Date() < tokenLimit){
       try {
@@ -47,7 +46,7 @@ export default async function handle(
       } catch(error) {
         console.error(error)
       }
-      if((isAdmin) && ip.ip.includes(process.env.NEXT_PUBLIC_HOST_IP)){
+      if((isAdmin)){
         const result = await prisma.mainAccount.findMany({
           where:{
             year:year

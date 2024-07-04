@@ -4,11 +4,6 @@ import { useToast } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 
 const STORAGE_TOKEN = "storage_token";
-const USER_ID = process.env.NEXT_PUBLIC_USER_ID;
-const USER_TOKEN = process.env.NEXT_PUBLIC_USER_TOKEN;
-const ADMIN_ID = process.env.NEXT_PUBLIC_ADMIN_ID;
-const ADMIN_TOKEN = process.env.NEXT_PUBLIC_ADMIN_TOKEN;
-const acceptIP = process.env.NEXT_PUBLIC_HOST_IP!;
 
 const encryptSha256 = (str: string) => {
   const hash = createHash("sha256");
@@ -41,14 +36,21 @@ export function UseLoginState(
     })
   }
 
-  async function loginAuth(id:string,pass:string,token:string){
+  async function loginAuth(id:string,pass:string,token:string,hostname:string){
     toast({
       title: "ログイン中",
       status: "loading",
       duration: 2000,
       isClosable: true,
     });
-    const oneTimePass = await fetch("api/auth/generatePass")
+    const authBody = {
+      hostname
+    }
+    const oneTimePass = await fetch("api/auth/generatePass",{
+      method:"POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify(authBody)
+    })
     const passResult = await oneTimePass.json()
     const oneTimeToken = passResult.token
     const body = {
@@ -56,6 +58,7 @@ export function UseLoginState(
       pass,
       token,
       oneTimeToken,
+      hostname,
     }
     const response = await fetch("/api/auth/login",{
       method: "POST",
@@ -117,12 +120,13 @@ export function UseLoginState(
     (id: string, pass: string, lIP: string) => {
       const hashPass = encryptSha256(pass);
       const uuidToken = crypto.randomUUID()
-      if (lIP.includes(acceptIP)) {
-        loginAuth(id,hashPass,uuidToken)
+      const allow = process.env.NEXT_PUBLIC_ALLOW_HOSTNAME!
+      if (lIP.includes(allow)) {
+        loginAuth(id,hashPass,uuidToken,lIP)
       } else {
         toast({
           title: "認証エラー",
-          description: "ログインには学内ネットワークへの接続が必要です。",
+          description: `ログインには学内ネットワークへの接続が必要です。${lIP}+${allow}`,
           status: "error",
           duration: 2500,
           isClosable: true,
