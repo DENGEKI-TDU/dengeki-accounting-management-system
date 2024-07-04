@@ -20,6 +20,7 @@ export default async function handle(
       year: string;
       inputPass: string;
       oneTimeToken: string;
+      hostname: string;
     };
   },
   res: {
@@ -36,7 +37,7 @@ export default async function handle(
     }) => void;
   }
 ) {
-  const { date, type, typeAlphabet, subType, fixture, value, year, inputPass, oneTimeToken } = req.body;
+  const { date, type, typeAlphabet, subType, fixture, value, year, inputPass, oneTimeToken, hostname } = req.body;
   let isAdmin = false;
   let isUser = false;
 	const passResult = await prisma.oneTimeToken.findFirst({
@@ -44,11 +45,10 @@ export default async function handle(
 			token:encryptSha256(oneTimeToken),
 		}
 	})
-  const data = await fetch("https://ipapi.co/json")
-  const ip = await data.json()
+  const allowHOST = process.env.ALLOW_HOSTNAME!
   const buyDate = new Date(date);
   const sessionToken = inputPass
-  if(passResult && ip.ip.includes(process.env.NEXT_PUBLIC_HOST_IP)){
+  if(passResult && hostname.includes(allowHOST)){
     if(new Date() < passResult.limit){
       try {
         const data = await prisma.tokens.findFirst({

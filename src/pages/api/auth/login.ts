@@ -15,13 +15,13 @@ export default async function Handler(
 					pass: string,
 					token: string,
 					oneTimeToken: string,
+					hostname:string,
 			}
 	},
 	res: NextApiResponse
 	){
-    const {id,pass,token,oneTimeToken} = req.body;
-    const data = await fetch("https://ipapi.co/json")
-    const ip = await data.json()
+    const {id,pass,token,oneTimeToken,hostname} = req.body;
+    const allowHOST = process.env.ALLOW_HOSTNAME!
     const loginDate = new Date()
     var limit = new Date()
     limit = new Date(limit.setDate(limit.getDate()+3))
@@ -30,7 +30,7 @@ export default async function Handler(
 			token:encryptSha256(oneTimeToken),
 		}
 	})
-	if(passResult && ip.ip.includes(process.env.NEXT_PUBLIC_HOST_IP)){
+	if(passResult && hostname.includes(allowHOST)){
 		const tokenLimit = passResult.limit
 		if(new Date() < tokenLimit){
 				const authResult = await prisma.users.findFirst({

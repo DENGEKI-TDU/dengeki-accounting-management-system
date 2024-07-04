@@ -9,14 +9,16 @@ const encryptSha256 = (str: string) => {
   };
 
 export default async function Handler(
-	req: NextApiRequest,
+	req: {
+        body:{
+            hostname:string
+        }
+    },
 	res: NextApiResponse
 	){
-    const data = await fetch("https://ipapi.co/json")
-    const ip = await data.json()
-    const allowIP = process.env.NEXT_PUBLIC_HOST_IP
-    console.log(ip.ip,allowIP)
-    // if(ip.ip.includes(process.env.NEXT_PUBLIC_HOST_IP)){
+    const {hostname} = req.body;
+    const allowHOST = process.env.ALLOW_HOSTNAME!
+    if(hostname.includes(allowHOST)){
         const randomToken = randomUUID()
         const result = await prisma.oneTimeToken.create({
             data: {
@@ -24,8 +26,8 @@ export default async function Handler(
                 limit:new Date(new Date().setMinutes(new Date().getMinutes()+3))
             }
         })
-        res.status(200).json({"token":randomToken,"ip":ip.ip,"allow":allowIP})
-    // } else {
-    //     res.status(403).json("permission denied.")
-    // }
+        res.status(200).json({"token":randomToken,"host":hostname,"allow":allowHOST})
+    } else {
+        res.status(403).json("permission denied.")
+    }
 }

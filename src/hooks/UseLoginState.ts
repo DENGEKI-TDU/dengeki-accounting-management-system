@@ -48,7 +48,15 @@ export function UseLoginState(
       duration: 2000,
       isClosable: true,
     });
-    const oneTimePass = await fetch("api/auth/generatePass")
+    const hostname = await fetch("https://ipinfo.io/hostname")
+    const authBody = {
+      hostname
+    }
+    const oneTimePass = await fetch("api/auth/generatePass",{
+      method:"POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify(authBody)
+    })
     const passResult = await oneTimePass.json()
     const oneTimeToken = passResult.token
     const body = {
@@ -56,6 +64,7 @@ export function UseLoginState(
       pass,
       token,
       oneTimeToken,
+      hostname,
     }
     const response = await fetch("/api/auth/login",{
       method: "POST",
