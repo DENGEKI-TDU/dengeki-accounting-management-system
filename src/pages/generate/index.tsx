@@ -45,12 +45,19 @@ export default class Test extends React.Component<IProps> {
       { header: "差引残高", key: "earnings" },
     ];
     // 行を定義
-    const token = await fetch("/api/auth/generatePass")
-    const getToken = await token.json()
-    const oneTimeToken = getToken.token
     const getHost = await fetch("https://ipapi.co/json")
     const res = await getHost.json()
     const hostname = res.ip
+    const authBody = {
+      hostname
+    }
+    const token = await fetch("/api/auth/generatePass",{
+      method:"POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify(authBody)
+    })
+    const getToken = await token.json()
+    const oneTimeToken = getToken.token
     const inputPass = localStorage.getItem("storage_token")
     const body = {
       year,
