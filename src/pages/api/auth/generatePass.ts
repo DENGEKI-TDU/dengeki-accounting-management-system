@@ -16,7 +16,7 @@ export default async function Handler(
     const ip = await data.json()
     const allowIP = process.env.NEXT_PUBLIC_HOST_IP
     console.log(ip.ip,allowIP)
-    if(ip.ip.includes(process.env.NEXT_PUBLIC_HOST_IP)){
+    // if(ip.ip.includes(process.env.NEXT_PUBLIC_HOST_IP)){
         const randomToken = randomUUID()
         const result = await prisma.oneTimeToken.create({
             data: {
@@ -25,7 +25,7 @@ export default async function Handler(
             }
         })
         res.status(200).json({"token":randomToken})
-    } else {
-        res.status(403).json("permission denied.")
-    }
+    // } else {
+    //     res.status(403).json("permission denied.")
+    // }
 }
