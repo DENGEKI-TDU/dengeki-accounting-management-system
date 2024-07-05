@@ -18,7 +18,7 @@ export default function Home() {
   const toast = useToast()
   const router = useRouter();
   const [year,setYear] = useState("")
-  const toastIdRef = useRef()
+  const toastIdRef:any = useRef()
   function generate(){
       toastIdRef.current = toast({
         title: "生成中",

@@ -28,7 +28,7 @@ export default function Home() {
   const [inputPass,setInputPass] = useState("")
   const toast = useToast();
   const router = useRouter();
-  const toastIdRef = useRef()
+  const toastIdRef:any = useRef()
   const path = router.pathname;
   useEffect(() => {
     setInputPass(localStorage.getItem("storage_token")!)

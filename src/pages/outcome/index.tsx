@@ -44,7 +44,7 @@ const Home: NextPage = () => {
   const [inputPass,setInputPass] = useState("")
   const path = router.pathname;
   const public_url = process.env.NEXT_PUBLIC_SUPABASE_PUBLIC_URL;
-  const toastIdRef = useRef()
+  const toastIdRef:any = useRef()
   useEffect(() => {
     setInputPass(localStorage.getItem("storage_token")!)
   },[])

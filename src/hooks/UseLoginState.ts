@@ -24,7 +24,7 @@ export function UseLoginState(
 
   const toast = useToast();
   const router = useRouter();
-  const toastIdRef = useRef()
+  const toastIdRef:any = useRef()
 
   async function logoutAuth(tokens:string){
     const body = {
