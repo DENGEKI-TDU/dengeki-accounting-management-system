@@ -149,6 +149,7 @@ export function UseLoginState(
       duration: 2500,
       isClosable: true,
     })
+    router.push("")
   }, []);
   return [isAdminInternal,isUserInternal, Login, Logout];
 }
