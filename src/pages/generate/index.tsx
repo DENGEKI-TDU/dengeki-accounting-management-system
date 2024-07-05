@@ -87,10 +87,10 @@ export default function Home() {
         headers:{"Content-Type":"application/json"},
         body:JSON.stringify(body)
       })
-      console.log(response)
+      
       const result = await response.json()
-      console.log(result)
-      console.log(result.data.length)
+      
+      
       var earning:number = 0
       for(var i=0;i<result.data.length;i++){
         earning += result.data[i].income
