@@ -58,7 +58,7 @@ const Home: NextPage = () => {
         sortBy: { column: "created_at", order: "desc" },
       });
     if (error) {
-      console.log(error);
+      
       return;
     }
 

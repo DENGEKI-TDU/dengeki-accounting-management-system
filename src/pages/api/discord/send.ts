@@ -23,7 +23,6 @@ export default async function handle(
   try {
     const result = await prisma.threadID.findFirst({});
     const hookurl = result?.hookurl+"?thread_id="+result?.threadID
-    console.log(hookurl)
     const formData = new FormData();
     formData.append("payload_json", JSON.stringify(sendData));
     const response = await fetch(hookurl, {

@@ -20,7 +20,7 @@ export default async function handle(
           tokens:sessionToken
         }
       });
-      console.log(data)
+      
       if(data){
         if(data.limit > new Date()){
           isUser = data.isUser
