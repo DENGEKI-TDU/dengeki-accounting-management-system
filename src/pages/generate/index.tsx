@@ -10,7 +10,7 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
-import React, { useState } from "react";
+import React, { useState,useRef } from "react";
 const ExcelJS = require("exceljs");
 
 export default function Home() {
@@ -18,8 +18,9 @@ export default function Home() {
   const toast = useToast()
   const router = useRouter();
   const [year,setYear] = useState("")
+  const toastIdRef = useRef()
   function generate(){
-      toast({
+      toastIdRef.current = toast({
         title: "生成中",
         description:year+"年度のExcelファイルを生成中",
         status: "loading",
@@ -27,6 +28,9 @@ export default function Home() {
         isClosable: true,
       });
       clickButtonAsync().then(()=>{
+        if(toastIdRef.current){
+          toast.close(toastIdRef.current)
+        }
           toast({
             title: "生成完了",
             description:year+"年度のExcelファイルを生成しました",

@@ -44,6 +44,7 @@ const Home: NextPage = () => {
   const [inputPass,setInputPass] = useState("")
   const path = router.pathname;
   const public_url = process.env.NEXT_PUBLIC_SUPABASE_PUBLIC_URL;
+  const toastIdRef = useRef()
   useEffect(() => {
     setInputPass(localStorage.getItem("storage_token")!)
   },[])
@@ -85,14 +86,12 @@ const Home: NextPage = () => {
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    toast({
+    toastIdRef.current = toast({
       title: "アップロード中",
       status: "loading",
-      duration: 9000,
+      duration: 15000,
       isClosable: true,
     });
-
-    const formData = new FormData();
 
     const types: string[] = [
       "大道具",
@@ -120,27 +119,23 @@ const Home: NextPage = () => {
     })
     const passResult = await oneTimePass.json()
     const oneTimeToken = passResult.token
-    try {
-      const body = {
-        date,
-        type,
-        typeAlphabet,
-        subType,
-        fixture,
-        value,
-        year,
-        inputPass,
-        oneTimeToken,
-        hostname,
-      };
-      await fetch("/api/database/outcome", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-    } catch (error) {
-      console.error(error);
-    }
+    const body = {
+      date,
+      type,
+      typeAlphabet,
+      subType,
+      fixture,
+      value,
+      year,
+      inputPass,
+      oneTimeToken,
+      hostname,
+    };
+    await fetch("/api/database/outcome", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
     if (file!!.type.match("image.*")) {
       const fileExtension = file!!.name.split(".").pop();
       const uuid = uuidv4();
@@ -176,29 +171,41 @@ const Home: NextPage = () => {
         "\n[レシート画像URL](" +
         ImageURL +
         ")";
-      try {
+        const username = "支出報告くん"
         const body = {
+          username,
           valueContent,
         };
         await fetch("api/discord/send", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(body),
+        }).then(()=> {
+          if(toastIdRef.current){
+            toast.close(toastIdRef.current)
+          }
+          toast({
+            title: "アップロード完了",
+            description: "アップロードが完了しました。アップロード日時：" + date,
+            status: "success",
+            duration: 2500,
+            isClosable: true,
+          });
+          router.push("/");
         });
-      } catch (error) {
-        console.error(error);
-      }
     } else {
-      alert("画像ファイル以外はアップロード出来ません。");
+      if(toastIdRef.current){
+        toast.close(toastIdRef.current)
+      }
+      toast({
+        title: "画像形式エラー",
+        description: "画像ファイル以外はアップロードできません。",
+        status: "error",
+        duration: 2500,
+        isClosable: true,
+      });
+      router.push("");
     }
-    toast({
-      title: "アップロード完了",
-      description: "アップロードが完了しました。アップロード日時：" + date,
-      status: "success",
-      duration: 2500,
-      isClosable: true,
-    });
-    router.push("/");
   };
 
   if (isAdmin || isUser) {

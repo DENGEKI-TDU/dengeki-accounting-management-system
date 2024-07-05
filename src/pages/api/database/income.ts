@@ -55,7 +55,6 @@ export default async function handle(
             tokens:sessionToken
           }
         });
-        console.log(data)
         if(data){
           if(data.limit > new Date()){
             isUser = data.isUser
@@ -78,7 +77,7 @@ export default async function handle(
             typeAlphabet: "",
           },
         });
-        res.json(result);
+        res.status(200).json(result);
       } else {
         res.status(403).json("permission denied.")
       }
