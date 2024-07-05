@@ -19,6 +19,18 @@ model mainAccount {
   outcome       Int
 }
 
+model aid {
+  id            Int @id @default(autoincrement())
+  year          String
+  date          DateTime
+  type          String
+  typeAlphabet  String
+  subtype       String
+  fixture       String
+  income        Int
+  outcome       Int
+}
+
 model accessHistory {
   id           Int @id @default(autoincrement())
   accessDate   DateTime
