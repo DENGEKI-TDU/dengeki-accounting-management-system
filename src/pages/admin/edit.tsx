@@ -1,10 +1,10 @@
 import { Table,Thead,Tbody,Tr,Th,Td, Select, Button, Center, Heading, VStack } from "@chakra-ui/react";
-import { GetStaticProps } from "next";
+import { GetServerSideProps, GetStaticProps } from "next";
 import prisma from "@/lib/prisma";
 import { useState } from "react";
 import Update from "../../components/update"
 
-export const getStaticProps: GetStaticProps = async () => {
+export const getServerSideProps: GetServerSideProps = async () => {
 	let nowYear = new Date().getFullYear()
 	if(nowYear < 4){
 		nowYear -1
