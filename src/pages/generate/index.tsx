@@ -46,6 +46,7 @@ export default function Home() {
       const worksheet = workbook.getWorksheet("My Sheet");
       // 列を定義
       worksheet.columns = [
+        { header: "", key: "empty" },
         { header: "月", key: "month" },
         { header: "日", key: "date" },
         { header: "摘要", key: "fixture" },
