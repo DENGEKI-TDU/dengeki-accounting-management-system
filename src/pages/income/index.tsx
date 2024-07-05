@@ -15,7 +15,7 @@ import {
   useToast,
   Button,
 } from "@chakra-ui/react";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
 
 export default function Home() {
@@ -27,8 +27,8 @@ export default function Home() {
   const [year, setYear] = useState("");
   const [inputPass,setInputPass] = useState("")
   const toast = useToast();
-  const hookurl = process.env.NEXT_PUBLIC_HOOK_URL!;
   const router = useRouter();
+  const toastIdRef:any = useRef()
   const path = router.pathname;
   useEffect(() => {
     setInputPass(localStorage.getItem("storage_token")!)
@@ -36,10 +36,11 @@ export default function Home() {
 
   const onsubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    toast({
+    toastIdRef.current = toast({
       title: "アップロード中",
       status: "loading",
-      duration: 9000,
+      duration: 15000,
+      isClosable: true,
     });
 
     const valueContent: string =
@@ -53,9 +54,10 @@ export default function Home() {
       fixture +
       "\nメモ : " +
       memo;
-    const sendData = {
-      username: "収入報告くん",
-      content: valueContent,
+    const username = "収入報告くん"
+    const discordData = {
+      username,
+      valueContent,
     };
     const getHost = await fetch("https://ipapi.co/json")
     const res = await getHost.json()
@@ -88,19 +90,23 @@ export default function Home() {
     } catch (error) {
       console.error(error);
     }
-    await fetch(hookurl, {
+    await fetch("api/discord/send", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(sendData),
+      body: JSON.stringify(discordData),
+    }).then(() => {
+      if(toastIdRef.current){
+        toast.close(toastIdRef.current)
+      }
+      toast({
+        title: "アップロード完了",
+        description: "アップロードが完了しました。アップロード日時：" + date,
+        status: "success",
+        duration: 2500,
+        isClosable: true,
+      });
+      router.push("/");
     });
-    toast({
-      title: "アップロード完了",
-      description: "アップロードが完了しました。アップロード日時：" + date,
-      status: "success",
-      duration: 2500,
-      isClosable: true,
-    });
-    router.push("/");
   };
 
   if (isAdmin || isUser) {

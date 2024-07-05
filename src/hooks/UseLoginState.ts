@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createHash, randomUUID } from "crypto";
 import { useToast } from "@chakra-ui/react";
 import { useRouter } from "next/router";
@@ -24,6 +24,7 @@ export function UseLoginState(
 
   const toast = useToast();
   const router = useRouter();
+  const toastIdRef:any = useRef()
 
   async function logoutAuth(tokens:string){
     const body = {
@@ -37,7 +38,7 @@ export function UseLoginState(
   }
 
   async function loginAuth(id:string,pass:string,token:string,hostname:string){
-    toast({
+    toastIdRef.current = toast({
       title: "ログイン中",
       status: "loading",
       duration: 2000,
@@ -65,8 +66,10 @@ export function UseLoginState(
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     })
-    const result = await response.json()
-    if(result){
+    await response.json().then((result) => {
+      if(toastIdRef.current){
+        toast.close(toastIdRef.current)
+      }
       if(result.status == "success"){
         localStorage.setItem(STORAGE_TOKEN,token);
         toast({
@@ -86,7 +89,8 @@ export function UseLoginState(
           isClosable: true,
         });
       }
-    }
+    })
+    
   }
 
   const getAuth = async () => {

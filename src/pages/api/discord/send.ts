@@ -9,14 +9,15 @@ type Data = {
 export default async function handle(
   req: {
     body: {
+      username: string;
       valueContent: string;
     };
   },
   res: NextApiResponse<Data>
 ) {
-  const { valueContent } = req.body;
+  const { username,valueContent } = req.body;
   const sendData = {
-    username: "支出報告くん",
+    username: username,
     content: valueContent,
   };
   try {
@@ -25,8 +26,8 @@ export default async function handle(
         id: 1
       }
     });
-    const threadID = result?.threadID
-    const hookurl = process.env.NEXT_PUBLIC_HOOK_URL!+threadID;
+    const threadID = "1257743150223462481"
+    const hookurl = "https://discord.com/api/webhooks/1206230033421836349/RolsB6o1AmgwGUTe_ns89kIQCMkAvbdjpaY1OJ0Lxk4HrOg9TRw5Xjp-uBqUmzzMh9LC?thread_id="+threadID;
     const formData = new FormData();
     formData.append("payload_json", JSON.stringify(sendData));
     const response = await fetch(hookurl, {
