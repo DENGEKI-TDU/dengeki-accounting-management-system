@@ -70,14 +70,14 @@ export default async function handle(
         })
         const result = await prisma.aid.create({
             data:{
-                date: response.date,
-                year: response.year,
-                type: response.type,
-                subtype: response.subtype,
-                fixture: response.fixture,
-                income: response.income,
-                outcome: response.outcome,
-                typeAlphabet: response.typeAlphabet,
+                date: response!.date,
+                year: response!.year,
+                type: response!.type,
+                subtype: response!.subtype,
+                fixture: response!.fixture,
+                income: response!.income,
+                outcome: response!.outcome,
+                typeAlphabet: response!.typeAlphabet,
             }
         })
         res.json(result);
