@@ -7,11 +7,13 @@ export default function App({ Component, pageProps }: AppProps) {
   return (
     <>
       <ChakraProvider>
+        <Box width="100%" position="sticky" top="0" zIndex={"calc(infinity)"}>
           <Link href="/">
             <Center>
               <Image src="/header.png" width="100%" alt="ヘッダー画像" position="sticky" top="0" zIndex={"calc(infinity)"} />
             </Center>
           </Link>
+        </Box>
         <Center marginTop={"20px"}>
           <Component {...pageProps} />
         </Center>
