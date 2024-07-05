@@ -21,7 +21,7 @@ export default function Home() {
   function generate(){
       toast({
         title: "生成中",
-        description:year+"年度のExcelfileを生成中",
+        description:year+"年度のExcelファイルを生成中",
         status: "loading",
         duration: 4000,
         isClosable: true,
@@ -29,7 +29,7 @@ export default function Home() {
       clickButtonAsync().then(()=>{
           toast({
             title: "生成完了",
-            description:year+"年度のExcelfileを生成しました",
+            description:year+"年度のExcelファイルを生成しました",
             status: "success",
             duration: 4000,
             isClosable: true,
