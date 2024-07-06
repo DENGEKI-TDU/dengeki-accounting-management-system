@@ -40,11 +40,11 @@ type updateAccount = {
 }
 
 const Home: React.FC<updateAccount> = (props) => {
-	const [isAdmin,isUser, Login, Logout] = UseLoginState(false);
+	// const [isAdmin,isUser, Login, Logout] = UseLoginState(false);
 	const router = useRouter()
 	return (
 		<>
-		{isAdmin ? 
+		{/* {isAdmin ?  */}
 		<Center width="100%">
 		  <VStack width="100%">
 			<Heading>収支報告編集ページ</Heading>
@@ -74,14 +74,14 @@ const Home: React.FC<updateAccount> = (props) => {
 			</Table>
 			</VStack>
 		</Center>
-		: 
+		{/* : 
 		<>
 		  <VStack>
 			<Heading>ログインしてください。</Heading>
 			<Button onClick={() => router.push("/login")}>ログイン</Button>
 		  </VStack>
 		</>
-		}
+		} */}
 		</>
 	)
 }
