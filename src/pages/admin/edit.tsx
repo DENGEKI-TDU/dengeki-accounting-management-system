@@ -3,6 +3,8 @@ import { GetServerSideProps, GetStaticProps } from "next";
 import prisma from "@/lib/prisma";
 import { useState } from "react";
 import Update from "../../components/update"
+import { UseLoginState } from "@/hooks/UseLoginState";
+import {useRouter} from "next/router";
 
 export const getStaticProps: GetStaticProps = async () => {
 	let nowYear = new Date().getFullYear()
@@ -38,8 +40,11 @@ type updateAccount = {
 }
 
 const Home: React.FC<updateAccount> = (props) => {
+	const [isAdmin,isUser, Login, Logout] = UseLoginState(false);
+	const router = useRouter()
 	return (
 		<>
+		{isAdmin ? 
 		<Center width="100%">
 		  <VStack width="100%">
 			<Heading>収支報告編集ページ</Heading>
@@ -61,7 +66,7 @@ const Home: React.FC<updateAccount> = (props) => {
 			{
 				props.response.map((account: { id: number; year: string; date: Date; type: string; typeAlphabet: string; subtype: string; fixture: string; income: number; outcome: number; }) => (
 					<Tr key={account.id}>
-						<Update update={account} key={account.id}/>
+						<Update update={account} />
 					</Tr>
 				))
 			}
@@ -69,6 +74,14 @@ const Home: React.FC<updateAccount> = (props) => {
 			</Table>
 			</VStack>
 		</Center>
+		: 
+		<>
+		  <VStack>
+			<Heading>ログインしてください。</Heading>
+			<Button onClick={() => router.push("/login")}>ログイン</Button>
+		  </VStack>
+		</>
+		}
 		</>
 	)
 }
