@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 import { useState } from "react";
 import Update from "../../components/update"
 
-export const getServerSideProps: GetServerSideProps = async () => {
+export const getStaticProps: GetStaticProps = async () => {
 	let nowYear = new Date().getFullYear()
 	if(nowYear < 4){
 		nowYear -1
