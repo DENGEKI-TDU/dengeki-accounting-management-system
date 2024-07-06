@@ -130,8 +130,9 @@ const Home: NextPage = () => {
       inputPass,
       oneTimeToken,
       hostname,
+      mode:"outcome",
     };
-    await fetch("/api/database/outcome", {
+    await fetch("/api/database/post-earning", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),

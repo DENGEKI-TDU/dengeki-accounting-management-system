@@ -3,7 +3,6 @@ import { Tr,Td, Select, Button, HStack, Input, Text, useToast, Tooltip } from "@
 import { useState } from "react";
 import { EditIcon,CheckIcon, CloseIcon, DeleteIcon } from "@chakra-ui/icons"
 import { UseLoginState } from "@/hooks/UseLoginState";
-import prisma from "@/lib/prisma";
 import { useRouter } from "next/router";
 
 type updateAccount = {
@@ -57,9 +56,9 @@ const Update: React.FC<{ update: updateAccount }> = ({ update }) => {
 		const getToken = await token.json()
 		const oneTimeToken = getToken.token
 		const inputPass = localStorage.getItem("storage_token")
-		const editData = {"id":String(update.id),"year":String(update.year),"date":String(update.date),"type":String(tmpType),"typeAlphabet":alphabet[types.indexOf(tmpType)],"subtype":tmpSubType,"fixture":tmpFixture,"income":String(update.income),"outcome":String(update.outcome),"inputPass":inputPass,"oneTimeToken":oneTimeToken,"hostname":hostname}
+		const editData = {"id":String(update.id),"year":String(update.year),"date":String(update.date),"type":String(tmpType),"typeAlphabet":alphabet[types.indexOf(tmpType)],"subtype":tmpSubType,"fixture":tmpFixture,"income":String(update.income),"outcome":String(update.outcome),"inputPass":inputPass,"oneTimeToken":oneTimeToken,"hostname":hostname,"mode":"update"}
 
-		await fetch("/api/database/updateEarning",{
+		await fetch("/api/database/post-earning",{
 			method:"POST",
 			headers:{"Content-type":"application/json"},
 			body:JSON.stringify(editData)
@@ -93,9 +92,10 @@ const Update: React.FC<{ update: updateAccount }> = ({ update }) => {
 			id,
 			inputPass,
 			oneTimeToken,
-			hostname
+			hostname,
+			mode:"aid"
 		}
-		await fetch("/api/database/aid",{
+		await fetch("/api/database/post-earning",{
 			method:"POST",
 			headers:{"Content-type":"application/json"},
 			body:JSON.stringify(body)
