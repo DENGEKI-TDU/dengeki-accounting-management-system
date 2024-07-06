@@ -5,7 +5,7 @@ import Update from "../../components/update"
 import { UseLoginState } from "@/hooks/UseLoginState";
 import {useRouter} from "next/router";
 
-export const getStaticProps: GetStaticProps = async () => {
+export const getServerSideProps: GetServerSideProps = async () => {
 	let nowYear = new Date().getFullYear()
 	if(nowYear < 4){
 		nowYear -1
