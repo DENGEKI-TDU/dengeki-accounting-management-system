@@ -1,4 +1,4 @@
-import { Table,Thead,Tbody,Tr,Th,Td, Select, Button, Center, Heading, VStack } from "@chakra-ui/react";
+import { Table,Thead,Tbody,Tr,Th,Td, Select, Button, Center, Heading, VStack, Box } from "@chakra-ui/react";
 import { GetServerSideProps, GetStaticProps } from "next";
 import prisma from "@/lib/prisma";
 import { useState } from "react";
@@ -60,9 +60,9 @@ const Home: React.FC<updateAccount> = (props) => {
 				<Tbody>
 			{
 				props.response.map((account: { id: number; year: string; date: Date; type: string; typeAlphabet: string; subtype: string; fixture: string; income: number; outcome: number; }) => (
-					<>
-						<Update update={account}/>
-					</>
+					<Tr key={account.id}>
+						<Update update={account} key={account.id}/>
+					</Tr>
 				))
 			}
 				</Tbody>

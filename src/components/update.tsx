@@ -118,7 +118,7 @@ const Update: React.FC<{ update: updateAccount }> = ({ update }) => {
 	const alphabet: string[] = ["A", "B", "C", "D", "E", "F", "X"];
 	if(isAdmin){
 		return (
-			<Tr>
+			<>
 				{!isEditMode ? 
 				<>
 				<Td>{update.year}</Td>
@@ -211,7 +211,7 @@ const Update: React.FC<{ update: updateAccount }> = ({ update }) => {
 				<Td><HStack><Tooltip label="編集を保存"><CheckIcon onClick={() => adopt()} marginRight={"5px"} marginLeft={"5px"} /></Tooltip><Tooltip label="共済金からの支払いに変更"><DeleteIcon onClick={() => aid()} marginRight={"5px"} marginLeft={"5px"}/></Tooltip><Tooltip label="変更を破棄"><CloseIcon onClick={() => close()} marginRight={"5px"} marginLeft={"5px"} /></Tooltip></HStack></Td>
 				</>
 				}
-			</Tr>
+			</>
 		)
 	}
 }
