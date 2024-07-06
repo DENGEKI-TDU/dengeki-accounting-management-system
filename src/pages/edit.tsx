@@ -1,8 +1,7 @@
 import { Table,Thead,Tbody,Tr,Th,Td, Select, Button, Center, Heading, VStack, Box } from "@chakra-ui/react";
 import { GetServerSideProps, GetStaticProps } from "next";
 import prisma from "@/lib/prisma";
-import { useState } from "react";
-import Update from "../../components/update"
+import Update from "../components/update"
 import { UseLoginState } from "@/hooks/UseLoginState";
 import {useRouter} from "next/router";
 
