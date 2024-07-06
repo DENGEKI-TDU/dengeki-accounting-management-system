@@ -29,8 +29,9 @@ export function UseLoginState(
   async function logoutAuth(tokens:string){
     const body = {
       tokens,
+      mode:"logout"
     }
-    await fetch("/api/auth/logout",{
+    await fetch("/api/auth",{
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
@@ -41,13 +42,13 @@ export function UseLoginState(
     toastIdRef.current = toast({
       title: "ログイン中",
       status: "loading",
-      duration: 2000,
+      duration: 5000,
       isClosable: true,
     });
     const authBody = {
       hostname
     }
-    const oneTimePass = await fetch("api/auth/generatePass",{
+    const oneTimePass = await fetch("/api/auth/generatePass",{
       method:"POST",
       headers: {"Content-Type":"application/json"},
       body: JSON.stringify(authBody)
@@ -60,8 +61,9 @@ export function UseLoginState(
       token,
       oneTimeToken,
       hostname,
+      mode:"login"
     }
-    const response = await fetch("/api/auth/login",{
+    const response = await fetch("/api/auth",{
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
@@ -94,9 +96,10 @@ export function UseLoginState(
   }
 
   const getAuth = async () => {
-    const sessionToken = localStorage.getItem(STORAGE_TOKEN)
+    const token = localStorage.getItem(STORAGE_TOKEN)
     const body = {
-      sessionToken
+      token,
+      mode:"get"
     }
     const response = await fetch("/api/auth",{
       method: "POST",
@@ -130,7 +133,7 @@ export function UseLoginState(
       } else {
         toast({
           title: "認証エラー",
-          description: `ログインには学内ネットワークへの接続が必要です。${lIP}+${allow}`,
+          description: `ログインには学内ネットワークへの接続が必要です。`,
           status: "error",
           duration: 2500,
           isClosable: true,

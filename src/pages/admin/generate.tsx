@@ -41,7 +41,6 @@ export default function Home() {
       })
   }
   async function clickButtonAsync() {
-      // e.preventDefault();
       // Workbookの作成
       const workbook = new ExcelJS.Workbook();
       // Workbookに新しいWorksheetを追加

@@ -81,8 +81,9 @@ export default function Home() {
         inputPass,
         oneTimeToken,
         hostname,
+        mode:"income",
       };
-      await fetch("/api/database/income", {
+      await fetch("/api/database/post-earning", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),

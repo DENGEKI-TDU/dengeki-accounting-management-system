@@ -29,7 +29,7 @@ export default async function handle(
 			token:encryptSha256(oneTimeToken),
 		}
 	})
-  if(hostname.includes(allowHOST) &&passResult){
+  if(hostname.includes(allowHOST) && passResult){
 		const tokenLimit = passResult.limit
 		if(new Date() < tokenLimit){
       try {

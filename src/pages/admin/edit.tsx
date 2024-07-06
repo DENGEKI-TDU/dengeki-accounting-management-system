@@ -1,8 +1,9 @@
-import { Table,Thead,Tbody,Tr,Th,Td, Select, Button, Center, Heading, VStack } from "@chakra-ui/react";
+import { Table,Thead,Tbody,Tr,Th,Td, Select, Button, Center, Heading, VStack, Text } from "@chakra-ui/react";
 import { GetServerSideProps, GetStaticProps } from "next";
 import prisma from "@/lib/prisma";
-import { useState } from "react";
 import Update from "../../components/update"
+import { UseLoginState } from "@/hooks/UseLoginState";
+import {useRouter} from "next/router";
 
 export const getServerSideProps: GetServerSideProps = async () => {
 	let nowYear = new Date().getFullYear()
@@ -38,8 +39,13 @@ type updateAccount = {
 }
 
 const Home: React.FC<updateAccount> = (props) => {
+	const [isAdmin,isUser, Login, Logout] = UseLoginState(false);
+	const router = useRouter()
 	return (
 		<>
+		{isAdmin || isUser ? 
+		<>
+		{isAdmin ? 
 		<Center width="100%">
 		  <VStack width="100%">
 			<Heading>収支報告編集ページ</Heading>
@@ -60,15 +66,25 @@ const Home: React.FC<updateAccount> = (props) => {
 				<Tbody>
 			{
 				props.response.map((account: { id: number; year: string; date: Date; type: string; typeAlphabet: string; subtype: string; fixture: string; income: number; outcome: number; }) => (
-					<>
-						<Update update={account}/>
-					</>
+					<Tr key={account.id}>
+						<Update update={account} />
+					</Tr>
 				))
 			}
 				</Tbody>
 			</Table>
 			</VStack>
 		</Center>
+		: <Text>一般ユーザーの権限では使用できません。</Text>}
+		</>
+		: 
+		<>
+		  <VStack>
+			<Heading>ログインしてください。</Heading>
+			<Button onClick={() => router.push("/login")}>ログイン</Button>
+		  </VStack>
+		</>
+		} 
 		</>
 	)
 }
