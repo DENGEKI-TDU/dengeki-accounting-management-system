@@ -81,9 +81,8 @@ export default function Home() {
         inputPass,
         oneTimeToken,
         hostname,
-        mode:"generate",
       }
-      const response = await fetch("/api/database/post-earning",{
+      const response = await fetch("/api/database/generate",{
         method:"POST",
         headers:{"Content-Type":"application/json"},
         body:JSON.stringify(body)

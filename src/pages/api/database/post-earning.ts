@@ -143,19 +143,6 @@ export default async function handle(
 					})
 					res.json(result);
 				}
-				if(mode == "generate" && isAdmin){
-					const result = await prisma.mainAccount.findMany({
-						where:{
-							year:year
-						},
-						orderBy:[{income:"desc"},{date:"asc"}]
-					});
-					let response:String[] = []
-					for(let i=0;i<result.length;i++){
-							response.push(String(JSON.stringify(result[i])))
-					}
-					res.json({"data":result});
-				}
       } else {
         res.status(403).json("permission denied.")
       }
