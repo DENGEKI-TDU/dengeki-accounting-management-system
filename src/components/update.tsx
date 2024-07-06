@@ -1,4 +1,3 @@
-"useclient"
 import { Tr,Td, Select, Button, HStack, Input, Text, useToast, Tooltip } from "@chakra-ui/react";
 import { useState } from "react";
 import { EditIcon,CheckIcon, CloseIcon, DeleteIcon } from "@chakra-ui/icons"
