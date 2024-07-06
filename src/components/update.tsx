@@ -1,5 +1,5 @@
 import { Tr,Td, Select, Button, HStack, Input, Text, useToast, Tooltip } from "@chakra-ui/react";
-import { useState } from "react";
+import { useState,useRef } from "react";
 import { EditIcon,CheckIcon, CloseIcon, DeleteIcon } from "@chakra-ui/icons"
 import { useRouter } from "next/router";
 
@@ -25,6 +25,7 @@ const Update: React.FC<{ update: updateAccount }> = ({ update }) => {
 	const [tmpFixture, setTmpFixture] = useState(update.fixture);
 	const router = useRouter()
 	const toast = useToast()
+	const toastIdRef:any = useRef()
 	const types: string[] = [
 		"大道具",
 		"小道具",
@@ -36,6 +37,13 @@ const Update: React.FC<{ update: updateAccount }> = ({ update }) => {
 	];
 
 	async function adopt() {
+		toastIdRef.current = toast({
+			title:"更新中",
+			description:"ID:"+update.id+"のデータを更新中",
+			status:"loading",
+			duration:5000,
+			isClosable:false
+		})
 		setType(tmpType)
 		setSubType(tmpSubType)
 		setFixture(tmpFixture)
@@ -61,6 +69,9 @@ const Update: React.FC<{ update: updateAccount }> = ({ update }) => {
 			body:JSON.stringify(editData)
 		})
 		setIsEditMode(false)
+		if(toastIdRef.current){
+			toast.close(toastIdRef.current)
+		}
 		toast({
 			title:"編集完了",
 			status:"success",
@@ -70,6 +81,13 @@ const Update: React.FC<{ update: updateAccount }> = ({ update }) => {
 		router.push("")
 	}
 	async function aid() {
+		toastIdRef.current = toast({
+			title:"更新中",
+			description:"ID:"+update.id+"のデータを共済金からの支払いに変更中",
+			status:"loading",
+			duration:5000,
+			isClosable:false
+		})
 		const id = update.id
 		const getHost = await fetch("https://ipapi.co/json")
 		const res = await getHost.json()
@@ -98,8 +116,12 @@ const Update: React.FC<{ update: updateAccount }> = ({ update }) => {
 			body:JSON.stringify(body)
 		})
 		setIsEditMode(false)
+		if(toastIdRef.current){
+			toast.close(toastIdRef.current)
+		}
 		toast({
-			title:"共済行き完了",
+			title:"変更完了",
+			description:"共済金からの支払いへの変更を完了しました。",
 			status:"success",
 			duration:1500,
 			isClosable:true
