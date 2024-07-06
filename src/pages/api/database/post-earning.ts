@@ -70,21 +70,6 @@ export default async function handle(
         console.error(error)
       }
       if((isAdmin || isUser)){
-				if(mode == "outcome"){
-					const result = await prisma.mainAccount.create({
-						data: {
-							year: year,
-							date: buyDate,
-							type: type,
-							subtype: subType,
-							fixture: fixture,
-							income: 0,
-							outcome: value,
-							typeAlphabet: typeAlphabet,
-						},
-					});
-					res.json(result);
-				}
 				if(mode == "income"){
 					const result = await prisma.mainAccount.create({
 						data: {
@@ -99,6 +84,21 @@ export default async function handle(
 						},
 					});
 					res.status(200).json(result);
+				}
+				if(mode == "outcome"){
+					const result = await prisma.mainAccount.create({
+						data: {
+							year: year,
+							date: buyDate,
+							type: type,
+							subtype: subType,
+							fixture: fixture,
+							income: 0,
+							outcome: value,
+							typeAlphabet: typeAlphabet,
+						},
+					});
+					res.json(result);
 				}
 				if(mode == "update" && isAdmin){
 					const result = await prisma.mainAccount.update({
