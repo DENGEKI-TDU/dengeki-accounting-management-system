@@ -14,23 +14,15 @@ export default function Home() {
             <Text>Log in as : {isAdmin?"管理者":"一般ユーザー"}</Text>
           </> 
         : null}
-        <Text fontSize={"2xl"}>ホーム</Text>
+        <Text fontSize={"2xl"}>鳩山祭援助金収支申請ホーム</Text>
         {isAdmin || isUser ? (
           <>
-            <Link href={"/income"}>
-              <Box borderBottom="1px solid #fc8819">本予算収入報告</Box>
+            <Link href={"/hatosai/income"}>
+              <Box borderBottom="1px solid #fc8819">収入報告</Box>
             </Link>
-            <Link href={"/outcome"}>
-              <Box borderBottom="1px solid #fc8819">本予算支出報告</Box>
+            <Link href={"/hatosai/outcome"}>
+              <Box borderBottom="1px solid #fc8819">支出報告</Box>
             </Link>
-            <Link href={"/other"}>
-              <Box borderBottom="1px solid #fc8819">本予算以外の収支報告ページ</Box>
-            </Link>
-            {isAdmin ? 
-            <Link href="/admin">
-              <Box borderBottom="1px solid #fc8819">管理者用ページ</Box>
-            </Link>
-            : null }
             <Button onClick={Logout}>ログアウト</Button>
           </>
         ) : (

@@ -5,6 +5,7 @@ import {
   FormLabel,
   Heading,
   Input,
+  Select,
   Text,
   VStack,
   useToast,
@@ -18,6 +19,7 @@ export default function Home() {
   const toast = useToast()
   const router = useRouter();
   const [year,setYear] = useState("")
+  const [from,setFrom] = useState("")
   const toastIdRef:any = useRef()
   function generate(){
       toastIdRef.current = toast({
@@ -80,6 +82,7 @@ export default function Home() {
         inputPass,
         oneTimeToken,
         hostname,
+        from
       }
       const response = await fetch("/api/database/generate",{
         method:"POST",
@@ -110,7 +113,9 @@ export default function Home() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `演劇部決算_${year}.xlsx`;
+      const accoutnType = ["","鳩山祭","後援会費","校友会費"]
+      const accountIndex = ["main","hatosai","clubsupport","alumni"]
+      a.download = `演劇部${accoutnType[accountIndex.indexOf(from)]}決算_${year}.xlsx`;
       a.click();
       // ダウンロード後は不要なのでaタグを除去
       a.remove();
@@ -127,6 +132,15 @@ export default function Home() {
                   生成する年度を入力してください。
                 </Text>
                 <FormControl>
+                  <FormLabel>会計種別を選択</FormLabel>
+                  <Select onChange={(e) => setFrom(e.target.value)}>
+                    <option value="main">本予算</option>
+                    <option value="hatosai">鳩山祭援助金</option>
+                    <option value="clubsupport">後援会費</option>
+                    <option value="alumni">校友会費</option>
+                  </Select>
+                </FormControl>
+                <FormControl>
                   <FormLabel>生成する年度</FormLabel>
                   <Input
                     onChange={(e) => {
@@ -134,9 +148,11 @@ export default function Home() {
                     }}
                   ></Input>
                 </FormControl>
+                {from&&year?
                 <Button onClick={(e) => generate()}>
                   ダウンロード
                 </Button>
+                : null }
               </VStack>
             :
             <Heading>一般ユーザーの権限では使用できません。</Heading>}

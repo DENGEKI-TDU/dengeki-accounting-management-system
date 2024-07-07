@@ -19,6 +19,42 @@ model mainAccount {
   outcome       Int
 }
 
+model hatosaiAccount {
+  id            Int @id @default(autoincrement())
+  year          String
+  date          DateTime
+  type          String
+  typeAlphabet  String
+  subtype       String
+  fixture       String
+  income        Int
+  outcome       Int
+}
+
+model clubsupportAccount {
+  id            Int @id @default(autoincrement())
+  year          String
+  date          DateTime
+  type          String
+  typeAlphabet  String
+  subtype       String
+  fixture       String
+  income        Int
+  outcome       Int
+}
+
+model alumniAccount {
+  id            Int @id @default(autoincrement())
+  year          String
+  date          DateTime
+  type          String
+  typeAlphabet  String
+  subtype       String
+  fixture       String
+  income        Int
+  outcome       Int
+}
+
 model aid {
   id            Int @id @default(autoincrement())
   year          String
@@ -40,6 +76,7 @@ model threadID {
   id           Int @id @default(autoincrement())
   hookurl      String
   threadID     String
+  mode         String
 }
 
 model tokens {

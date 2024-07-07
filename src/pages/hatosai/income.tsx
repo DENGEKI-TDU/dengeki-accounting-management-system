@@ -54,11 +54,11 @@ export default function Home() {
       fixture +
       "\nメモ : " +
       memo;
-    const username = "収入報告くん"
+    const username = "鳩祭収入報告くん"
     const discordData = {
       username,
       valueContent,
-      mode:"main"
+      mode:"hatosai"
     };
     const getHost = await fetch("https://ipapi.co/json")
     const res = await getHost.json()
@@ -83,7 +83,7 @@ export default function Home() {
         oneTimeToken,
         hostname,
         mode:"income",
-        from:"main"
+        from:"hatosai"
       };
       await fetch("/api/database/post-earning", {
         method: "POST",
@@ -116,7 +116,7 @@ export default function Home() {
     return (
       <>
         <Container>
-          <Heading>収入報告フォーム</Heading>
+          <Heading>鳩山祭収入報告フォーム</Heading>
           <form onSubmit={onsubmit} encType="multipart/form-data">
             <FormControl>
               <FormLabel>会計年度</FormLabel>

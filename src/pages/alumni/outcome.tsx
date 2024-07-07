@@ -131,7 +131,7 @@ const Home: NextPage = () => {
       oneTimeToken,
       hostname,
       mode:"outcome",
-      from:"main"
+      from:"alumni"
     };
     await fetch("/api/database/post-earning", {
       method: "POST",
@@ -141,7 +141,7 @@ const Home: NextPage = () => {
     if (file!!.type.match("image.*")) {
       const fileExtension = file!!.name.split(".").pop();
       const uuid = uuidv4();
-      const inputFileName = `image/${year}/${uuid}.${fileExtension}`;
+      const inputFileName = `image/${year}/alumni/${uuid}.${fileExtension}`;
       const ImageURL = public_url + inputFileName;
       const { error } = await supabase.storage
         .from("dengeki-receipt")
@@ -173,11 +173,11 @@ const Home: NextPage = () => {
         "\n[レシート画像URL](" +
         ImageURL +
         ")";
-        const username = "支出報告くん"
+        const username = "後援会費支出報告くん"
         const body = {
           username,
           valueContent,
-          mode:"main"
+          mode:"alumni"
         };
         await fetch("/api/discord/send", {
           method: "POST",
@@ -214,7 +214,7 @@ const Home: NextPage = () => {
   if (isAdmin || isUser) {
     return (
       <Container pt="10">
-        <Heading>支出報告フォーム</Heading>
+        <Heading>後援会費支出報告フォーム</Heading>
         <form onSubmit={onSubmit} encType="multipart/form-data">
           <FormControl>
             <FormLabel>会計年度</FormLabel>
