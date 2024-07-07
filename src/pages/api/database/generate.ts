@@ -15,12 +15,13 @@ export default async function handle(
       year:string
       inputPass: string;
       oneTimeToken: string;
-      hostname:string
+      hostname:string;
+      from:string;
     };
   },
   res: NextApiResponse
 ) {
-  const { year,inputPass, oneTimeToken, hostname } = req.body;
+  const { year,inputPass, oneTimeToken, hostname, from } = req.body;
   const allowHOST = process.env.NEXT_PUBLIC_ALLOW_HOSTNAME!
   let isAdmin = false;
   const sessionToken = inputPass
@@ -47,17 +48,58 @@ export default async function handle(
         console.error(error)
       }
       if((isAdmin)){
-        const result = await prisma.mainAccount.findMany({
-          where:{
-            year:year
-          },
-          orderBy:[{income:"desc"},{date:"asc"}]
-        });
-        let response:String[] = []
-        for(let i=0;i<result.length;i++){
-            response.push(String(JSON.stringify(result[i])))
+        if(from == "main"){
+          const result = await prisma.mainAccount.findMany({
+            where:{
+              year:year
+            },
+            orderBy:[{income:"desc"},{date:"asc"}]
+          });
+          let response:String[] = []
+          for(let i=0;i<result.length;i++){
+              response.push(String(JSON.stringify(result[i])))
+          }
+          res.json({"data":result});
         }
-        res.json({"data":result});
+        if(from == "hatosai"){
+          const result = await prisma.hatosaiAccount.findMany({
+            where:{
+              year:year
+            },
+            orderBy:[{income:"desc"},{date:"asc"}]
+          });
+          let response:String[] = []
+          for(let i=0;i<result.length;i++){
+              response.push(String(JSON.stringify(result[i])))
+          }
+          res.json({"data":result});
+        }
+        if(from == "clubsupport"){
+          const result = await prisma.clubsupportAccount.findMany({
+            where:{
+              year:year
+            },
+            orderBy:[{income:"desc"},{date:"asc"}]
+          });
+          let response:String[] = []
+          for(let i=0;i<result.length;i++){
+              response.push(String(JSON.stringify(result[i])))
+          }
+          res.json({"data":result});
+        }
+        if(from == "alumni"){
+          const result = await prisma.alumniAccount.findMany({
+            where:{
+              year:year
+            },
+            orderBy:[{income:"desc"},{date:"asc"}]
+          });
+          let response:String[] = []
+          for(let i=0;i<result.length;i++){
+              response.push(String(JSON.stringify(result[i])))
+          }
+          res.json({"data":result});
+        }
       } else {
         res.status(403).json("permission denied.")
       }
