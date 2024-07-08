@@ -16,6 +16,7 @@ export function UseLoginState(
 ): [
   isUser: boolean,
   isAdmin: boolean,
+  status: boolean,
   Login: (ID: string, TOKEN: string, LocalIP: string) => void,
   Logout: () => void
 ] {
@@ -25,6 +26,7 @@ export function UseLoginState(
   const toast = useToast();
   const router = useRouter();
   const toastIdRef:any = useRef()
+  const [sessionStatus,setSessionStatus] = useState(false)
 
   async function logoutAuth(tokens:string){
     const body = {
@@ -92,7 +94,6 @@ export function UseLoginState(
         });
       }
     })
-    
   }
 
   const getAuth = async () => {
@@ -121,6 +122,7 @@ export function UseLoginState(
 
   useEffect(() => {
     getAuth()
+    setSessionStatus(true)
   }, [setIsUserInternal]);
 
   const Login = useCallback(
@@ -154,5 +156,5 @@ export function UseLoginState(
     })
     router.push("")
   }, []);
-  return [isAdminInternal,isUserInternal, Login, Logout];
+  return [isAdminInternal,isUserInternal,sessionStatus, Login, Logout];
 }

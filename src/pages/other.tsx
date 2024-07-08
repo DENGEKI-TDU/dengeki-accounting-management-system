@@ -1,14 +1,16 @@
-import { Box, Button, Text, VStack } from "@chakra-ui/react";
+import { Box, Button, Heading, Text, VStack } from "@chakra-ui/react";
 import Link from "next/link";
 import { UseLoginState } from "@/hooks/UseLoginState";
 import { useRouter } from "next/router";
 
 export default function Home() {
-  const [isAdmin,isUser, Login, Logout] = UseLoginState(false);
+  const [isAdmin,isUser,status, Login, Logout] = UseLoginState(false);
   const router = useRouter();
   return (
     <>
       <VStack>
+        {status ?
+        <>
         {isAdmin || isUser ?
           <>
             <Text>Log in as : {isAdmin?"管理者":"一般ユーザー"}</Text>
@@ -33,6 +35,8 @@ export default function Home() {
         ) : (
           <Button onClick={() => router.push("/login")}>ログイン</Button>
         )}
+        </>
+         : <Heading>ログイン状態認証中</Heading>}
       </VStack>
     </>
   );

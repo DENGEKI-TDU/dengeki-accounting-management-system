@@ -19,7 +19,7 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
 
 export default function Home() {
-  const [isAdmin,isUser, Login, Logout] = UseLoginState(false);
+  const [isAdmin,isUser,status, Login, Logout] = UseLoginState(false);
   const [date, setDate] = useState("");
   const [value, setValue] = useState(0);
   const [fixture, setFixture] = useState("");
@@ -111,68 +111,73 @@ export default function Home() {
       router.push("/");
     });
   };
-
-  if (isAdmin || isUser) {
-    return (
-      <>
-        <Container>
-          <Heading>収入報告フォーム</Heading>
-          <form onSubmit={onsubmit} encType="multipart/form-data">
-            <FormControl>
-              <FormLabel>会計年度</FormLabel>
-              <NumberInput
-                min={new Date().getFullYear() - 2}
-                onChange={(e) => setYear(String(Number(e)))}
-              >
-                <NumberInputField />
-                <NumberInputStepper>
-                  <NumberIncrementStepper />
-                  <NumberDecrementStepper />
-                </NumberInputStepper>
-              </NumberInput>
-            </FormControl>
-            <FormControl>
-              <FormLabel>取得日</FormLabel>
-              <Input type="date" onChange={(e) => setDate(e.target.value)} />
-            </FormControl>
-            <FormControl>
-              <FormLabel>金額</FormLabel>
-              <NumberInput min={1} onChange={(e) => setValue(Number(e))}>
-                <NumberInputField />
-                <NumberInputStepper>
-                  <NumberIncrementStepper />
-                  <NumberDecrementStepper />
-                </NumberInputStepper>
-              </NumberInput>
-            </FormControl>
-            <FormControl>
-              <FormLabel>収入事由</FormLabel>
-              <Textarea onChange={(e) => setFixture(e.target.value)} />
-            </FormControl>
-            <FormControl>
-              <FormLabel>メモ</FormLabel>
-              <Textarea onChange={(e) => setMemo(e.target.value)} />
-            </FormControl>
-            {date != "" && value != 0 && fixture != "" ? (
-              <Input
-                type="submit"
-                value="提出"
-                margin="10px auto"
-                variant="filled"
-              />
-            ) : null}
-          </form>
-        </Container>
-      </>
-    );
+  if(status){
+    if (isAdmin || isUser) {
+      return (
+        <>
+          <Container>
+            <Heading>収入報告フォーム</Heading>
+            <form onSubmit={onsubmit} encType="multipart/form-data">
+              <FormControl>
+                <FormLabel>会計年度</FormLabel>
+                <NumberInput
+                  min={new Date().getFullYear() - 2}
+                  onChange={(e) => setYear(String(Number(e)))}
+                >
+                  <NumberInputField />
+                  <NumberInputStepper>
+                    <NumberIncrementStepper />
+                    <NumberDecrementStepper />
+                  </NumberInputStepper>
+                </NumberInput>
+              </FormControl>
+              <FormControl>
+                <FormLabel>取得日</FormLabel>
+                <Input type="date" onChange={(e) => setDate(e.target.value)} />
+              </FormControl>
+              <FormControl>
+                <FormLabel>金額</FormLabel>
+                <NumberInput min={1} onChange={(e) => setValue(Number(e))}>
+                  <NumberInputField />
+                  <NumberInputStepper>
+                    <NumberIncrementStepper />
+                    <NumberDecrementStepper />
+                  </NumberInputStepper>
+                </NumberInput>
+              </FormControl>
+              <FormControl>
+                <FormLabel>収入事由</FormLabel>
+                <Textarea onChange={(e) => setFixture(e.target.value)} />
+              </FormControl>
+              <FormControl>
+                <FormLabel>メモ</FormLabel>
+                <Textarea onChange={(e) => setMemo(e.target.value)} />
+              </FormControl>
+              {date != "" && value != 0 && fixture != "" ? (
+                <Input
+                  type="submit"
+                  value="提出"
+                  margin="10px auto"
+                  variant="filled"
+                />
+              ) : null}
+            </form>
+          </Container>
+        </>
+      );
+    } else {
+      return (
+        <>
+          <Heading>ログインが必要です。</Heading>
+          <Button onClick={() => router.push(`/login?pagelocate=${path}`)}>
+            ログインする
+          </Button>
+        </>
+      );
+    }
   } else {
     return (
-      <>
-        <Heading>ログインが必要です。</Heading>
-        <Button onClick={() => router.push(`/login?pagelocate=${path}`)}>
-          ログインする
-        </Button>
-      </>
-    );
+      <Heading>ログイン状態認証中</Heading>
+    )
   }
 }
