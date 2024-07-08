@@ -20,27 +20,44 @@ export default function Home() {
   const router = useRouter();
   const [year,setYear] = useState("")
   const [from,setFrom] = useState("")
+  const accoutnType = ["","鳩山祭","後援会費","校友会費"]
+  const jpAccoutnType = ["本予算","鳩山祭","後援会費","校友会費"]
+  const accountIndex = ["main","hatosai","clubsupport","alumni"]
   const toastIdRef:any = useRef()
   function generate(){
       toastIdRef.current = toast({
         title: "生成中",
-        description:year+"年度のExcelファイルを生成中",
+        description:year+"年度"+jpAccoutnType[accountIndex.indexOf(from)]+"の決算Excelファイルを生成中",
         status: "loading",
         duration: 4000,
         isClosable: true,
       });
-      clickButtonAsync().then(()=>{
-        if(toastIdRef.current){
-          toast.close(toastIdRef.current)
+      clickButtonAsync().then((msg)=>{
+        if(!(msg == "error")){
+          if(toastIdRef.current){
+            toast.close(toastIdRef.current)
+          }
+            toast({
+              title: "生成完了",
+              description:year+"年度"+jpAccoutnType[accountIndex.indexOf(from)]+"の決算Excelファイルを生成しました",
+              status: "success",
+              duration: 4000,
+              isClosable: true,
+            });
+          } else {
+            if(toastIdRef.current){
+              toast.close(toastIdRef.current)
+            }
+              toast({
+                title: "エラー",
+                description:"エラーが発生したため、生成できませんでした。認証情報を確認して下さい。",
+                status: "error",
+                duration: 4000,
+                isClosable: true,
+              });
+          }
         }
-          toast({
-            title: "生成完了",
-            description:year+"年度のExcelファイルを生成しました",
-            status: "success",
-            duration: 4000,
-            isClosable: true,
-          });
-      })
+      )
   }
   async function clickButtonAsync() {
       // Workbookの作成
@@ -91,34 +108,36 @@ export default function Home() {
       })
       const result = await response.json()
       var earning:number = 0
-      for(var i=0;i<result.data.length;i++){
-        earning += result.data[i].income
-        earning -= result.data[i].outcome
-        const earning_string = "\\"+earning.toLocaleString()
-        let income:string = ""
-        if(result.data[i].income != 0){
-          income = "\\"+result.data[i].income.toLocaleString()
+      if(!result.msg){
+        for(var i=0;i<result.data.length;i++){
+          earning += result.data[i].income
+          earning -= result.data[i].outcome
+          const earning_string = "\\"+earning.toLocaleString()
+          let income:string = ""
+          if(result.data[i].income != 0){
+            income = "\\"+result.data[i].income.toLocaleString()
+          }
+          let outcome:string = ""
+          if(result.data[i].outcome != 0){
+            outcome = "\\"+result.data[i].outcome.toLocaleString()
+            if(outcome.length>3){}
+          }
+          worksheet.addRow({month:new Date(result.data[i].date).getMonth()+1,date:new Date(result.data[i].date).getDate(),fixture:result.data[i].fixture,indexNumber:"",mainType:result.data[i].typeAlphabet,subType:result.data[i].subtype,income:income,outcome:outcome,earnings:earning_string})
         }
-        let outcome:string = ""
-        if(result.data[i].outcome != 0){
-          outcome = "\\"+result.data[i].outcome.toLocaleString()
-          if(outcome.length>3){}
-        }
-        worksheet.addRow({month:new Date(result.data[i].date).getMonth()+1,date:new Date(result.data[i].date).getDate(),fixture:result.data[i].fixture,indexNumber:"",mainType:result.data[i].typeAlphabet,subType:result.data[i].subtype,income:income,outcome:outcome,earnings:earning_string})
+        // UInt8Arrayを生成
+        const uint8Array = await workbook.xlsx.writeBuffer();
+        // Blob
+        const blob = new Blob([uint8Array], { type: "application/octet-binary" });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `演劇部${accoutnType[accountIndex.indexOf(from)]}決算_${year}.xlsx`;
+        a.click();
+        // ダウンロード後は不要なのでaタグを除去
+        a.remove();
+      } else {
+        return "error"
       }
-      // UInt8Arrayを生成
-      const uint8Array = await workbook.xlsx.writeBuffer();
-      // Blob
-      const blob = new Blob([uint8Array], { type: "application/octet-binary" });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      const accoutnType = ["","鳩山祭","後援会費","校友会費"]
-      const accountIndex = ["main","hatosai","clubsupport","alumni"]
-      a.download = `演劇部${accoutnType[accountIndex.indexOf(from)]}決算_${year}.xlsx`;
-      a.click();
-      // ダウンロード後は不要なのでaタグを除去
-      a.remove();
     }
 
     return (
@@ -133,7 +152,7 @@ export default function Home() {
               </Text>
               <FormControl>
                 <FormLabel>会計種別を選択</FormLabel>
-                <Select onChange={(e) => setFrom(e.target.value)}>
+                <Select onChange={(e) => setFrom(e.target.value)} placeholder={"選択してください"}>
                   <option value="main">本予算</option>
                   <option value="hatosai">鳩山祭援助金</option>
                   <option value="clubsupport">後援会費</option>

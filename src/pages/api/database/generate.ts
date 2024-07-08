@@ -36,7 +36,7 @@ export default async function handle(
       try {
         const data = await prisma.tokens.findFirst({
           where:{
-            tokens:sessionToken
+            tokens:encryptSha256(sessionToken)
           }
         });
         if(data){
@@ -101,12 +101,12 @@ export default async function handle(
           res.json({"data":result});
         }
       } else {
-        res.status(403).json("permission denied.")
+        res.status(403).json({"msg":"permission denied."})
       }
     } else {
-      res.status(403).json("Authentication information expired")
+      res.status(403).json({"msg":"Authentication information expired"})
     }
   } else {
-    res.status(403).json("permission denied.")
+    res.status(403).json({"msg":"permission denied."})
   }
 }
