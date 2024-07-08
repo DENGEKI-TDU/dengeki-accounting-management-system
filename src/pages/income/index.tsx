@@ -147,7 +147,7 @@ export default function Home() {
               </FormControl>
               <FormControl>
                 <FormLabel>収入事由</FormLabel>
-                <Textarea onChange={(e) => setFixture(e.target.value)} />
+                <Input onChange={(e) => setFixture(e.target.value)} />
               </FormControl>
               <FormControl>
                 <FormLabel>メモ</FormLabel>

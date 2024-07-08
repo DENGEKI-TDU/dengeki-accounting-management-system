@@ -326,7 +326,7 @@ const Home: NextPage = () => {
             </FormControl>
             <FormControl>
               <FormLabel>購入物品名</FormLabel>
-              <Textarea onChange={(e) => setFixture(e.target.value)} />
+              <Input onChange={(e) => setFixture(e.target.value)} />
             </FormControl>
             <FormControl>
               <FormLabel>メモ</FormLabel>
