@@ -74,7 +74,7 @@ export default async function Handler(
 					res.status(403).json("Authentication information expired")
 				}
 			} else{
-				res.status(403).json("permission denied.")
+				res.status(403).json({"msg":"permission denied."})
 			}
 		}
 		if(mode == "logout"){
@@ -86,6 +86,6 @@ export default async function Handler(
 			res.status(200).json(result)
 		}
 	} else {
-		res.status(403).json("permission denied.")
+		res.status(403).json({"msg":"permission denied."})
 	}
 }

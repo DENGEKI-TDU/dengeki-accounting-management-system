@@ -88,9 +88,9 @@ export default async function handle(
       res.status(200).json(send_string);
     }
     else {
-      res.status(403).json("permission denied.")
+      res.status(403).json({"msg":"permission denied."})
     }
   } else {
-    res.status(403).json("permission denied.")
+    res.status(403).json({"msg":"permission denied."})
   }
 }
