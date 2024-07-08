@@ -24,7 +24,7 @@ export default async function handle(
   let isAdmin:boolean = false
   const data = await prisma.tokens.findFirst({
     where:{
-      tokens:sessionToken
+      tokens:encryptSha256(sessionToken)
     }
   });
   if(data){
