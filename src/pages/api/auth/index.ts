@@ -27,7 +27,7 @@ export default async function Handler(
     if(mode == "get"){
 			const sessionUser = await prisma.tokens.findFirst({
 				where:{
-					tokens:token
+					tokens:encryptSha256(token)
 				}
 			})
 			res.status(200).json({"isAdmin":sessionUser?.isAdmin,"isUser":sessionUser?.isUser})
@@ -58,7 +58,7 @@ export default async function Handler(
 								limit:limit,
 								isAdmin:authResult.isAdmin,
 								isUser:authResult.isUser,
-								tokens:token,
+								tokens:encryptSha256(token),
 							}
 						})
 						await prisma.oneTimeToken.deleteMany({
@@ -80,7 +80,7 @@ export default async function Handler(
 		if(mode == "logout"){
 			const result = await prisma.tokens.deleteMany({
 					where:{
-							tokens:token,
+							tokens:encryptSha256(token),
 					}
 			})
 			res.status(200).json(result)
