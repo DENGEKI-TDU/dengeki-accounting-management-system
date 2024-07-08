@@ -43,6 +43,7 @@ export default async function handle(
   }
 ) {
   const { id, date, type, typeAlphabet, subType, fixture, value, year, inputPass, oneTimeToken, hostname, mode, income, outcome, from } = req.body;
+  console.log(id, date, type, typeAlphabet, subType, fixture, value, year, inputPass, oneTimeToken, hostname, mode, income, outcome, from)
   let isAdmin = false;
   let isUser = false;
 	const passResult = await prisma.oneTimeToken.findFirst({
@@ -58,7 +59,7 @@ export default async function handle(
       try {
         const data = await prisma.tokens.findFirst({
           where:{
-            tokens:sessionToken
+            tokens:encryptSha256(sessionToken)
           }
         });
         if(data){
@@ -70,6 +71,7 @@ export default async function handle(
       } catch(error) {
         console.error(error)
       }
+	  console.log("isAdmin: ",isAdmin,",isUser: ",isUser)
       if((isAdmin || isUser)){
 		if(from == "main"){
 			if(mode == "income"){
@@ -118,6 +120,7 @@ export default async function handle(
 								outcome:Number(outcome),
 						}
 				})
+				console.log(result)
 				res.json(result);
 			}
 			if(mode == "aid" && isAdmin){
@@ -126,6 +129,7 @@ export default async function handle(
 								id: Number(id),
 						},
 				})
+				console.log(response)
 				await prisma.mainAccount.deleteMany({
 						where:{
 								id: Number(id),
@@ -143,6 +147,7 @@ export default async function handle(
 								typeAlphabet: response!.typeAlphabet,
 						}
 				})
+				console.log(result)
 				res.json(result);
 			}
 		}

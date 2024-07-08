@@ -15,7 +15,7 @@ type updateAccount = {
     outcome: number,
 }
 
-const Update: React.FC<{ update: updateAccount }> = ({ update }) => {
+const Update: React.FC<{ update: updateAccount,from:string }> = ({ update,from }) => {
 	const [isEditMode,setIsEditMode] = useState(false)
 	const [type, setType] = useState(update.type);
 	const [subType, setSubType] = useState(update.subtype);
@@ -61,7 +61,22 @@ const Update: React.FC<{ update: updateAccount }> = ({ update }) => {
 		const getToken = await token.json()
 		const oneTimeToken = getToken.token
 		const inputPass = localStorage.getItem("storage_token")
-		const editData = {"id":String(update.id),"year":String(update.year),"date":String(update.date),"type":String(tmpType),"typeAlphabet":alphabet[types.indexOf(tmpType)],"subtype":tmpSubType,"fixture":tmpFixture,"income":String(update.income),"outcome":String(update.outcome),"inputPass":inputPass,"oneTimeToken":oneTimeToken,"hostname":hostname,"mode":"update"}
+		const editData = {
+			"id":String(update.id),
+			"year":String(update.year),
+			"date":String(update.date),
+			"type":String(tmpType),
+			"typeAlphabet":alphabet[types.indexOf(tmpType)],
+			"subtype":tmpSubType,
+			"fixture":tmpFixture,
+			"income":String(update.income),
+			"outcome":String(update.outcome),
+			"inputPass":inputPass,
+			"oneTimeToken":oneTimeToken,
+			"hostname":hostname,
+			"mode":"update",
+			from:from
+		}
 
 		await fetch("/api/database/post-earning",{
 			method:"POST",
@@ -78,7 +93,7 @@ const Update: React.FC<{ update: updateAccount }> = ({ update }) => {
 			duration:1500,
 			isClosable:true
 		})
-		router.push("")
+		router.push("/admin/edit?from="+from)
 	}
 	async function aid() {
 		toastIdRef.current = toast({
@@ -108,7 +123,8 @@ const Update: React.FC<{ update: updateAccount }> = ({ update }) => {
 			inputPass,
 			oneTimeToken,
 			hostname,
-			mode:"aid"
+			mode:"aid",
+			from:from
 		}
 		await fetch("/api/database/post-earning",{
 			method:"POST",
@@ -126,7 +142,7 @@ const Update: React.FC<{ update: updateAccount }> = ({ update }) => {
 			duration:1500,
 			isClosable:true
 		})
-		router.push("")
+		router.push("/admin/edit?from="+from)
 	}
 	function close() {
 		setTmpType(update.type)

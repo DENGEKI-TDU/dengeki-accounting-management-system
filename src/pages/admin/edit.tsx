@@ -108,7 +108,7 @@ const Home: React.FC<updateAccount> = (props) => {
 				{
 					props.response.map((account: { id: number; year: string; date: Date; type: string; typeAlphabet: string; subtype: string; fixture: string; income: number; outcome: number; }) => (
 						<Tr key={account.id}>
-							<Update update={account} />
+							<Update update={account} from={from} />
 						</Tr>
 					))
 				}
