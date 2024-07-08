@@ -33,7 +33,7 @@ export default function Home() {
         isClosable: true,
       });
       clickButtonAsync().then((msg)=>{
-        if(!(msg == "error")){
+        if(!(msg)){
           if(toastIdRef.current){
             toast.close(toastIdRef.current)
           }
@@ -50,7 +50,7 @@ export default function Home() {
             }
               toast({
                 title: "エラー",
-                description:"エラーが発生したため、生成できませんでした。認証情報を確認して下さい。",
+                description:"エラーが発生したため、生成できませんでした。認証情報を確認して下さい。\nLOG:"+msg,
                 status: "error",
                 duration: 4000,
                 isClosable: true,
@@ -136,7 +136,7 @@ export default function Home() {
         // ダウンロード後は不要なのでaタグを除去
         a.remove();
       } else {
-        return "error"
+        return result.msg
       }
     }
 
