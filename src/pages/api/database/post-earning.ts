@@ -58,7 +58,7 @@ export default async function handle(
       try {
         const data = await prisma.tokens.findFirst({
           where:{
-            tokens:sessionToken
+            tokens:encryptSha256(sessionToken)
           }
         });
         if(data){
