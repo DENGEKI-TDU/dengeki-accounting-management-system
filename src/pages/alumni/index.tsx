@@ -8,31 +8,32 @@ export default function Home() {
   const router = useRouter();
   return (
     <>
-      <VStack>
-        {status ? 
+      {status && (isAdmin || isUser) ? 
+        <VStack>
+          <Text>Log in as : {isAdmin?"管理者":"一般ユーザー"}</Text>
+          <Text fontSize={"2xl"}>校友会費収支申請ホーム</Text>
+          <Link href={"/alumni/income"}>
+            <Box borderBottom="1px solid #fc8819">収入報告</Box>
+          </Link>
+          <Link href={"/alumni/outcome"}>
+            <Box borderBottom="1px solid #fc8819">支出報告</Box>
+          </Link>
+          <Button onClick={Logout}>ログアウト</Button>
+        </VStack>
+      : 
+      <>
+        {status ?
         <>
-        {isAdmin || isUser ?
-          <>
-            <Text>Log in as : {isAdmin?"管理者":"一般ユーザー"}</Text>
-          </> 
-        : null}
-        <Text fontSize={"2xl"}>校友会費収支申請ホーム</Text>
-        {isAdmin || isUser ? (
-          <>
-            <Link href={"/alumni/income"}>
-              <Box borderBottom="1px solid #fc8819">収入報告</Box>
-            </Link>
-            <Link href={"/alumni/outcome"}>
-              <Box borderBottom="1px solid #fc8819">支出報告</Box>
-            </Link>
-            <Button onClick={Logout}>ログアウト</Button>
-          </>
-        ) : (
-          <Button onClick={() => router.push("/login")}>ログイン</Button>
-        )}
+          <VStack>
+            <Heading>ログインしてください。</Heading>
+            <Button onClick={() => router.push("/login")}>ログイン</Button>
+          </VStack>
         </>
-        : <Heading>ログイン状態認証中</Heading> }
-      </VStack>
+        :
+          <Heading>ログイン状態認証中</Heading>
+        }
+      </>
+      }
     </>
   );
 }

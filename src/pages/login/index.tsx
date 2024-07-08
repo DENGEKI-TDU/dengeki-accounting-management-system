@@ -38,48 +38,40 @@ export default function Home() {
   }
   return (
     <>
-      <VStack>
-        {status ? 
-        <>
-        {isAdmin || isUser ? (
+      {status && (isAdmin || isUser) ? 
           <Heading>ログイン済みです。</Heading>
-        ) : (
-          <Center>
-            <VStack>
-              <Heading>ログインフォーム</Heading>
-              <Text>
-                ログインには学内インターネットへの接続が必要です。
-                <br />
-                学外からログインするには
-                <Link href="https://www.mrcl.dendai.ac.jp/mrcl/it-service/network/vpn/">
-                  <Box as="span" borderBottom={"1px solid #fc8819"}>
-                    このリンク
-                  </Box>
-                  を参照してVPNを利用してください。
-                </Link>
-              </Text>
-              <Box border={"3px dotted #fc8819"} w="80%">
-                <FormControl>
-                  <FormLabel>ID</FormLabel>
-                  <Input onChange={(e) => setInputID(e.target.value)}></Input>
-                </FormControl>
-                <FormControl>
-                  <FormLabel>PASSWORD</FormLabel>
-                  <Input
-                    onChange={(e) => setInputPass(e.target.value)}
-                    type="password"
-                  ></Input>
-                </FormControl>
-                <Button onClick={setLogin}>LOGIN</Button>
+        :
+        <Center>
+        <VStack>
+          <Heading>ログインフォーム</Heading>
+          <Text>
+            ログインには学内インターネットへの接続が必要です。
+            <br />
+            学外からログインするには
+            <Link href="https://www.mrcl.dendai.ac.jp/mrcl/it-service/network/vpn/">
+              <Box as="span" borderBottom={"1px solid #fc8819"}>
+                このリンク
               </Box>
-            </VStack>
-          </Center>
-        )}
-        </>
-        :<Heading>ログイン状態認証中</Heading>
-        }
-        <p>Your IP : {IP}</p>
-      </VStack>
-    </>
-  );
+              を参照してVPNを利用してください。
+            </Link>
+          </Text>
+          <Box border={"3px dotted #fc8819"} w="80%">
+            <FormControl>
+              <FormLabel>ID</FormLabel>
+              <Input onChange={(e) => setInputID(e.target.value)}></Input>
+            </FormControl>
+            <FormControl>
+              <FormLabel>PASSWORD</FormLabel>
+              <Input
+                onChange={(e) => setInputPass(e.target.value)}
+                type="password"
+              ></Input>
+            </FormControl>
+            <Button onClick={setLogin}>LOGIN</Button>
+          </Box>
+        </VStack>
+      </Center>
+      }
+      </>
+  )
 }

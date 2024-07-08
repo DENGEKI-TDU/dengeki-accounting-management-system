@@ -123,53 +123,54 @@ export default function Home() {
 
     return (
       <>
-      {status ? 
+      {status && (isAdmin || isUser) ? 
         <>
-          {isAdmin || isUser ? 
-            <>
-              {isAdmin?
-                <VStack>
-                  <Heading>Excelダウンロードページ</Heading>
-                  <Text fontSize={"xl"}>
-                    生成する年度を入力してください。
-                  </Text>
-                  <FormControl>
-                    <FormLabel>会計種別を選択</FormLabel>
-                    <Select onChange={(e) => setFrom(e.target.value)}>
-                      <option value="main">本予算</option>
-                      <option value="hatosai">鳩山祭援助金</option>
-                      <option value="clubsupport">後援会費</option>
-                      <option value="alumni">校友会費</option>
-                    </Select>
-                  </FormControl>
-                  <FormControl>
-                    <FormLabel>生成する年度</FormLabel>
-                    <Input
-                      onChange={(e) => {
-                        setYear(e.target.value);
-                      }}
-                    ></Input>
-                  </FormControl>
-                  {from&&year?
-                  <Button onClick={(e) => generate()}>
-                    ダウンロード
-                  </Button>
-                  : null }
-                </VStack>
-              :
-              <Heading>一般ユーザーの権限では使用できません。</Heading>}
-            </>
-            :
-            <>
-              <VStack>
-                <Heading>ログインしてください。</Heading>
-                <Button onClick={() => router.push("/login")}>ログイン</Button>
-              </VStack>
-            </>}
+          {isAdmin?
+            <VStack>
+              <Heading>Excelダウンロードページ</Heading>
+              <Text fontSize={"xl"}>
+                生成する年度を入力してください。
+              </Text>
+              <FormControl>
+                <FormLabel>会計種別を選択</FormLabel>
+                <Select onChange={(e) => setFrom(e.target.value)}>
+                  <option value="main">本予算</option>
+                  <option value="hatosai">鳩山祭援助金</option>
+                  <option value="clubsupport">後援会費</option>
+                  <option value="alumni">校友会費</option>
+                </Select>
+              </FormControl>
+              <FormControl>
+                <FormLabel>生成する年度</FormLabel>
+                <Input
+                  onChange={(e) => {
+                    setYear(e.target.value);
+                  }}
+                ></Input>
+              </FormControl>
+              {from&&year?
+              <Button onClick={(e) => generate()}>
+                ダウンロード
+              </Button>
+              : null }
+            </VStack>
+          :
+          <Heading>一般ユーザーの権限では使用できません。</Heading>}
         </>
       : 
-      <Heading>ログイン状態認証中</Heading>
-      }
+      <>
+        {status ?
+        <>
+          <VStack>
+            <Heading>ログインしてください。</Heading>
+            <Button onClick={() => router.push("/login")}>ログイン</Button>
+          </VStack>
+        </>
+        :
+          <Heading>ログイン状態認証中</Heading>
+        }
       </>
-    );
+      }
+    </>
+  );
 }

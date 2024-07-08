@@ -83,9 +83,7 @@ const Home: React.FC<updateAccount> = (props) => {
 	const router = useRouter()
 	return (
 		<>
-		{status ? 
-		<>
-			{isAdmin || isUser ? 
+		{status && (isAdmin || isUser) ? 
 			<>
 			{isAdmin ? 
 			<Center width="100%">
@@ -136,22 +134,26 @@ const Home: React.FC<updateAccount> = (props) => {
 				</VStack>
 			}
 			</Center>
-			: <Text>一般ユーザーの権限では使用できません。</Text>}
+			:
+			<Text>一般ユーザーの権限では使用できません。</Text>}
 			</>
-			: 
-			<>
-			<VStack>
-				<Heading>ログインしてください。</Heading>
-				<Button onClick={() => router.push("/login")}>ログイン</Button>
-			</VStack>
-			</>
-			} 
-		</>
 		:
+		<>
+		  {status ?
+		  <>
+			<VStack>
+			  <Heading>ログインしてください。</Heading>
+			  <Button onClick={() => router.push("/login")}>ログイン</Button>
+			</VStack>
+		  </>
+		  :
 			<Heading>ログイン状態認証中</Heading>
-		}
+		  }
 		</>
-	)
-}
+		}
+	  </>
+	);
+  }
+  
 
 export default Home

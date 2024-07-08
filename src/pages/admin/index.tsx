@@ -51,18 +51,14 @@ export default function Home() {
     setAlumniBalance(res.alumniBalance)
   }
   useEffect(()=>{
-    const sessionToken = localStorage.getItem("storage_token")!
-    getEarngings(sessionToken)
+      const sessionToken = localStorage.getItem("storage_token")!
+      getEarngings(sessionToken)
   },[])
   return (
     <>
-      {status ? 
+      {status && (isAdmin || isUser) ? 
         <VStack>
-          {isAdmin || isUser ?
-            <>
-              <Text>Log in as : {isAdmin?"管理者":"一般ユーザー"}</Text>
-            </> 
-          : null}
+          <Text>Log in as : {isAdmin?"管理者":"一般ユーザー"}</Text> 
           <Text fontSize={"2xl"}>管理者用ページホーム</Text>
           {isAdmin || isUser ? (
             <>
@@ -83,9 +79,6 @@ export default function Home() {
               <Link href={"/admin/edit?from=alumni"}>
                 <Box borderBottom="1px solid #fc8819">校友会費関連帳簿データ編集</Box>
               </Link>
-              </>
-              : <Heading>一般ユーザーの権限では使用できません。</Heading> }
-              
               <Box>
                 <Box margin="5px"  border="1px solid #fc8819" borderRadius={"lg"}>
                   <VStack margin={"5px"}>
@@ -112,6 +105,9 @@ export default function Home() {
                   </VStack>
                 </Box>
               </Box>
+              </>
+              : <Heading>一般ユーザーの権限では使用できません。</Heading> }
+              
               <Button onClick={Logout}>ログアウト</Button>
             </>
           ) : (
@@ -119,8 +115,19 @@ export default function Home() {
           )}
         </VStack>
       : 
-      <Heading>ログイン状態認証中</Heading>
+      <>
+        {status ?
+        <>
+          <VStack>
+            <Heading>ログインしてください。</Heading>
+            <Button onClick={() => router.push("/login")}>ログイン</Button>
+          </VStack>
+        </>
+        :
+          <Heading>ログイン状態認証中</Heading>
         }
+      </>
+      }
     </>
   );
 }

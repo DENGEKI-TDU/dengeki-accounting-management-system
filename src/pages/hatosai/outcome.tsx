@@ -15,6 +15,7 @@ import {
   Textarea,
   useToast,
   Button,
+  VStack,
 } from "@chakra-ui/react";
 import type { NextPage } from "next";
 import { ChangeEvent, FormEvent, useEffect, useRef, useState } from "react";
@@ -210,8 +211,7 @@ const Home: NextPage = () => {
       router.push("");
     }
   };
-  if(status){
-    if (isAdmin || isUser) {
+  if(status && (isAdmin || isUser)){
       return (
         <Container pt="10">
           <Heading>鳩祭支出報告フォーム</Heading>
@@ -372,20 +372,23 @@ const Home: NextPage = () => {
             </Swiper>
           </Container>
         </Container>
-      );
+      ); 
     } else {
-      <>
-        <Heading>ログインが必要です。</Heading>
-        <Button onClick={() => router.push(`/login?pagelocate=${path}`)}>
-          ログインする
-        </Button>
-      </>;
+      return (
+        <>
+        {status ?
+          <>
+            <VStack>
+              <Heading>ログインしてください。</Heading>
+              <Button onClick={() => router.push("/login")}>ログイン</Button>
+            </VStack>
+          </>
+          :
+            <Heading>ログイン状態認証中</Heading>
+          }
+        </>
+      )
     }
-  } else {
-    return (
-      <Heading>ログイン状態認証中</Heading>
-    )
   }
-};
 
 export default Home;
