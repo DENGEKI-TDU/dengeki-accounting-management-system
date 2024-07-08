@@ -126,7 +126,6 @@ export default async function handle(
 								id: Number(id),
 						},
 				})
-				console.log(response)
 				await prisma.mainAccount.deleteMany({
 						where:{
 								id: Number(id),
