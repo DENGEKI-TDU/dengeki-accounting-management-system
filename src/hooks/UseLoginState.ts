@@ -107,22 +107,23 @@ export function UseLoginState(
       headers: {"Content-Type": "application/json"},
       body: JSON.stringify(body)
     });
-    const data = await response.json();
-    if(data){
-      if(data.limit >= new Date()){
-        localStorage.clear;
-        setIsUserInternal(false)
-        setIsAdminInternal(false)
-      } else {
-        setIsUserInternal(data.isUser)
-        setIsAdminInternal(data.isAdmin)
+    await response.json().then((data) => {
+      if(data){
+        if(data.limit >= new Date()){
+          localStorage.clear;
+          setIsUserInternal(false)
+          setIsAdminInternal(false)
+        } else {
+          setIsUserInternal(data.isUser)
+          setIsAdminInternal(data.isAdmin)
+        }
       }
-    }
+      setSessionStatus(true)
+    });
   }
 
   useEffect(() => {
     getAuth()
-    setSessionStatus(true)
   }, [setIsUserInternal]);
 
   const Login = useCallback(
