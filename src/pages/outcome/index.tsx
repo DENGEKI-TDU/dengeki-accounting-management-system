@@ -15,6 +15,7 @@ import {
   Textarea,
   useToast,
   Button,
+  VStack,
 } from "@chakra-ui/react";
 import type { NextPage } from "next";
 import { ChangeEvent, FormEvent, useEffect, useRef, useState } from "react";
@@ -40,7 +41,7 @@ const Home: NextPage = () => {
   const [memo, setMemo] = useState("");
   const [year, setYear] = useState("");
   const [images, setImages] = useState<Blob[]>([]);
-  const [isAdmin,isUser, Login, Logout] = UseLoginState(false);
+  const [isAdmin,isUser, status, Login, Logout] = UseLoginState(false);
   const [inputPass,setInputPass] = useState("")
   const path = router.pathname;
   const public_url = process.env.NEXT_PUBLIC_SUPABASE_PUBLIC_URL;
@@ -210,177 +211,183 @@ const Home: NextPage = () => {
       router.push("");
     }
   };
-
-  if (isAdmin || isUser) {
-    return (
-      <Container pt="10">
-        <Heading>支出報告フォーム</Heading>
-        <form onSubmit={onSubmit} encType="multipart/form-data">
-          <FormControl>
-            <FormLabel>会計年度</FormLabel>
-            <NumberInput
-              min={new Date().getFullYear() - 2}
-              onChange={(e) => setYear(String(Number(e)))}
-            >
-              <NumberInputField />
-              <NumberInputStepper>
-                <NumberIncrementStepper />
-                <NumberDecrementStepper />
-              </NumberInputStepper>
-            </NumberInput>
-          </FormControl>
-          <FormControl>
-            <FormLabel>購入日時</FormLabel>
-            <Input type="date" onChange={(e) => setDate(e.target.value)} />
-          </FormControl>
-          <FormControl>
-            <FormLabel>分類</FormLabel>
-            <Select
-              onChange={(e) => setType(e.target.value)}
-              placeholder="選択してください。"
-            >
-              <option value={"大道具"}>大道具</option>
-              <option value={"小道具"}>小道具</option>
-              <option value={"衣装"}>衣装</option>
-              <option value={"照明"}>照明</option>
-              <option value={"音響"}>音響</option>
-              <option value={"庶務"}>庶務</option>
-              <option value={"その他"}>その他</option>
-            </Select>
-          </FormControl>
-          <FormControl>
-            <FormLabel>分類詳細</FormLabel>
-            <Select
-              onChange={(e) => setSubType(e.target.value)}
-              placeholder="選択してください。"
-            >
-              {type == "大道具" ? (
-                <>
-                  <option value="1">昨年度大道具代</option>
-                  <option value="2">大道具部品代</option>
-                  <option value="3">大道具代</option>
-                </>
-              ) : null}
-              {type == "小道具" ? (
-                <>
-                  <option value="1">昨年度小道具代</option>
-                  <option value="2">小道具部品代</option>
-                  <option value="3">小道具代</option>
-                </>
-              ) : null}
-              {type == "衣装" ? (
-                <>
-                  <option value="1">昨年度衣装代</option>
-                  <option value="2">衣装部品代</option>
-                  <option value="3">衣装代</option>
-                  <option value="4">化粧品代</option>
-                  <option value="5">クリーニング代</option>
-                </>
-              ) : null}
-              {type == "照明" ? (
-                <>
-                  <option value="1">昨年度照明代</option>
-                  <option value="2">照明代</option>
-                </>
-              ) : null}
-              {type == "音響" ? (
-                <>
-                  <option value="1">昨年度音響代</option>
-                  <option value="2">音響代</option>
-                </>
-              ) : null}
-              {type == "庶務" ? (
-                <>
-                  <option value="1">昨年度庶務代</option>
-                  <option value="2">庶務代</option>
-                </>
-              ) : null}
-              <option value="X">その他</option>
-              <option value="Z">不明</option>
-            </Select>
-          </FormControl>
-          <FormControl>
-            <FormLabel>金額</FormLabel>
-            <NumberInput min={1} onChange={(e) => setValue(Number(e))}>
-              <NumberInputField />
-              <NumberInputStepper>
-                <NumberIncrementStepper />
-                <NumberDecrementStepper />
-              </NumberInputStepper>
-            </NumberInput>
-          </FormControl>
-          <FormControl>
-            <FormLabel>購入者</FormLabel>
-            <Input onChange={(e) => setName(e.target.value)} />
-          </FormControl>
-          <FormControl>
-            <FormLabel htmlFor="postImages">レシート画像</FormLabel>
-            <Input
-              type="file"
-              id="formFile"
-              accept="image/*"
-              onChange={(e) => {
-                handleChangeFile(e);
+  if(status && (isAdmin || isUser)){
+      return (
+        <Container pt="10">
+          <Heading>支出報告フォーム</Heading>
+          <form onSubmit={onSubmit} encType="multipart/form-data">
+            <FormControl>
+              <FormLabel>会計年度</FormLabel>
+              <NumberInput
+                min={new Date().getFullYear() - 2}
+                onChange={(e) => setYear(String(Number(e)))}
+              >
+                <NumberInputField />
+                <NumberInputStepper>
+                  <NumberIncrementStepper />
+                  <NumberDecrementStepper />
+                </NumberInputStepper>
+              </NumberInput>
+            </FormControl>
+            <FormControl>
+              <FormLabel>購入日時</FormLabel>
+              <Input type="date" onChange={(e) => setDate(e.target.value)} />
+            </FormControl>
+            <FormControl>
+              <FormLabel>分類</FormLabel>
+              <Select
+                onChange={(e) => setType(e.target.value)}
+                placeholder="選択してください。"
+              >
+                <option value={"大道具"}>大道具</option>
+                <option value={"小道具"}>小道具</option>
+                <option value={"衣装"}>衣装</option>
+                <option value={"照明"}>照明</option>
+                <option value={"音響"}>音響</option>
+                <option value={"庶務"}>庶務</option>
+                <option value={"その他"}>その他</option>
+              </Select>
+            </FormControl>
+            <FormControl>
+              <FormLabel>分類詳細</FormLabel>
+              <Select
+                onChange={(e) => setSubType(e.target.value)}
+                placeholder="選択してください。"
+              >
+                {type == "大道具" ? (
+                  <>
+                    <option value="1">昨年度大道具代</option>
+                    <option value="2">大道具部品代</option>
+                    <option value="3">大道具代</option>
+                  </>
+                ) : null}
+                {type == "小道具" ? (
+                  <>
+                    <option value="1">昨年度小道具代</option>
+                    <option value="2">小道具部品代</option>
+                    <option value="3">小道具代</option>
+                  </>
+                ) : null}
+                {type == "衣装" ? (
+                  <>
+                    <option value="1">昨年度衣装代</option>
+                    <option value="2">衣装部品代</option>
+                    <option value="3">衣装代</option>
+                    <option value="4">化粧品代</option>
+                    <option value="5">クリーニング代</option>
+                  </>
+                ) : null}
+                {type == "照明" ? (
+                  <>
+                    <option value="1">昨年度照明代</option>
+                    <option value="2">照明代</option>
+                  </>
+                ) : null}
+                {type == "音響" ? (
+                  <>
+                    <option value="1">昨年度音響代</option>
+                    <option value="2">音響代</option>
+                  </>
+                ) : null}
+                {type == "庶務" ? (
+                  <>
+                    <option value="1">昨年度庶務代</option>
+                    <option value="2">庶務代</option>
+                  </>
+                ) : null}
+                <option value="X">その他</option>
+                <option value="Z">不明</option>
+              </Select>
+            </FormControl>
+            <FormControl>
+              <FormLabel>金額</FormLabel>
+              <NumberInput min={1} onChange={(e) => setValue(Number(e))}>
+                <NumberInputField />
+                <NumberInputStepper>
+                  <NumberIncrementStepper />
+                  <NumberDecrementStepper />
+                </NumberInputStepper>
+              </NumberInput>
+            </FormControl>
+            <FormControl>
+              <FormLabel>購入者</FormLabel>
+              <Input onChange={(e) => setName(e.target.value)} />
+            </FormControl>
+            <FormControl>
+              <FormLabel htmlFor="postImages">レシート画像</FormLabel>
+              <Input
+                type="file"
+                id="formFile"
+                accept="image/*"
+                onChange={(e) => {
+                  handleChangeFile(e);
+                }}
+              />
+            </FormControl>
+            <FormControl>
+              <FormLabel>購入物品名</FormLabel>
+              <Textarea onChange={(e) => setFixture(e.target.value)} />
+            </FormControl>
+            <FormControl>
+              <FormLabel>メモ</FormLabel>
+              <Textarea onChange={(e) => setMemo(e.target.value)} />
+            </FormControl>
+            {date != "" &&
+            year != "" &&
+            type != "" &&
+            subType != "" &&
+            value != 0 &&
+            name != "" &&
+            fixture != "" &&
+            file != undefined ? (
+              <Input
+                type="submit"
+                value="提出"
+                margin="10px auto"
+                variant="filled"
+              />
+            ) : null}
+          </form>
+          <Container>
+            <p>購入日時 : {date}</p>
+            <p>分類 : {type}</p>
+            <p>金額 : ¥{value}</p>
+            <p>購入者 : {name}</p>
+            <p>備品名 : {fixture}</p>
+            <p>{memo}</p>
+            <Swiper
+              slidesPerView={1} //一度に表示するスライドの数
+              modules={[Navigation, Pagination]}
+              pagination={{
+                clickable: true,
               }}
-            />
-          </FormControl>
-          <FormControl>
-            <FormLabel>購入物品名</FormLabel>
-            <Textarea onChange={(e) => setFixture(e.target.value)} />
-          </FormControl>
-          <FormControl>
-            <FormLabel>メモ</FormLabel>
-            <Textarea onChange={(e) => setMemo(e.target.value)} />
-          </FormControl>
-          {date != "" &&
-          year != "" &&
-          type != "" &&
-          subType != "" &&
-          value != 0 &&
-          name != "" &&
-          fixture != "" &&
-          file != undefined ? (
-            <Input
-              type="submit"
-              value="提出"
-              margin="10px auto"
-              variant="filled"
-            />
-          ) : null}
-        </form>
-        <Container>
-          <p>購入日時 : {date}</p>
-          <p>分類 : {type}</p>
-          <p>金額 : ¥{value}</p>
-          <p>購入者 : {name}</p>
-          <p>備品名 : {fixture}</p>
-          <p>{memo}</p>
-          <Swiper
-            slidesPerView={1} //一度に表示するスライドの数
-            modules={[Navigation, Pagination]}
-            pagination={{
-              clickable: true,
-            }}
-            navigation
-            loop={true}
-          >
-            {images.map((image, i) => (
-              <SwiperSlide key={i}>
-                <Image src={URL.createObjectURL(image)} w={"80%"} h={"auto"} />
-              </SwiperSlide>
-            ))}
-          </Swiper>
+              navigation
+              loop={true}
+            >
+              {images.map((image, i) => (
+                <SwiperSlide key={i}>
+                  <Image src={URL.createObjectURL(image)} w={"80%"} h={"auto"} />
+                </SwiperSlide>
+              ))}
+            </Swiper>
+          </Container>
         </Container>
-      </Container>
-    );
-  } else {
-    <>
-      <Heading>ログインが必要です。</Heading>
-      <Button onClick={() => router.push(`/login?pagelocate=${path}`)}>
-        ログインする
-      </Button>
-    </>;
+      );
+    } else {
+      return (
+        <>
+        {status ?
+          <>
+            <VStack>
+              <Heading>ログインしてください。</Heading>
+              <Button onClick={() => router.push("/login")}>ログイン</Button>
+            </VStack>
+          </>
+          :
+            <Heading>ログイン状態認証中</Heading>
+          }
+        </>
+      )
+    }
   }
-};
-
 export default Home;

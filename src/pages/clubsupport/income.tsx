@@ -14,12 +14,13 @@ import {
   Textarea,
   useToast,
   Button,
+  VStack,
 } from "@chakra-ui/react";
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
 
 export default function Home() {
-  const [isAdmin,isUser, Login, Logout] = UseLoginState(false);
+  const [isAdmin,isUser,status, Login, Logout] = UseLoginState(false);
   const [date, setDate] = useState("");
   const [value, setValue] = useState(0);
   const [fixture, setFixture] = useState("");
@@ -111,8 +112,7 @@ export default function Home() {
       router.push("/");
     });
   };
-
-  if (isAdmin || isUser) {
+  if(status && (isAdmin || isUser)){
     return (
       <>
         <Container>
@@ -168,11 +168,17 @@ export default function Home() {
   } else {
     return (
       <>
-        <Heading>ログインが必要です。</Heading>
-        <Button onClick={() => router.push(`/login?pagelocate=${path}`)}>
-          ログインする
-        </Button>
+      {status ?
+        <>
+          <VStack>
+            <Heading>ログインしてください。</Heading>
+            <Button onClick={() => router.push("/login")}>ログイン</Button>
+          </VStack>
+        </>
+        :
+          <Heading>ログイン状態認証中</Heading>
+        }
       </>
-    );
+    )
   }
 }
