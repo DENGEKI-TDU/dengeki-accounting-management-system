@@ -147,7 +147,7 @@ const Home: React.FC<updateAccount> = (props) => {
 			</VStack>
 		  </>
 		  :
-			<Heading>ログイン状態認証中</Heading>
+			<Heading>ログイン状態確認中</Heading>
 		  }
 		</>
 		}
