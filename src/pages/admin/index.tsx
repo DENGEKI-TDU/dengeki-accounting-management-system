@@ -1,4 +1,4 @@
-import { Box, Button, Heading, Tab, Text, VStack } from "@chakra-ui/react";
+import { Box, Button, Heading, Spinner, Tab, Text, VStack } from "@chakra-ui/react";
 import Link from "next/link";
 import { UseLoginState } from "@/hooks/UseLoginState";
 import { useRouter } from "next/router";
@@ -20,6 +20,7 @@ export default function Home() {
   const [alumniIncome,setAlumniIncome] = useState(0)
   const [alumniOutcome,setAlumniOutcome] = useState(0)
   const [alumniBalance,setAlumniBalance] = useState(0)
+  const [completeFetching,setCompleteFetching] = useState(false)
   async function getEarngings(sessionToken:string) {
     let year = new Date().getFullYear()
     if(new Date().getMonth()+1 < 4){
@@ -36,19 +37,22 @@ export default function Home() {
       headers:{"Content-Type":"application/json"},
       body:JSON.stringify(body)
     })
-    const res = JSON.parse(await result.json())
-    setIncome(res.income)
-    setOutcome(res.outcome)
-    setBalance(res.balance)
-    setHatosaiIncome(res.hatosaiIncome)
-    setHatosaiOutcome(res.hatosaiOutcome)
-    setHatosaiBalance(res.hatosaiBalance)
-    setCSIncome(res.csIncome)
-    setCSOutcome(res.csOutcome)
-    setCSBalance(res.csBalance)
-    setAlumniIncome(res.alumniIncome)
-    setAlumniOutcome(res.alumniOutcome)
-    setAlumniBalance(res.alumniBalance)
+    await result.json().then((res:any)=> {
+      res = JSON.parse(res)
+      setIncome(res.income)
+      setOutcome(res.outcome)
+      setBalance(res.balance)
+      setHatosaiIncome(res.hatosaiIncome)
+      setHatosaiOutcome(res.hatosaiOutcome)
+      setHatosaiBalance(res.hatosaiBalance)
+      setCSIncome(res.csIncome)
+      setCSOutcome(res.csOutcome)
+      setCSBalance(res.csBalance)
+      setAlumniIncome(res.alumniIncome)
+      setAlumniOutcome(res.alumniOutcome)
+      setAlumniBalance(res.alumniBalance)
+      setCompleteFetching(true)
+    })
   }
   useEffect(()=>{
       const sessionToken = localStorage.getItem("storage_token")!
@@ -83,25 +87,73 @@ export default function Home() {
                 <Box margin="5px"  border="1px solid #fc8819" borderRadius={"lg"}>
                   <VStack margin={"5px"}>
                   <Text>現在の本予算収支</Text>
-                  <Text>収入:{income}円、支出:{outcome}円、残高:{(balance>=0)?<>{balance}</>:<Text as="span" color="red" fontWeight={"extrabold"}>{balance}</Text>}円</Text>
+                  {completeFetching ? 
+                    <Text>収入:{income}円、支出:{outcome}円、残高:{(balance>=0)?<>{balance}</>:<Text as="span" color="red" fontWeight={"extrabold"}>{balance}</Text>}円</Text>
+                    :
+                    <Text><Spinner
+                    thickness='2px'
+                    speed='0.65s'
+                    emptyColor='#FE6FFD'
+                    color='#69F0FD'
+                    size="sm"
+                    marginRight={"5px"}
+                    />
+                    取得中</Text>
+                  }
                   </VStack>
                 </Box>
                 <Box margin="5px"  border="1px solid #1e90ff" borderRadius={"lg"}>
                   <VStack margin={"5px"}>
                   <Text>現在の鳩山祭援助金収支</Text>
-                  <Text>収入:{hatosaiIncome}円、支出:{hatosaiOutcome}円、残高:{(hatosaiBalance>=0)?<>{hatosaiBalance}</>:<Text as="span" color="red" fontWeight={"extrabold"}>{hatosaiBalance}</Text>}円</Text>
+                  {completeFetching ? 
+                    <Text>収入:{hatosaiIncome}円、支出:{hatosaiOutcome}円、残高:{(hatosaiBalance>=0)?<>{hatosaiBalance}</>:<Text as="span" color="red" fontWeight={"extrabold"}>{hatosaiBalance}</Text>}円</Text>
+                    :
+                    <Text><Spinner
+                    thickness='2px'
+                    speed='0.65s'
+                    emptyColor='#FE6FFD'
+                    color='#69F0FD'
+                    size="sm"
+                    marginRight={"5px"}
+                    />
+                    取得中</Text>
+                  }
                   </VStack>
                 </Box>
                 <Box margin="5px"  border="1px solid #32cd32" borderRadius={"lg"}>
                   <VStack margin={"5px"}>
                   <Text>現在の後援会費収支</Text>
-                  <Text>収入:{csIncome}円、支出:{csOutcome}円、残高:{(csBalance>=0)?<>{csBalance}</>:<Text as="span" color="red" fontWeight={"extrabold"}>{csBalance}</Text>}円</Text>
+                  {completeFetching ? 
+                    <Text>収入:{csIncome}円、支出:{csOutcome}円、残高:{(csBalance>=0)?<>{csBalance}</>:<Text as="span" color="red" fontWeight={"extrabold"}>{csBalance}</Text>}円</Text>
+                    :
+                    <Text><Spinner
+                    thickness='2px'
+                    speed='0.65s'
+                    emptyColor='#FE6FFD'
+                    color='#69F0FD'
+                    size="sm"
+                    marginRight={"5px"}
+                    />
+                    取得中</Text>
+                  }
                   </VStack>
                 </Box>
                 <Box margin="5px" border="1px solid #0000cd" borderRadius={"lg"}>
                   <VStack margin={"5px"}>
                   <Text>現在の校友会費収支</Text>
-                  <Text>収入:{alumniIncome}円、支出:{alumniOutcome}円、残高:{(alumniBalance>=0)?<>{alumniBalance}</>:<Text as="span" color="red" fontWeight={"extrabold"}>{alumniBalance}</Text>}円</Text>
+                  {completeFetching ? 
+                    <Text>収入:{alumniIncome}円、支出:{alumniOutcome}円、残高:{(alumniBalance>=0)?<>{alumniBalance}</>:<Text as="span" color="red" fontWeight={"extrabold"}>{alumniBalance}</Text>}円</Text>
+                    :
+                    <Text><Spinner
+                    thickness='2px'
+                    speed='0.65s'
+                    emptyColor='#FE6FFD'
+                    color='#69F0FD'
+                    size="sm"
+                    marginRight={"5px"}
+                    />
+                    取得中</Text>
+                  }
                   </VStack>
                 </Box>
               </Box>
