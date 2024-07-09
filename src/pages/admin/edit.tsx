@@ -89,7 +89,6 @@ const Home: React.FC<updateAccount> = (props) => {
 			<>
 			{isAdmin ? 
 			<Center width="100%">
-				{from}
 			{from ? 
 			<VStack width="100%">
 				<Heading>{fromName[fromType.indexOf(from)]}収支報告編集ページ</Heading>
