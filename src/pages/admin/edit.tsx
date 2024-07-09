@@ -79,6 +79,8 @@ type updateAccount = {
 const Home: React.FC<updateAccount> = (props) => {
 	const serachParams = useSearchParams()
 	const from = serachParams.get("from")
+	const fromType = ["main","hatosai","clubsupport","alumni"]
+	const fromName = ["本予算","鳩山祭援助金","後援会費","校友会費"]
 	const [isAdmin,isUser,status, Login, Logout] = UseLoginState(false);
 	const router = useRouter()
 	return (
@@ -87,9 +89,10 @@ const Home: React.FC<updateAccount> = (props) => {
 			<>
 			{isAdmin ? 
 			<Center width="100%">
+				{from}
 			{from ? 
 			<VStack width="100%">
-				<Heading>収支報告編集ページ</Heading>
+				<Heading>{fromName[fromType.indexOf(from)]}収支報告編集ページ</Heading>
 				<Table width="100%">
 					<Thead>
 					<Tr>
