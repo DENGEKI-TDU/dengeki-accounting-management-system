@@ -4,6 +4,8 @@ import { UseLoginState } from "@/hooks/UseLoginState";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import prisma from "@/lib/prisma";
+import { getImgProps } from "next/dist/shared/lib/get-img-props";
+import { WarningIcon } from "@chakra-ui/icons";
 
 export default function Home() {
   const [isAdmin,isUser,status, Login, Logout] = UseLoginState(false);
@@ -21,6 +23,16 @@ export default function Home() {
   const [alumniOutcome,setAlumniOutcome] = useState(0)
   const [alumniBalance,setAlumniBalance] = useState(0)
   const [completeFetching,setCompleteFetching] = useState(false)
+  const [allowAccess,setAllowAccess] = useState(false)
+
+  const getIP = async() => {
+    const getHost = await fetch("https://ipapi.co/json")
+      const res = await getHost.json()
+      const hostname = res.ip
+      const allowHOST = process.env.NEXT_PUBLIC_ALLOW_HOSTNAME!
+      setAllowAccess(hostname.includes(allowHOST))
+  }
+
   async function getEarngings(sessionToken:string) {
     let year = new Date().getFullYear()
     if(new Date().getMonth()+1 < 4){
@@ -55,6 +67,7 @@ export default function Home() {
     })
   }
   useEffect(()=>{
+      getIP()
       const sessionToken = localStorage.getItem("storage_token")!
       getEarngings(sessionToken)
   },[])
@@ -68,95 +81,109 @@ export default function Home() {
             <>
               {isAdmin ? 
               <>
-              <Link href="/admin/generate">
-                <Box borderBottom="1px solid #fc8819">excel出力</Box>
-              </Link>
-              <Link href={"/admin/edit?from=main"}>
-                <Box borderBottom="1px solid #fc8819">本予算帳簿データ編集</Box>
-              </Link>
-              <Link href={"/admin/edit?from=hatosai"}>
-                <Box borderBottom="1px solid #fc8819">鳩祭援助金帳簿データ編集</Box>
-              </Link>
-              <Link href={"/admin/edit?from=clubsupport"}>
-                <Box borderBottom="1px solid #fc8819">後援会費関連帳簿データ編集</Box>
-              </Link>
-              <Link href={"/admin/edit?from=alumni"}>
-                <Box borderBottom="1px solid #fc8819">校友会費関連帳簿データ編集</Box>
-              </Link>
-              <Box>
-                <Box margin="5px"  border="1px solid #fc8819" borderRadius={"lg"}>
-                  <VStack margin={"5px"}>
-                  <Text>現在の本予算収支</Text>
-                  {completeFetching ? 
-                    <Text>収入:{income}円、支出:{outcome}円、残高:{(balance>=0)?<>{balance}</>:<Text as="span" color="red" fontWeight={"extrabold"}>{balance}</Text>}円</Text>
-                    :
-                    <Text><Spinner
-                    thickness='2px'
-                    speed='0.65s'
-                    emptyColor='#FE6FFD'
-                    color='#69F0FD'
-                    size="sm"
-                    marginRight={"5px"}
-                    />
-                    取得中</Text>
-                  }
-                  </VStack>
+              {allowAccess ?
+              <>
+                <Box borderRadius={"lg"} bgColor={"green"} color={"white"} fontWeight={"bold"}>
+                  <Text margin={"5px"}>access : ALLOW</Text>
                 </Box>
-                <Box margin="5px"  border="1px solid #1e90ff" borderRadius={"lg"}>
-                  <VStack margin={"5px"}>
-                  <Text>現在の鳩山祭援助金収支</Text>
-                  {completeFetching ? 
-                    <Text>収入:{hatosaiIncome}円、支出:{hatosaiOutcome}円、残高:{(hatosaiBalance>=0)?<>{hatosaiBalance}</>:<Text as="span" color="red" fontWeight={"extrabold"}>{hatosaiBalance}</Text>}円</Text>
-                    :
-                    <Text><Spinner
-                    thickness='2px'
-                    speed='0.65s'
-                    emptyColor='#FE6FFD'
-                    color='#69F0FD'
-                    size="sm"
-                    marginRight={"5px"}
-                    />
-                    取得中</Text>
-                  }
-                  </VStack>
+                <Link href="/admin/generate">
+                  <Box borderBottom="1px solid #fc8819">excel出力</Box>
+                </Link>
+                <Link href={"/admin/edit?from=main"}>
+                  <Box borderBottom="1px solid #fc8819">本予算帳簿データ編集</Box>
+                </Link>
+                <Link href={"/admin/edit?from=hatosai"}>
+                  <Box borderBottom="1px solid #fc8819">鳩祭援助金帳簿データ編集</Box>
+                </Link>
+                <Link href={"/admin/edit?from=clubsupport"}>
+                  <Box borderBottom="1px solid #fc8819">後援会費関連帳簿データ編集</Box>
+                </Link>
+                <Link href={"/admin/edit?from=alumni"}>
+                  <Box borderBottom="1px solid #fc8819">校友会費関連帳簿データ編集</Box>
+                </Link>
+                <Box>
+                  <Box margin="5px"  border="1px solid #fc8819" borderRadius={"lg"}>
+                    <VStack margin={"5px"}>
+                    <Text>現在の本予算収支</Text>
+                    {completeFetching ? 
+                      <Text>収入:{income}円、支出:{outcome}円、残高:{(balance>=0)?<>{balance}</>:<Text as="span" color="red" fontWeight={"extrabold"}>{balance}</Text>}円</Text>
+                      :
+                      <Text><Spinner
+                      thickness='2px'
+                      speed='0.65s'
+                      emptyColor='#FE6FFD'
+                      color='#69F0FD'
+                      size="sm"
+                      marginRight={"5px"}
+                      />
+                      取得中</Text>
+                    }
+                    </VStack>
+                  </Box>
+                  <Box margin="5px"  border="1px solid #1e90ff" borderRadius={"lg"}>
+                    <VStack margin={"5px"}>
+                    <Text>現在の鳩山祭援助金収支</Text>
+                    {completeFetching ? 
+                      <Text>収入:{hatosaiIncome}円、支出:{hatosaiOutcome}円、残高:{(hatosaiBalance>=0)?<>{hatosaiBalance}</>:<Text as="span" color="red" fontWeight={"extrabold"}>{hatosaiBalance}</Text>}円</Text>
+                      :
+                      <Text><Spinner
+                      thickness='2px'
+                      speed='0.65s'
+                      emptyColor='#FE6FFD'
+                      color='#69F0FD'
+                      size="sm"
+                      marginRight={"5px"}
+                      />
+                      取得中</Text>
+                    }
+                    </VStack>
+                  </Box>
+                  <Box margin="5px"  border="1px solid #32cd32" borderRadius={"lg"}>
+                    <VStack margin={"5px"}>
+                    <Text>現在の後援会費収支</Text>
+                    {completeFetching ? 
+                      <Text>収入:{csIncome}円、支出:{csOutcome}円、残高:{(csBalance>=0)?<>{csBalance}</>:<Text as="span" color="red" fontWeight={"extrabold"}>{csBalance}</Text>}円</Text>
+                      :
+                      <Text><Spinner
+                      thickness='2px'
+                      speed='0.65s'
+                      emptyColor='#FE6FFD'
+                      color='#69F0FD'
+                      size="sm"
+                      marginRight={"5px"}
+                      />
+                      取得中</Text>
+                    }
+                    </VStack>
+                  </Box>
+                  <Box margin="5px" border="1px solid #0000cd" borderRadius={"lg"}>
+                    <VStack margin={"5px"}>
+                    <Text>現在の校友会費収支</Text>
+                    {completeFetching ? 
+                      <Text>収入:{alumniIncome}円、支出:{alumniOutcome}円、残高:{(alumniBalance>=0)?<>{alumniBalance}</>:<Text as="span" color="red" fontWeight={"extrabold"}>{alumniBalance}</Text>}円</Text>
+                      :
+                      <Text><Spinner
+                      thickness='2px'
+                      speed='0.65s'
+                      emptyColor='#FE6FFD'
+                      color='#69F0FD'
+                      size="sm"
+                      marginRight={"5px"}
+                      />
+                      取得中</Text>
+                    }
+                    </VStack>
+                  </Box>
                 </Box>
-                <Box margin="5px"  border="1px solid #32cd32" borderRadius={"lg"}>
-                  <VStack margin={"5px"}>
-                  <Text>現在の後援会費収支</Text>
-                  {completeFetching ? 
-                    <Text>収入:{csIncome}円、支出:{csOutcome}円、残高:{(csBalance>=0)?<>{csBalance}</>:<Text as="span" color="red" fontWeight={"extrabold"}>{csBalance}</Text>}円</Text>
-                    :
-                    <Text><Spinner
-                    thickness='2px'
-                    speed='0.65s'
-                    emptyColor='#FE6FFD'
-                    color='#69F0FD'
-                    size="sm"
-                    marginRight={"5px"}
-                    />
-                    取得中</Text>
-                  }
-                  </VStack>
+              </>
+              : 
+                <>
+                <Box borderRadius={"lg"} bgColor={"red"} color={"white"} fontWeight={"extrabold"}>
+                  <Text margin={"5px"}><WarningIcon boxSize={3.5} marginRight={"3px"} />access : DENIED.</Text>
                 </Box>
-                <Box margin="5px" border="1px solid #0000cd" borderRadius={"lg"}>
-                  <VStack margin={"5px"}>
-                  <Text>現在の校友会費収支</Text>
-                  {completeFetching ? 
-                    <Text>収入:{alumniIncome}円、支出:{alumniOutcome}円、残高:{(alumniBalance>=0)?<>{alumniBalance}</>:<Text as="span" color="red" fontWeight={"extrabold"}>{alumniBalance}</Text>}円</Text>
-                    :
-                    <Text><Spinner
-                    thickness='2px'
-                    speed='0.65s'
-                    emptyColor='#FE6FFD'
-                    color='#69F0FD'
-                    size="sm"
-                    marginRight={"5px"}
-                    />
-                    取得中</Text>
-                  }
-                  </VStack>
-                </Box>
-              </Box>
+                <Text color="red" fontWeight={"extrabold"}>管理者ページでの操作には学内インターネットへの接続が必須です。</Text>
+                </>
+              }
               </>
               : <Heading>一般ユーザーの権限では使用できません。</Heading> }
               
