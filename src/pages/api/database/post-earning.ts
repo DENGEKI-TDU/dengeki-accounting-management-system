@@ -372,12 +372,12 @@ export default async function handle(
 			}
 		}
       } else {
-        res.status(403).json({"msg":"permission denied."})
+        res.status(403).end()
       }
     } else {
       res.status(403).json("Authentication information expired")
     }
   } else {
-    res.status(403).json({"msg":"permission denied."})
+    res.status(403).end()
   }
 }

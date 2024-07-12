@@ -101,12 +101,12 @@ export default async function handle(
           res.json({"data":result});
         }
       } else {
-        res.status(403).json({"msg":"permission denied."})
+        res.status(403).end()
       }
     } else {
       res.status(403).json({"msg":"Authentication information expired"})
     }
   } else {
-    res.status(403).json({"msg":"permission denied."})
+    res.status(403).end()
   }
 }

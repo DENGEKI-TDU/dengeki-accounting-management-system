@@ -28,6 +28,6 @@ export default async function Handler(
         })
         res.status(200).json({"token":randomToken})
     } else {
-        res.status(403).json({"msg":"permission denied."})
+        res.status(403).end()
     }
 }

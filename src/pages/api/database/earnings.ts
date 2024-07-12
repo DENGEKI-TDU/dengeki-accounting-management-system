@@ -22,75 +22,79 @@ export default async function handle(
   const pass = process.env.EARNINGPASS
   const {year,inputPass,sessionToken} = req.body
   let isAdmin:boolean = false
-  const data = await prisma.tokens.findFirst({
-    where:{
-      tokens:encryptSha256(sessionToken)
+  if(sessionToken){
+    const data = await prisma.tokens.findFirst({
+      where:{
+        tokens:encryptSha256(sessionToken)
+      }
+    });
+    if(data){
+      if(data.limit > new Date()){
+        isAdmin = data.isAdmin
+      }
     }
-  });
-  if(data){
-    if(data.limit > new Date()){
-      isAdmin = data.isAdmin
-    }
-  }
-  if(inputPass || sessionToken){
-    const hashPass = encryptSha256(inputPass)
-    if(pass == hashPass || isAdmin) {
-      const result = await prisma.mainAccount.findMany({
-        where: {
-          year: year
+    if(inputPass || sessionToken){
+      const hashPass = encryptSha256(inputPass)
+      if(pass == hashPass || isAdmin) {
+        const result = await prisma.mainAccount.findMany({
+          where: {
+            year: year
+          }
+        });
+        let income:number = 0;
+        let outcome: number = 0;
+        for(var i=0;i<result.length;i++){
+          income += result[i].income
+          outcome += result[i].outcome
         }
-      });
-      let income:number = 0;
-      let outcome: number = 0;
-      for(var i=0;i<result.length;i++){
-        income += result[i].income
-        outcome += result[i].outcome
-      }
-      var balance = income-outcome
-      const hatoyamaResult = await prisma.hatosaiAccount.findMany({
-        where: {
-          year: year
+        var balance = income-outcome
+        const hatoyamaResult = await prisma.hatosaiAccount.findMany({
+          where: {
+            year: year
+          }
+        });
+        let hatoyamaIncome:number = 0;
+        let hatoyamaOutcome: number = 0;
+        for(var i=0;i<hatoyamaResult.length;i++){
+          hatoyamaIncome += hatoyamaResult[i].income
+          hatoyamaOutcome += hatoyamaResult[i].outcome
         }
-      });
-      let hatoyamaIncome:number = 0;
-      let hatoyamaOutcome: number = 0;
-      for(var i=0;i<hatoyamaResult.length;i++){
-        hatoyamaIncome += hatoyamaResult[i].income
-        hatoyamaOutcome += hatoyamaResult[i].outcome
-      }
-      var hatoyamaBalance = hatoyamaIncome-hatoyamaOutcome
-      const csResult = await prisma.clubsupportAccount.findMany({
-        where: {
-          year: year
+        var hatoyamaBalance = hatoyamaIncome-hatoyamaOutcome
+        const csResult = await prisma.clubsupportAccount.findMany({
+          where: {
+            year: year
+          }
+        });
+        let csIncome:number = 0;
+        let csOutcome: number = 0;
+        for(var i=0;i<csResult.length;i++){
+          csIncome += csResult[i].income
+          csOutcome += csResult[i].outcome
         }
-      });
-      let csIncome:number = 0;
-      let csOutcome: number = 0;
-      for(var i=0;i<csResult.length;i++){
-        csIncome += csResult[i].income
-        csOutcome += csResult[i].outcome
-      }
-      var csBalance = csIncome-csOutcome
-      const alumniResult = await prisma.alumniAccount.findMany({
-        where: {
-          year: year
+        var csBalance = csIncome-csOutcome
+        const alumniResult = await prisma.alumniAccount.findMany({
+          where: {
+            year: year
+          }
+        });
+        let alumniIncome:number = 0;
+        let alumniOutcome: number = 0;
+        for(var i=0;i<alumniResult.length;i++){
+          alumniIncome += alumniResult[i].income
+          alumniOutcome += alumniResult[i].outcome
         }
-      });
-      let alumniIncome:number = 0;
-      let alumniOutcome: number = 0;
-      for(var i=0;i<alumniResult.length;i++){
-        alumniIncome += alumniResult[i].income
-        alumniOutcome += alumniResult[i].outcome
+        var alumniBalance = alumniIncome-alumniOutcome
+        var response = {"income":income,"outcome":outcome,"balance":balance,"hatosaiIncome":hatoyamaIncome,"hatosaiOutcome":hatoyamaOutcome,"hatosaiBalance":hatoyamaBalance,"csIncome":csIncome,"csOutcome":csOutcome,"csBalance":csBalance,"alumniIncome":alumniIncome,"alumniOutcome":alumniOutcome,"alumniBalance":alumniBalance}
+        var send_string = JSON.stringify(response)
+        res.status(200).json(send_string);
       }
-      var alumniBalance = alumniIncome-alumniOutcome
-      var response = {"income":income,"outcome":outcome,"balance":balance,"hatosaiIncome":hatoyamaIncome,"hatosaiOutcome":hatoyamaOutcome,"hatosaiBalance":hatoyamaBalance,"csIncome":csIncome,"csOutcome":csOutcome,"csBalance":csBalance,"alumniIncome":alumniIncome,"alumniOutcome":alumniOutcome,"alumniBalance":alumniBalance}
-      var send_string = JSON.stringify(response)
-      res.status(200).json(send_string);
-    }
-    else {
-      res.status(403).json({"msg":"permission denied."})
+      else {
+        res.status(403).end()
+      }
+    } else {
+      res.status(403).end()
     }
   } else {
-    res.status(403).json({"msg":"permission denied."})
-  }
+    res.status(403).end()
+  } 
 }
