@@ -149,7 +149,8 @@ export function UseLoginState(
     const sessionToken = localStorage.getItem(STORAGE_TOKEN)
     logoutAuth(sessionToken!)
     localStorage.removeItem(STORAGE_TOKEN);
-    setIsUserInternal(false);toast({
+    setIsUserInternal(false);
+    toast({
       title: "ログアウトしました",
       status: "success",
       duration: 2500,

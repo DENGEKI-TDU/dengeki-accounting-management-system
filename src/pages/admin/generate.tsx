@@ -50,7 +50,7 @@ export default function Home() {
             }
               toast({
                 title: "エラー",
-                description:"エラーが発生したため、生成できませんでした。認証情報を確認して下さい。\nLOG:"+msg,
+                description:"エラーが発生したため、生成できませんでした。認証情報を確認して下さい。",
                 status: "error",
                 duration: 4000,
                 isClosable: true,
