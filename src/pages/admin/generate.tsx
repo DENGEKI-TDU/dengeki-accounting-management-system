@@ -63,9 +63,9 @@ export default function Home() {
       // Workbookの作成
       const workbook = new ExcelJS.Workbook();
       // Workbookに新しいWorksheetを追加
-      workbook.addWorksheet("My Sheet");
+      workbook.addWorksheet("金銭出納帳簿");
       // ↑で追加したWorksheetを参照し変数に代入
-      const worksheet = workbook.getWorksheet("My Sheet");
+      const worksheet = workbook.getWorksheet("金銭出納帳簿");
       // 列を定義
       worksheet.columns = [
         { header: "", key: "empty" },
