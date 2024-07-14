@@ -103,7 +103,7 @@ export function UseLoginState(
       mode:"get"
     }
     const response = await fetch("/api/auth",{
-      method: "POST",
+      method: "GET",
       headers: {"Content-Type": "application/json"},
       body: JSON.stringify(body)
     });

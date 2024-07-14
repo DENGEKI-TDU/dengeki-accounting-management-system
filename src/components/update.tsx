@@ -54,7 +54,7 @@ const Update: React.FC<{ update: updateAccount,from:string }> = ({ update,from }
 			hostname
 		}
 		const token = await fetch("/api/auth/generatePass",{
-			method:"POST",
+			method:"GET",
 			headers: {"Content-Type":"application/json"},
 			body: JSON.stringify(authBody)
 		})
@@ -111,7 +111,7 @@ const Update: React.FC<{ update: updateAccount,from:string }> = ({ update,from }
 			hostname
 		}
 		const token = await fetch("/api/auth/generatePass",{
-			method:"POST",
+			method:"GET",
 			headers: {"Content-Type":"application/json"},
 			body: JSON.stringify(authBody)
 		})

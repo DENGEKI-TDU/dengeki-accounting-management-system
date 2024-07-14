@@ -87,7 +87,7 @@ export default function Home() {
         hostname
       }
       const token = await fetch("/api/auth/generatePass",{
-        method:"POST",
+        method:"GET",
         headers: {"Content-Type":"application/json"},
         body: JSON.stringify(authBody)
       })
