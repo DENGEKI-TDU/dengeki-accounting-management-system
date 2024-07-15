@@ -1,7 +1,6 @@
 import prisma from "@/lib/prisma";
 import { createHash } from "crypto";
 import type { NextApiResponse } from "next";
-import { env } from "process";
 
 const encryptSha256 = (str: string) => {
   const hash = createHash("sha256");
@@ -23,15 +22,18 @@ export default async function handle(
   const {year,inputPass,sessionToken} = req.body
   let isAdmin:boolean = false
   if(sessionToken){
-    const data = await prisma.tokens.findFirst({
-      where:{
-        tokens:encryptSha256(sessionToken)
-      }
-    });
+    const body = {
+      token:sessionToken,
+      mode:"get"
+    }
+    const dataRes = await fetch(`${process.env.SSO_DOMAIN}/api/auth`,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify(body)
+    })
+    const data = await dataRes.json()
     if(data){
-      if(data.limit > new Date()){
-        isAdmin = data.isAdmin
-      }
+      isAdmin = data.isAdmin
     }
     if(inputPass || sessionToken){
       const hashPass = encryptSha256(inputPass)
