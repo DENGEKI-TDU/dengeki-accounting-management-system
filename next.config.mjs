@@ -5,11 +5,11 @@ const nextConfig = {
     return [
       {
         source: '/api/auth',
-        destination: "https://sso.dengeki-fox.net/api/auth",
+        destination: "https://"+process.env.SSO_DOMAIN+"/api/auth",
       },
       {
         source: '/api/auth/generatePass',
-        destination:"https://sso.dengeki-fox.net/api/auth/generatePass",
+        destination:"https://"+process.env.SSO_DOMAIN+"/api/auth/generatePass",
       },
     ]
   },
