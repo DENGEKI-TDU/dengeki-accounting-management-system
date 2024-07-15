@@ -3,8 +3,6 @@ import Link from "next/link";
 import { UseLoginState } from "@/hooks/UseLoginState";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import prisma from "@/lib/prisma";
-import { getImgProps } from "next/dist/shared/lib/get-img-props";
 import { WarningIcon } from "@chakra-ui/icons";
 
 export default function Home() {
@@ -41,7 +39,7 @@ export default function Home() {
     const sendYear = String(year)
     const body = {
       year:sendYear,
-      inputPass:"from admin page",
+      inputPass:"from-admin-page",
       sessionToken
     }
     const result = await fetch("/api/database/earnings",{
@@ -51,18 +49,20 @@ export default function Home() {
     })
     await result.json().then((res:any)=> {
       res = JSON.parse(res)
-      setIncome(res.income)
-      setOutcome(res.outcome)
-      setBalance(res.balance)
-      setHatosaiIncome(res.hatosaiIncome)
-      setHatosaiOutcome(res.hatosaiOutcome)
-      setHatosaiBalance(res.hatosaiBalance)
-      setCSIncome(res.csIncome)
-      setCSOutcome(res.csOutcome)
-      setCSBalance(res.csBalance)
-      setAlumniIncome(res.alumniIncome)
-      setAlumniOutcome(res.alumniOutcome)
-      setAlumniBalance(res.alumniBalance)
+      if(res){
+        setIncome(res.income)
+        setOutcome(res.outcome)
+        setBalance(res.balance)
+        setHatosaiIncome(res.hatosaiIncome)
+        setHatosaiOutcome(res.hatosaiOutcome)
+        setHatosaiBalance(res.hatosaiBalance)
+        setCSIncome(res.csIncome)
+        setCSOutcome(res.csOutcome)
+        setCSBalance(res.csBalance)
+        setAlumniIncome(res.alumniIncome)
+        setAlumniOutcome(res.alumniOutcome)
+        setAlumniBalance(res.alumniBalance)
+      }
       setCompleteFetching(true)
     })
   }
