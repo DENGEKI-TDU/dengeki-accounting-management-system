@@ -68,7 +68,7 @@ export default function Home() {
       hostname
     }
     const oneTimePass = await fetch("/api/auth/generatePass",{
-      method:"GET",
+      method: "POST",
       headers: {"Content-Type":"application/json"},
       body: JSON.stringify(authBody)
     })
