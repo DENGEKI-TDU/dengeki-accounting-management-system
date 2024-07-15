@@ -5,11 +5,11 @@ const nextConfig = {
     return [
       {
         source: '/api/auth',
-        destination: process.env.SSO_DOMAIN+'/api/auth',
+        destination: "https://"+process.env.SSO_DOMAIN+'/api/auth',
       },
       {
         source: '/api/auth/generatePass',
-        destination: process.env.SSO_DOMAIN+'/api/auth/generatePass',
+        destination:"https://"+process.env.SSO_DOMAIN+'/api/auth/generatePass',
       },
     ]
   },
