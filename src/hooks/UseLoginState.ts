@@ -98,28 +98,34 @@ export function UseLoginState(
 
   const getAuth = async () => {
     const token = localStorage.getItem(STORAGE_TOKEN)
-    const body = {
-      token,
-      mode:"get"
-    }
-    const response = await fetch("/api/auth",{
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify(body)
-    });
-    await response.json().then((data) => {
-      if(data){
-        if(data.limit >= new Date()){
-          localStorage.clear;
-          setIsUserInternal(false)
-          setIsAdminInternal(false)
-        } else {
-          setIsUserInternal(data.isUser)
-          setIsAdminInternal(data.isAdmin)
-        }
+    if(token){
+      const body = {
+        token,
+        mode:"get"
       }
+      const response = await fetch("/api/auth",{
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(body)
+      });
+      await response.json().then((data) => {
+        if(data){
+          if(data.limit >= new Date()){
+            localStorage.clear;
+            setIsUserInternal(false)
+            setIsAdminInternal(false)
+          } else {
+            setIsUserInternal(data.isUser)
+            setIsAdminInternal(data.isAdmin)
+          }
+        }
+        setSessionStatus(true)
+      });
+    } else {
+      setIsUserInternal(false)
+      setIsAdminInternal(false)
       setSessionStatus(true)
-    });
+    }
   }
 
   useEffect(() => {
