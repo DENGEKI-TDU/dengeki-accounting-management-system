@@ -162,7 +162,7 @@ export function UseLoginState(
       duration: 2500,
       isClosable: true,
     })
-    router.push("")
+    router.reload()
   }, []);
   return [isAdminInternal,isUserInternal,sessionStatus, Login, Logout];
 }

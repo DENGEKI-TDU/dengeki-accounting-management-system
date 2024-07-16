@@ -208,7 +208,7 @@ const Home: NextPage = () => {
         duration: 2500,
         isClosable: true,
       });
-      router.push("");
+      router.reload();
     }
   };
   if(status && (isAdmin || isUser)){
