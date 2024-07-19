@@ -26,7 +26,15 @@ export default function Home() {
         <>
           <VStack>
             <Heading>ログインしてください。</Heading>
-            <Button onClick={() => router.push("/login")}>ログイン</Button>
+            <Button
+              onClick={() => {
+                router.push({
+                  pathname:"https://"+process.env.NEXT_PUBLIC_SSO_DOMAIN+"/login",
+                  query: {locate:"accounting",}
+                },"http:/localhost:3000/login")
+              }}>
+                ログイン
+              </Button>
           </VStack>
         </>
         :
