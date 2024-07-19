@@ -26,7 +26,7 @@ export default async function handle(
       token:sessionToken,
       mode:"get"
     }
-    const dataRes = await fetch(`https://${process.env.SSO_DOMAIN}/api/auth`,{
+    const dataRes = await fetch(`https://${process.env.NEXT_PUBLIC_SSO_DOMAIN}/api/auth`,{
       method:"POST",
       headers:{"Content-Type":"application/json"},
       body:JSON.stringify(body)
