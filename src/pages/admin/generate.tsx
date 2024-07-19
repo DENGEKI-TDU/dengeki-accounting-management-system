@@ -145,7 +145,8 @@ export default function Home() {
       {status && (isAdmin || isUser) ? 
         <>
           {isAdmin?
-            <VStack>
+            <VStack> 
+          <Heading color="red">バグ発生中。現在復旧作業中。復帰見込み：7/26</Heading>
               <Heading>Excelダウンロードページ</Heading>
               <Text fontSize={"xl"}>
                 生成する年度を入力してください。
