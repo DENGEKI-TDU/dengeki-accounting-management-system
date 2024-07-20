@@ -25,22 +25,31 @@ export default async function handle(
   const allowHOST = process.env.NEXT_PUBLIC_ALLOW_HOSTNAME!
   let isAdmin = false;
   const sessionToken = inputPass
-	const passResult = await prisma.oneTimeToken.findFirst({
-		where: {
-			token:encryptSha256(oneTimeToken),
-		}
-	})
+  const body = {
+    oneTimeToken
+  }
+  const pr = await fetch("https://"+process.env.NEXT_PUBLIC_SSO_DOMAIN+"/api/auth/authToken",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify(body)
+  })
+  const passResult = await pr.json()
   if(hostname.includes(allowHOST) && passResult){
 		const tokenLimit = passResult.limit
-		if(new Date() < tokenLimit){
+		if(new Date() < new Date(tokenLimit)){
       try {
-        const data = await prisma.tokens.findFirst({
-          where:{
-            tokens:encryptSha256(sessionToken)
-          }
+        const body = {
+          token:sessionToken,
+          mode:"get"
+        }
+        const response = await fetch("https://"+process.env.NEXT_PUBLIC_SSO_DOMAIN+"/api/auth",{
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify(body)
         });
+        const data = await response.json()
         if(data){
-          if(data.limit > new Date()){
+          if(new Date(data.limit) > new Date()){
             isAdmin = data.isAdmin
           }
         }

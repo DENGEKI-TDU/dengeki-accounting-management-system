@@ -11,6 +11,10 @@ const nextConfig = {
         source: '/api/auth/generatePass',
         destination:"https://"+process.env.NEXT_PUBLIC_SSO_DOMAIN+"/api/auth/generatePass",
       },
+      {
+        source: '/api/auth/authToken',
+        destination:"https://"+process.env.NEXT_PUBLIC_SSO_DOMAIN+"/api/auth/authToken",
+      },
     ]
   },
 };
