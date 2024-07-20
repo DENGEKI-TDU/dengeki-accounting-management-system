@@ -12,11 +12,11 @@ export default function Home() {
       if(token != ""){
         localStorage.setItem("storage_token",String(token))
       }
+      router.push("/")
     }
 },[router])
   return (
     <>
-      <meta http-equiv="refresh" content="1;URL='/'" />
       <HStack><Spinner /><Text>ログイン認証中</Text></HStack>
     </>
   )
