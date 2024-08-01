@@ -21,12 +21,16 @@ export default async function handle(
   const pass = process.env.EARNINGPASS
   const {year,inputPass,sessionToken} = req.body
   let isAdmin:boolean = false
+  let http = "http"
+  if(process.env.NODE_ENV == "production"){
+	http = "https"
+  }
   if(sessionToken){
     const body = {
       token:sessionToken,
       mode:"get"
     }
-    const dataRes = await fetch(`https://${process.env.NEXT_PUBLIC_SSO_DOMAIN}/api/auth`,{
+    const dataRes = await fetch(http+"://"+process.env.NEXT_PUBLIC_SSO_DOMAIN+"/api/auth",{
       method:"POST",
       headers:{"Content-Type":"application/json"},
       body:JSON.stringify(body)

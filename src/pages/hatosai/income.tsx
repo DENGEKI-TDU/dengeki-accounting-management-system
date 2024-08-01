@@ -18,6 +18,7 @@ import {
 } from "@chakra-ui/react";
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
+import axios from "axios";
 
 export default function Home() {
   const [isAdmin,isUser,status, Login, Logout] = UseLoginState(false);
@@ -55,116 +56,144 @@ export default function Home() {
       fixture +
       "\nメモ : " +
       memo;
-    const username = "鳩祭収入報告くん"
+    const username = "収入報告くん"
     const discordData = {
       username,
       valueContent,
-      mode:"hatosai"
-    };
-    const getHost = await fetch("https://ipapi.co/json")
-    const res = await getHost.json()
-    const hostname = res.ip
-    const authBody = {
-      hostname
-    }
-    const oneTimePass = await fetch("/api/auth/generatePass",{
-      method: "POST",
-      headers: {"Content-Type":"application/json"},
-      body: JSON.stringify(authBody)
-    })
-    const passResult = await oneTimePass.json()
-    const oneTimeToken = passResult.token
-    try {
-      const body = {
-        date,
-        fixture,
-        value,
-        year,
-        inputPass,
-        oneTimeToken,
-        hostname,
-        mode:"income",
-        from:"hatosai"
-      };
-      await fetch("/api/database/post-earning", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-    } catch (error) {
-      console.error(error);
-    }
-    await fetch("/api/discord/send", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(discordData),
-    }).then(() => {
+      mode:"main"
+    };axios.get("https://ipapi.co/json").then((getHost) => {
+      const hostname = getHost.data.ip
+      axios.post("/api/auth/generatePass",{
+        hostname
+      }).then((oneTimePass) => {
+        const oneTimeToken = oneTimePass.data.token
+        console.log(oneTimeToken)
+        axios.post("/api/database/post-earning",{
+          date,
+          fixture,
+          value,
+          year,
+          inputPass,
+          oneTimeToken,
+          hostname,
+          mode:"income",
+          from:"hatosai"
+        }).then(async () => {
+              const username = "収入報告くん"
+              axios.post("/api/discord/send",{
+                username,
+                valueContent,
+                mode:"hatosai"
+              }).then(() => {
+                if(toastIdRef.current){
+                  toast.close(toastIdRef.current)
+                }
+                toast({
+                  title: "アップロード完了",
+                  description: "アップロードが完了しました。アップロード日時：" + date,
+                  status: "success",
+                  duration: 2500,
+                  isClosable: true,
+                });
+                router.push("/");
+              }).catch(() => {
+                if(toastIdRef.current){
+                  toast.close(toastIdRef.current)
+                }
+                toast({
+                  title: "discord error",
+                  status: "error",
+                  duration: 2500,
+                  isClosable: true,
+                });
+              })
+        }).catch(() => {
+          if(toastIdRef.current){
+            toast.close(toastIdRef.current)
+          }
+          toast({
+            title: "db post error",
+            status: "error",
+            duration: 2500,
+            isClosable: true,
+          });
+        }).catch(() => {
+          if(toastIdRef.current){
+            toast.close(toastIdRef.current)
+          }
+          toast({
+            title: "token generate error",
+            status: "error",
+            duration: 2500,
+            isClosable: true,
+          });
+        })
+      })
+    }).catch(() => {
       if(toastIdRef.current){
         toast.close(toastIdRef.current)
       }
       toast({
-        title: "アップロード完了",
-        description: "アップロードが完了しました。アップロード日時：" + date,
-        status: "success",
+        title: "IPアドレス取得エラー",
+        status: "error",
         duration: 2500,
         isClosable: true,
       });
-      router.push("/");
-    });
+    })
   };
   if(status && (isAdmin || isUser)){
-    return (
-      <>
-        <Container>
-          <Heading>鳩山祭収入報告フォーム</Heading>
-          <form onSubmit={onsubmit} encType="multipart/form-data">
-            <FormControl>
-              <FormLabel>会計年度</FormLabel>
-              <NumberInput
-                min={new Date().getFullYear() - 2}
-                onChange={(e) => setYear(String(Number(e)))}
-              >
-                <NumberInputField />
-                <NumberInputStepper>
-                  <NumberIncrementStepper />
-                  <NumberDecrementStepper />
-                </NumberInputStepper>
-              </NumberInput>
-            </FormControl>
-            <FormControl>
-              <FormLabel>取得日</FormLabel>
-              <Input type="date" onChange={(e) => setDate(e.target.value)} />
-            </FormControl>
-            <FormControl>
-              <FormLabel>金額</FormLabel>
-              <NumberInput min={1} onChange={(e) => setValue(Number(e))}>
-                <NumberInputField />
-                <NumberInputStepper>
-                  <NumberIncrementStepper />
-                  <NumberDecrementStepper />
-                </NumberInputStepper>
-              </NumberInput>
-            </FormControl>
-            <FormControl>
-              <FormLabel>収入事由</FormLabel>
-              <Input onChange={(e) => setFixture(e.target.value)} />
-            </FormControl>
-            <FormControl>
-              <FormLabel>メモ</FormLabel>
-              <Textarea onChange={(e) => setMemo(e.target.value)} />
-            </FormControl>
-            {date != "" && value != 0 && fixture != "" ? (
-              <Input
-                type="submit"
-                value="提出"
-                margin="10px auto"
-                variant="filled"
-              />
-            ) : null}
-          </form>
-        </Container>
-      </>
-    );
+      return (
+        <>
+          <Container>
+            <Heading>鳩山祭援助金収入報告フォーム</Heading>
+            <form onSubmit={onsubmit} encType="multipart/form-data">
+              <FormControl>
+                <FormLabel>会計年度</FormLabel>
+                <NumberInput
+                  min={new Date().getFullYear() - 2}
+                  onChange={(e) => setYear(String(Number(e)))}
+                >
+                  <NumberInputField />
+                  <NumberInputStepper>
+                    <NumberIncrementStepper />
+                    <NumberDecrementStepper />
+                  </NumberInputStepper>
+                </NumberInput>
+              </FormControl>
+              <FormControl>
+                <FormLabel>取得日</FormLabel>
+                <Input type="date" onChange={(e) => setDate(e.target.value)} />
+              </FormControl>
+              <FormControl>
+                <FormLabel>金額</FormLabel>
+                <NumberInput min={1} onChange={(e) => setValue(Number(e))}>
+                  <NumberInputField />
+                  <NumberInputStepper>
+                    <NumberIncrementStepper />
+                    <NumberDecrementStepper />
+                  </NumberInputStepper>
+                </NumberInput>
+              </FormControl>
+              <FormControl>
+                <FormLabel>収入事由</FormLabel>
+                <Input onChange={(e) => setFixture(e.target.value)} />
+              </FormControl>
+              <FormControl>
+                <FormLabel>メモ</FormLabel>
+                <Textarea onChange={(e) => setMemo(e.target.value)} />
+              </FormControl>
+              {date != "" && value != 0 && fixture != "" ? (
+                <Input
+                  type="submit"
+                  value="提出"
+                  margin="10px auto"
+                  variant="filled"
+                />
+              ) : null}
+            </form>
+          </Container>
+        </>
+      );
   } else {
     return (
       <>

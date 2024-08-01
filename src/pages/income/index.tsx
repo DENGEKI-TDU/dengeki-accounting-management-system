@@ -18,6 +18,7 @@ import {
 } from "@chakra-ui/react";
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
+import axios from "axios";
 
 export default function Home() {
   const [isAdmin,isUser,status, Login, Logout] = UseLoginState(false);
@@ -60,57 +61,85 @@ export default function Home() {
       username,
       valueContent,
       mode:"main"
-    };
-    const getHost = await fetch("https://ipapi.co/json")
-    const res = await getHost.json()
-    const hostname = res.ip
-    const authBody = {
-      hostname
-    }
-    const oneTimePass = await fetch("/api/auth/generatePass",{
-      method: "POST",
-      headers: {"Content-Type":"application/json"},
-      body: JSON.stringify(authBody)
-    })
-    const passResult = await oneTimePass.json()
-    const oneTimeToken = passResult.token
-    try {
-      const body = {
-        date,
-        fixture,
-        value,
-        year,
-        inputPass,
-        oneTimeToken,
-        hostname,
-        mode:"income",
-        from:"main"
-      };
-      await fetch("/api/database/post-earning", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-    } catch (error) {
-      console.error(error);
-    }
-    await fetch("/api/discord/send", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(discordData),
-    }).then(() => {
+    };axios.get("https://ipapi.co/json").then((getHost) => {
+      const hostname = getHost.data.ip
+      axios.post("/api/auth/generatePass",{
+        hostname
+      }).then((oneTimePass) => {
+        const oneTimeToken = oneTimePass.data.token
+        console.log(oneTimeToken)
+        axios.post("/api/database/post-earning",{
+          date,
+          fixture,
+          value,
+          year,
+          inputPass,
+          oneTimeToken,
+          hostname,
+          mode:"income",
+          from:"main"
+        }).then(async () => {
+              const username = "収入報告くん"
+              axios.post("/api/discord/send",{
+                username,
+                valueContent,
+                mode:"main"
+              }).then(() => {
+                if(toastIdRef.current){
+                  toast.close(toastIdRef.current)
+                }
+                toast({
+                  title: "アップロード完了",
+                  description: "アップロードが完了しました。アップロード日時：" + date,
+                  status: "success",
+                  duration: 2500,
+                  isClosable: true,
+                });
+                router.push("/");
+              }).catch(() => {
+                if(toastIdRef.current){
+                  toast.close(toastIdRef.current)
+                }
+                toast({
+                  title: "discord error",
+                  status: "error",
+                  duration: 2500,
+                  isClosable: true,
+                });
+              })
+        }).catch(() => {
+          if(toastIdRef.current){
+            toast.close(toastIdRef.current)
+          }
+          toast({
+            title: "db post error",
+            status: "error",
+            duration: 2500,
+            isClosable: true,
+          });
+        }).catch(() => {
+          if(toastIdRef.current){
+            toast.close(toastIdRef.current)
+          }
+          toast({
+            title: "token generate error",
+            status: "error",
+            duration: 2500,
+            isClosable: true,
+          });
+        })
+      })
+    }).catch(() => {
       if(toastIdRef.current){
         toast.close(toastIdRef.current)
       }
       toast({
-        title: "アップロード完了",
-        description: "アップロードが完了しました。アップロード日時：" + date,
-        status: "success",
+        title: "IPアドレス取得エラー",
+        status: "error",
         duration: 2500,
         isClosable: true,
       });
-      router.push("/");
-    });
+    })
   };
   if(status && (isAdmin || isUser)){
       return (
