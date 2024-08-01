@@ -28,6 +28,7 @@ import { UseLoginState } from "@/hooks/UseLoginState";
 import Router, { useRouter } from "next/router";
 import { supabase } from "../../../utils/supabase/supabase";
 import { v4 as uuidv4 } from "uuid";
+import axios from "axios";
 
 const Home: NextPage = () => {
   const toast = useToast();
@@ -41,7 +42,7 @@ const Home: NextPage = () => {
   const [memo, setMemo] = useState("");
   const [year, setYear] = useState("");
   const [images, setImages] = useState<Blob[]>([]);
-  const [isAdmin,isUser,status, Login, Logout] = UseLoginState(false);
+  const [isAdmin,isUser, status, Login, Logout] = UseLoginState(false);
   const [inputPass,setInputPass] = useState("")
   const path = router.pathname;
   const public_url = process.env.NEXT_PUBLIC_SUPABASE_PUBLIC_URL;
@@ -107,114 +108,141 @@ const Home: NextPage = () => {
     const alphabet: string[] = ["A", "B", "C", "D", "E", "F", "X"];
 
     const typeAlphabet = alphabet[types.indexOf(type)];
-    const getHost = await fetch("https://ipapi.co/json")
-    const res = await getHost.json()
-    const hostname = res.ip
-    const authBody = {
-      hostname
-    }
-    const oneTimePass = await fetch("/api/auth/generatePass",{
-      method: "POST",
-      headers: {"Content-Type":"application/json"},
-      body: JSON.stringify(authBody)
-    })
-    const passResult = await oneTimePass.json()
-    const oneTimeToken = passResult.token
-    const body = {
-      date,
-      type,
-      typeAlphabet,
-      subType,
-      fixture,
-      value,
-      year,
-      inputPass,
-      oneTimeToken,
-      hostname,
-      mode:"outcome",
-      from:"hatosai"
-    };
-    await fetch("/api/database/post-earning", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    if (file!!.type.match("image.*")) {
-      const fileExtension = file!!.name.split(".").pop();
-      const uuid = uuidv4();
-      const inputFileName = `image/${year}/hatosai/${uuid}.${fileExtension}`;
-      const ImageURL = public_url + inputFileName;
-      const { error } = await supabase.storage
-        .from("dengeki-receipt")
-        .upload(inputFileName, file!!);
-      if (error) {
-        alert("エラーが発生しました：" + error.message);
-        return;
-      }
-      setFile(undefined);
-      await listAllImage();
-      const valueContent: string =
-        "# 支出報告\n購入日時 : " +
-        date +
-        "\n会計年度 : " +
-        year +
-        "\n分類 : " +
-        type +
-        "\n分類番号 : " +
-        typeAlphabet +
-        subType +
-        "\n金額 : ¥" +
-        value +
-        "\n購入者 : " +
-        name +
-        "\n備品名 : " +
-        fixture +
-        "\nメモ : " +
-        memo +
-        "\n[レシート画像URL](" +
-        ImageURL +
-        ")";
-        const username = "鳩祭支出報告くん"
-        const body = {
-          username,
-          valueContent,
-          mode:"hatosai"
-        };
-        await fetch("/api/discord/send", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
-        }).then(()=> {
+    axios.get("https://ipapi.co/json").then((getHost) => {
+      const hostname = getHost.data.ip
+      axios.post("/api/auth/generatePass",{
+        hostname
+      }).then((oneTimePass) => {
+        const oneTimeToken = oneTimePass.data.token
+        console.log(oneTimeToken)
+        axios.post("/api/database/post-earning",{
+          date,
+          type,
+          typeAlphabet,
+          subType,
+          fixture,
+          value,
+          year,
+          inputPass,
+          oneTimeToken,
+          hostname,
+          mode:"outcome",
+          from:"hatosai"
+        }).then(async () => {
+          if (file!!.type.match("image.*")) {
+            const fileExtension = file!!.name.split(".").pop();
+            const uuid = uuidv4();
+            const inputFileName = `image/${year}/hatosai/${uuid}.${fileExtension}`;
+            const ImageURL = public_url + inputFileName;
+            const { error } = await supabase.storage
+              .from("dengeki-receipt")
+              .upload(inputFileName, file!!);
+            if (error) {
+              alert("エラーが発生しました：" + error.message);
+              return;
+            }
+            setFile(undefined);
+            await listAllImage();
+            const valueContent: string =
+              "# 支出報告\n購入日時 : " +
+              date +
+              "\n会計年度 : " +
+              year +
+              "\n分類 : " +
+              type +
+              "\n分類番号 : " +
+              typeAlphabet +
+              subType +
+              "\n金額 : ¥" +
+              value +
+              "\n購入者 : " +
+              name +
+              "\n備品名 : " +
+              fixture +
+              "\nメモ : " +
+              memo +
+              "\n[レシート画像URL](" +
+              ImageURL +
+              ")";
+              const username = "支出報告くん"
+              axios.post("/api/discord/send",{
+                username,
+                valueContent,
+                mode:"hatosai"
+              }).then(() => {
+                if(toastIdRef.current){
+                  toast.close(toastIdRef.current)
+                }
+                toast({
+                  title: "アップロード完了",
+                  description: "アップロードが完了しました。アップロード日時：" + date,
+                  status: "success",
+                  duration: 2500,
+                  isClosable: true,
+                });
+                router.push("/");
+              }).catch(() => {
+                if(toastIdRef.current){
+                  toast.close(toastIdRef.current)
+                }
+                toast({
+                  title: "discord error",
+                  status: "error",
+                  duration: 2500,
+                  isClosable: true,
+                });
+              })
+          } else {
+            if(toastIdRef.current){
+              toast.close(toastIdRef.current)
+            }
+            toast({
+              title: "画像形式エラー",
+              description: "画像ファイル以外はアップロードできません。",
+              status: "error",
+              duration: 2500,
+              isClosable: true,
+            });
+            router.reload();
+          }
+        }).catch(() => {
           if(toastIdRef.current){
             toast.close(toastIdRef.current)
           }
           toast({
-            title: "アップロード完了",
-            description: "アップロードが完了しました。アップロード日時：" + date,
-            status: "success",
+            title: "db post error",
+            status: "error",
             duration: 2500,
             isClosable: true,
           });
-          router.push("/");
-        });
-    } else {
+        }).catch(() => {
+          if(toastIdRef.current){
+            toast.close(toastIdRef.current)
+          }
+          toast({
+            title: "token generate error",
+            status: "error",
+            duration: 2500,
+            isClosable: true,
+          });
+        })
+      })
+    }).catch(() => {
       if(toastIdRef.current){
         toast.close(toastIdRef.current)
       }
       toast({
-        title: "画像形式エラー",
-        description: "画像ファイル以外はアップロードできません。",
+        title: "IPアドレス取得エラー",
         status: "error",
         duration: 2500,
         isClosable: true,
       });
-      router.reload();
-    }
+    })
   };
   if(status && (isAdmin || isUser)){
       return (
         <Container pt="10">
-          <Heading>鳩祭支出報告フォーム</Heading>
+          <Heading>鳩山祭援助金支出報告フォーム</Heading>
           <form onSubmit={onSubmit} encType="multipart/form-data">
             <FormControl>
               <FormLabel>会計年度</FormLabel>
@@ -372,7 +400,7 @@ const Home: NextPage = () => {
             </Swiper>
           </Container>
         </Container>
-      ); 
+      );
     } else {
       return (
         <>
@@ -398,5 +426,4 @@ const Home: NextPage = () => {
       )
     }
   }
-
 export default Home;
