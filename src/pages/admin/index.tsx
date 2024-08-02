@@ -54,7 +54,7 @@ export default function Home() {
       inputPass:"from-admin-page",
       sessionToken
     }).then((res) => {
-      setIncome(res.data.income)
+        setIncome(res.data.income)
         setOutcome(res.data.outcome)
         setBalance(res.data.balance)
         setHatosaiIncome(res.data.hatosaiIncome)
@@ -66,6 +66,7 @@ export default function Home() {
         setAlumniIncome(res.data.alumniIncome)
         setAlumniOutcome(res.data.alumniOutcome)
         setAlumniBalance(res.data.alumniBalance)
+        setCompleteFetching(true)
     }).catch((error) => {
       console.error(error)
     })
