@@ -32,6 +32,10 @@ export default function Home() {
   const router = useRouter();
   const toastIdRef:any = useRef()
   const path = router.pathname;
+  let http = "http"
+  if(process.env.NODE_ENV == "production"){
+	http = "https"
+  }
   useEffect(() => {
     setInputPass(localStorage.getItem("storage_token")!)
   },[])
@@ -204,8 +208,8 @@ export default function Home() {
             <Button
               onClick={() => {
                 router.push({
-                  pathname:"https://"+process.env.NEXT_PUBLIC_SSO_DOMAIN+"/login",
-                  query: {locate:"accounting",}
+                  pathname:http+"://"+process.env.NEXT_PUBLIC_SSO_DOMAIN+"/login",
+                  query: {locate:"accounting",path:path}
                 },"http:/localhost:3000/login")
               }}>
                 ログイン
