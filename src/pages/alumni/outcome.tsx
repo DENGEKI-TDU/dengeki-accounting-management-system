@@ -45,6 +45,10 @@ const Home: NextPage = () => {
   const [isAdmin,isUser, status, Login, Logout] = UseLoginState(false);
   const [inputPass,setInputPass] = useState("")
   const path = router.pathname;
+  let http = "http"
+  if(process.env.NODE_ENV == "production"){
+	http = "https"
+  }
   const public_url = process.env.NEXT_PUBLIC_SUPABASE_PUBLIC_URL;
   const toastIdRef:any = useRef()
   useEffect(() => {
@@ -411,8 +415,8 @@ const Home: NextPage = () => {
               <Button
               onClick={() => {
                 router.push({
-                  pathname:"https://"+process.env.NEXT_PUBLIC_SSO_DOMAIN+"/login",
-                  query: {locate:"accounting",}
+                  pathname:http+"://"+process.env.NEXT_PUBLIC_SSO_DOMAIN+"/login",
+                  query: {locate:"accounting",path:path}
                 },"http:/localhost:3000/login")
               }}>
                 ログイン

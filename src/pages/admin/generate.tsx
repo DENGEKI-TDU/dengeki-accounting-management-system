@@ -24,6 +24,11 @@ export default function Home() {
   const jpAccoutnType = ["本予算","鳩山祭","後援会費","校友会費"]
   const accountIndex = ["main","hatosai","clubsupport","alumni"]
   const toastIdRef:any = useRef()
+  const path = router.pathname;
+  let http = "http"
+  if(process.env.NODE_ENV == "production"){
+	http = "https"
+  }
   function generate(){
       toastIdRef.current = toast({
         title: "生成中",
@@ -185,8 +190,8 @@ export default function Home() {
             <Button
               onClick={() => {
                 router.push({
-                  pathname:"https://"+process.env.NEXT_PUBLIC_SSO_DOMAIN+"/login",
-                  query: {locate:"accounting",}
+                  pathname:http+"://"+process.env.NEXT_PUBLIC_SSO_DOMAIN+"/login",
+                  query: {locate:"accounting",path:path}
                 },"http:/localhost:3000/login")
               }}>
                 ログイン

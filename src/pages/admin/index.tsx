@@ -4,6 +4,7 @@ import { UseLoginState } from "@/hooks/UseLoginState";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { WarningIcon } from "@chakra-ui/icons";
+import axios from "axios";
 
 export default function Home() {
   const [isAdmin,isUser,status, Login, Logout] = UseLoginState(false);
@@ -22,6 +23,11 @@ export default function Home() {
   const [alumniBalance,setAlumniBalance] = useState(0)
   const [completeFetching,setCompleteFetching] = useState(false)
   const [allowAccess,setAllowAccess] = useState(false)
+  const path = router.pathname;
+  let http = "http"
+  if(process.env.NODE_ENV == "production"){
+	http = "https"
+  }
 
   const getIP = async() => {
     const getHost = await fetch("https://ipapi.co/json")
@@ -42,28 +48,25 @@ export default function Home() {
       inputPass:"from-admin-page",
       sessionToken
     }
-    const result = await fetch("/api/database/earnings",{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify(body)
-    })
-    await result.json().then((res:any)=> {
-      res = JSON.parse(res)
-      if(res){
-        setIncome(res.income)
-        setOutcome(res.outcome)
-        setBalance(res.balance)
-        setHatosaiIncome(res.hatosaiIncome)
-        setHatosaiOutcome(res.hatosaiOutcome)
-        setHatosaiBalance(res.hatosaiBalance)
-        setCSIncome(res.csIncome)
-        setCSOutcome(res.csOutcome)
-        setCSBalance(res.csBalance)
-        setAlumniIncome(res.alumniIncome)
-        setAlumniOutcome(res.alumniOutcome)
-        setAlumniBalance(res.alumniBalance)
-      }
-      setCompleteFetching(true)
+    axios.post("/api/database/earnings",{
+      year:sendYear,
+      inputPass:"from-admin-page",
+      sessionToken
+    }).then((res) => {
+      setIncome(res.data.income)
+        setOutcome(res.data.outcome)
+        setBalance(res.data.balance)
+        setHatosaiIncome(res.data.hatosaiIncome)
+        setHatosaiOutcome(res.data.hatosaiOutcome)
+        setHatosaiBalance(res.data.hatosaiBalance)
+        setCSIncome(res.data.csIncome)
+        setCSOutcome(res.data.csOutcome)
+        setCSBalance(res.data.csBalance)
+        setAlumniIncome(res.data.alumniIncome)
+        setAlumniOutcome(res.data.alumniOutcome)
+        setAlumniBalance(res.data.alumniBalance)
+    }).catch((error) => {
+      console.error(error)
     })
   }
   useEffect(()=>{
@@ -193,8 +196,8 @@ export default function Home() {
             <Button
               onClick={() => {
                 router.push({
-                  pathname:"https://"+process.env.NEXT_PUBLIC_SSO_DOMAIN+"/login",
-                  query: {locate:"accounting",}
+                  pathname:http+"://"+process.env.NEXT_PUBLIC_SSO_DOMAIN+"/login",
+                  query: {locate:"accounting",path:path}
                 },"http:/localhost:3000/login")
               }}>
                 ログイン
@@ -210,8 +213,8 @@ export default function Home() {
             <Button
               onClick={() => {
                 router.push({
-                  pathname:"https://"+process.env.NEXT_PUBLIC_SSO_DOMAIN+"/login",
-                  query: {locate:"accounting",}
+                  pathname:http+"://"+process.env.NEXT_PUBLIC_SSO_DOMAIN+"/login",
+                  query: {locate:"accounting",path:path}
                 },"http:/localhost:3000/login")
               }}>
                 ログイン
