@@ -36,7 +36,7 @@ export default async function handle(
   }
 ) {
   const { id, date, type, typeAlphabet, subType, fixture, value, year, inputPass, oneTimeToken, hostname, mode, income, outcome, from } = req.body;
-  console.log(id, date, type, typeAlphabet, subType, fixture, value, year, inputPass, oneTimeToken, hostname, mode, income, outcome, from)
+  
   let isAdmin = false;
   let isUser = false;
   let http = "http"
@@ -63,7 +63,7 @@ export default async function handle(
 				body: JSON.stringify(body)
 			});
 			await response.json().then((data) => {
-				console.log(data)
+				
 				if(data){
 				if(data.limit >= new Date()){
 					localStorage.clear;
@@ -79,7 +79,7 @@ export default async function handle(
 			isUser = false
 			isAdmin = false
 			}
-			console.log((isAdmin || isUser))
+			
 		if((isAdmin || isUser)){
 			if(from == "main"){
 				if(mode == "income"){
@@ -110,7 +110,7 @@ export default async function handle(
 							typeAlphabet: typeAlphabet,
 						},
 					});
-					console.log(result)
+					
 					res.json(result);
 				}
 				if(mode == "update" && isAdmin){
@@ -392,7 +392,7 @@ export default async function handle(
 		res.status(403).end()
 	}
   }).catch((error) => {
-	console.log(new Date(),"token認証エラー")
+	
 	res.status(403).json(error)
   })
 }

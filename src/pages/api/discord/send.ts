@@ -17,7 +17,7 @@ export default async function handle(
   res: NextApiResponse<Data>
 ) {
   const { username,valueContent, mode } = req.body;
-  console.log(username,valueContent, mode)
+  
   const sendData = {
     username: username,
     content: valueContent,
@@ -29,7 +29,7 @@ export default async function handle(
       }
     });
     const hookurl = result?.hookurl+"?thread_id="+result?.threadID
-    console.log(hookurl)
+    
     const formData = new FormData();
     formData.append("payload_json", JSON.stringify(sendData));
     const response = await fetch(hookurl, {
