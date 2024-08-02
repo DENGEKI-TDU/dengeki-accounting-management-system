@@ -29,12 +29,13 @@ export default function Home() {
 	http = "https"
   }
 
-  const getIP = async() => {
-    const getHost = await fetch("https://ipapi.co/json")
-      const res = await getHost.json()
-      const hostname = res.ip
+  const getIP = () => {
+    axios.get("https://ipapi.co/json").then((getHost) => {
       const allowHOST = process.env.NEXT_PUBLIC_ALLOW_HOSTNAME!
-      setAllowAccess(hostname.includes(allowHOST))
+      setAllowAccess(getHost.data.ip.includes(allowHOST))
+    }).catch((error) => {
+      console.error(error)
+    })
   }
 
   async function getEarngings(sessionToken:string) {
