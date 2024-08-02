@@ -8,7 +8,7 @@ export default function Home() {
   useEffect(() => {
     if(router.isReady){
       const token = router.query.token
-      console.log(token)
+      
       if(token != ""){
         localStorage.setItem("storage_token",String(token))
       }

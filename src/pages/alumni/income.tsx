@@ -67,7 +67,7 @@ export default function Home() {
         hostname
       }).then((oneTimePass) => {
         const oneTimeToken = oneTimePass.data.token
-        console.log(oneTimeToken)
+        
         axios.post("/api/database/post-earning",{
           date,
           fixture,

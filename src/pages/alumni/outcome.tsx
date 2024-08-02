@@ -114,7 +114,7 @@ const Home: NextPage = () => {
         hostname
       }).then((oneTimePass) => {
         const oneTimeToken = oneTimePass.data.token
-        console.log(oneTimeToken)
+        
         axios.post("/api/database/post-earning",{
           date,
           type,
