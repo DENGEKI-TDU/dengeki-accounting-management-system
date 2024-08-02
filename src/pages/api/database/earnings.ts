@@ -83,9 +83,7 @@ export default async function handle(
             alumniOutcome += alumniResult[i].outcome
           }
           var alumniBalance = alumniIncome-alumniOutcome
-          var response = {"income":income,"outcome":outcome,"balance":balance,"hatosaiIncome":hatoyamaIncome,"hatosaiOutcome":hatoyamaOutcome,"hatosaiBalance":hatoyamaBalance,"csIncome":csIncome,"csOutcome":csOutcome,"csBalance":csBalance,"alumniIncome":alumniIncome,"alumniOutcome":alumniOutcome,"alumniBalance":alumniBalance}
-          var send_string = JSON.stringify(response)
-          res.status(200).json(send_string);
+          res.status(200).json({"income":income,"outcome":outcome,"balance":balance,"hatosaiIncome":hatoyamaIncome,"hatosaiOutcome":hatoyamaOutcome,"hatosaiBalance":hatoyamaBalance,"csIncome":csIncome,"csOutcome":csOutcome,"csBalance":csBalance,"alumniIncome":alumniIncome,"alumniOutcome":alumniOutcome,"alumniBalance":alumniBalance});
         }
         else {
           res.status(403).end()

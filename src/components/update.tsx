@@ -2,6 +2,7 @@ import { Tr,Td, Select, Button, HStack, Input, Text, useToast, Tooltip } from "@
 import { useState,useRef } from "react";
 import { EditIcon,CheckIcon, CloseIcon, DeleteIcon } from "@chakra-ui/icons"
 import { useRouter } from "next/router";
+import axios from "axios";
 
 type updateAccount = {
     id: number,
@@ -47,53 +48,46 @@ const Update: React.FC<{ update: updateAccount,from:string }> = ({ update,from }
 		setType(tmpType)
 		setSubType(tmpSubType)
 		setFixture(tmpFixture)
-		const getHost = await fetch("https://ipapi.co/json")
-		const res = await getHost.json()
-		const hostname = res.ip
-		const authBody = {
-			hostname
-		}
-		const token = await fetch("/api/auth/generatePass",{
-			method: "POST",
-			headers: {"Content-Type":"application/json"},
-			body: JSON.stringify(authBody)
+		let hostname:string
+		axios.get("https://ipapi.co/json").then((res) => {
+			hostname = res.data.ip
+			axios.post("/api/auth/generatePass",{
+				hostname
+			}).then((getToken) => {
+				const oneTimeToken = getToken.data.token
+				const inputPass = localStorage.getItem("storage_token")
+				axios.post("/api/database/post-earning",{
+					"id":String(update.id),
+					"year":String(update.year),
+					"date":String(update.date),
+					"type":String(tmpType),
+					"typeAlphabet":alphabet[types.indexOf(tmpType)],
+					"subtype":tmpSubType,
+					"fixture":tmpFixture,
+					"income":String(update.income),
+					"outcome":String(update.outcome),
+					"inputPass":inputPass,
+					"oneTimeToken":oneTimeToken,
+					"hostname":hostname,
+					"mode":"update",
+					from:from
+				}).then(() => {
+					setIsEditMode(false)
+					if(toastIdRef.current){
+						toast.close(toastIdRef.current)
+					}
+					toast({
+						title:"編集完了",
+						status:"success",
+						duration:1500,
+						isClosable:true
+					})
+					router.push("/admin/edit?from="+from)
+				})
+			})
+		}).catch((error) => {
+			console.error(error)
 		})
-		const getToken = await token.json()
-		const oneTimeToken = getToken.token
-		const inputPass = localStorage.getItem("storage_token")
-		const editData = {
-			"id":String(update.id),
-			"year":String(update.year),
-			"date":String(update.date),
-			"type":String(tmpType),
-			"typeAlphabet":alphabet[types.indexOf(tmpType)],
-			"subtype":tmpSubType,
-			"fixture":tmpFixture,
-			"income":String(update.income),
-			"outcome":String(update.outcome),
-			"inputPass":inputPass,
-			"oneTimeToken":oneTimeToken,
-			"hostname":hostname,
-			"mode":"update",
-			from:from
-		}
-
-		await fetch("/api/database/post-earning",{
-			method:"POST",
-			headers:{"Content-type":"application/json"},
-			body:JSON.stringify(editData)
-		})
-		setIsEditMode(false)
-		if(toastIdRef.current){
-			toast.close(toastIdRef.current)
-		}
-		toast({
-			title:"編集完了",
-			status:"success",
-			duration:1500,
-			isClosable:true
-		})
-		router.push("/admin/edit?from="+from)
 	}
 	async function aid() {
 		toastIdRef.current = toast({
@@ -104,45 +98,39 @@ const Update: React.FC<{ update: updateAccount,from:string }> = ({ update,from }
 			isClosable:false
 		})
 		const id = update.id
-		const getHost = await fetch("https://ipapi.co/json")
-		const res = await getHost.json()
-		const hostname = res.ip
-		const authBody = {
-			hostname
-		}
-		const token = await fetch("/api/auth/generatePass",{
-			method: "POST",
-			headers: {"Content-Type":"application/json"},
-			body: JSON.stringify(authBody)
+		let hostname:string
+		axios.get("https://ipapi.co/json").then((res) => {
+			hostname = res.data.ip
+			axios.post("/api/auth/generatePass",{
+				hostname
+			}).then((getToken) => {
+				const oneTimeToken = getToken.data.token
+				const inputPass = localStorage.getItem("storage_token")
+				axios.post("/api/database/post-earning",{	
+					id,
+					inputPass,
+					oneTimeToken,
+					hostname,
+					mode:"aid",
+					from:from
+				}).then(() => {
+					setIsEditMode(false)
+					if(toastIdRef.current){
+						toast.close(toastIdRef.current)
+					}
+					toast({
+						title:"変更完了",
+						description:"共済金からの支払いへの変更を完了しました。",
+						status:"success",
+						duration:1500,
+						isClosable:true
+					})
+					router.push("/admin/edit?from="+from)
+				})
+			})
+		}).catch((error) => {
+			console.error(error)
 		})
-		const getToken = await token.json()
-		const oneTimeToken = getToken.token
-		const inputPass = localStorage.getItem("storage_token")
-		const body = {
-			id,
-			inputPass,
-			oneTimeToken,
-			hostname,
-			mode:"aid",
-			from:from
-		}
-		await fetch("/api/database/post-earning",{
-			method:"POST",
-			headers:{"Content-type":"application/json"},
-			body:JSON.stringify(body)
-		})
-		setIsEditMode(false)
-		if(toastIdRef.current){
-			toast.close(toastIdRef.current)
-		}
-		toast({
-			title:"変更完了",
-			description:"共済金からの支払いへの変更を完了しました。",
-			status:"success",
-			duration:1500,
-			isClosable:true
-		})
-		router.push("/admin/edit?from="+from)
 	}
 	function close() {
 		setTmpType(update.type)

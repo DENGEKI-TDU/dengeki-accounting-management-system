@@ -10,6 +10,7 @@ import {
   VStack,
   useToast,
 } from "@chakra-ui/react";
+import axios from "axios";
 import { useRouter } from "next/router";
 import React, { useState,useRef } from "react";
 const ExcelJS = require("exceljs");
@@ -38,29 +39,16 @@ export default function Home() {
         isClosable: true,
       });
       clickButtonAsync().then((msg)=>{
-        if(!(msg)){
           if(toastIdRef.current){
             toast.close(toastIdRef.current)
           }
-            toast({
-              title: "生成完了",
-              description:year+"年度"+jpAccoutnType[accountIndex.indexOf(from)]+"の決算Excelファイルを生成しました",
-              status: "success",
-              duration: 4000,
-              isClosable: true,
-            });
-          } else {
-            if(toastIdRef.current){
-              toast.close(toastIdRef.current)
-            }
-              toast({
-                title: "エラー",
-                description:"エラーが発生したため、生成できませんでした。認証情報を確認して下さい。",
-                status: "error",
-                duration: 4000,
-                isClosable: true,
-              });
-          }
+          toast({
+            title: "生成完了",
+            description:year+"年度"+jpAccoutnType[accountIndex.indexOf(from)]+"の決算Excelファイルを生成しました",
+            status: "success",
+            duration: 4000,
+            isClosable: true,
+          });
         }
       )
   }
@@ -85,64 +73,57 @@ export default function Home() {
         { header: "差引残高", key: "earnings" },
       ];
       // 行を定義
-      const getHost = await fetch("https://ipapi.co/json")
-      const res = await getHost.json()
-      const hostname = res.ip
-      const authBody = {
-        hostname
-      }
-      const token = await fetch("/api/auth/generatePass",{
-        method: "POST",
-        headers: {"Content-Type":"application/json"},
-        body: JSON.stringify(authBody)
+      axios.get("https://ipapi.co/json").then((getHost) => {
+        const hostname = getHost.data.ip
+        axios.post("/api/auth/generatePass",{
+          hostname
+        }).then((getToken) => {
+          const oneTimeToken = getToken.data.token
+          const inputPass = localStorage.getItem("storage_token")
+          axios.post("/api/database/generate",{
+            year,
+            inputPass,
+            oneTimeToken,
+            hostname,
+            from
+          }).then(async(response) => {
+            const result = response.data
+            var earning:number = 0
+            for(var i=0;i<result.data.length;i++){
+              earning += result.data[i].income
+              earning -= result.data[i].outcome
+              const earning_string = "\\"+earning.toLocaleString()
+              let income:string = ""
+              if(result.data[i].income != 0){
+                income = "\\"+result.data[i].income.toLocaleString()
+              }
+              let outcome:string = ""
+              if(result.data[i].outcome != 0){
+                outcome = "\\"+result.data[i].outcome.toLocaleString()
+                if(outcome.length>3){}
+              }
+              worksheet.addRow({month:new Date(result.data[i].date).getMonth()+1,date:new Date(result.data[i].date).getDate(),fixture:result.data[i].fixture,indexNumber:"",mainType:result.data[i].typeAlphabet,subType:result.data[i].subtype,income:income,outcome:outcome,earnings:earning_string})
+            }
+            // UInt8Arrayを生成
+            const uint8Array = await workbook.xlsx.writeBuffer();
+            // Blob
+            const blob = new Blob([uint8Array], { type: "application/octet-binary" });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `演劇部${accoutnType[accountIndex.indexOf(from)]}決算_${year}.xlsx`;
+            a.click();
+            // ダウンロード後は不要なのでaタグを除去
+            a.remove();
+          }).catch((error) => {
+            console.error(error)
+          })
+        }).catch((error) => {
+          console.error(error)
+        })
+      }).catch((error) => {
+        console.error(error)
       })
-      const getToken = await token.json()
-      const oneTimeToken = getToken.token
-      const inputPass = localStorage.getItem("storage_token")
-      const body = {
-        year,
-        inputPass,
-        oneTimeToken,
-        hostname,
-        from
-      }
-      const response = await fetch("/api/database/generate",{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify(body)
-      })
-      const result = await response.json()
-      var earning:number = 0
-      if(!result.msg){
-        for(var i=0;i<result.data.length;i++){
-          earning += result.data[i].income
-          earning -= result.data[i].outcome
-          const earning_string = "\\"+earning.toLocaleString()
-          let income:string = ""
-          if(result.data[i].income != 0){
-            income = "\\"+result.data[i].income.toLocaleString()
-          }
-          let outcome:string = ""
-          if(result.data[i].outcome != 0){
-            outcome = "\\"+result.data[i].outcome.toLocaleString()
-            if(outcome.length>3){}
-          }
-          worksheet.addRow({month:new Date(result.data[i].date).getMonth()+1,date:new Date(result.data[i].date).getDate(),fixture:result.data[i].fixture,indexNumber:"",mainType:result.data[i].typeAlphabet,subType:result.data[i].subtype,income:income,outcome:outcome,earnings:earning_string})
-        }
-        // UInt8Arrayを生成
-        const uint8Array = await workbook.xlsx.writeBuffer();
-        // Blob
-        const blob = new Blob([uint8Array], { type: "application/octet-binary" });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `演劇部${accoutnType[accountIndex.indexOf(from)]}決算_${year}.xlsx`;
-        a.click();
-        // ダウンロード後は不要なのでaタグを除去
-        a.remove();
-      } else {
-        return result.msg
-      }
     }
 
     return (

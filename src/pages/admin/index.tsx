@@ -29,12 +29,13 @@ export default function Home() {
 	http = "https"
   }
 
-  const getIP = async() => {
-    const getHost = await fetch("https://ipapi.co/json")
-      const res = await getHost.json()
-      const hostname = res.ip
+  const getIP = () => {
+    axios.get("https://ipapi.co/json").then((getHost) => {
       const allowHOST = process.env.NEXT_PUBLIC_ALLOW_HOSTNAME!
-      setAllowAccess(hostname.includes(allowHOST))
+      setAllowAccess(getHost.data.ip.includes(allowHOST))
+    }).catch((error) => {
+      console.error(error)
+    })
   }
 
   async function getEarngings(sessionToken:string) {
@@ -53,7 +54,7 @@ export default function Home() {
       inputPass:"from-admin-page",
       sessionToken
     }).then((res) => {
-      setIncome(res.data.income)
+        setIncome(res.data.income)
         setOutcome(res.data.outcome)
         setBalance(res.data.balance)
         setHatosaiIncome(res.data.hatosaiIncome)
@@ -65,6 +66,7 @@ export default function Home() {
         setAlumniIncome(res.data.alumniIncome)
         setAlumniOutcome(res.data.alumniOutcome)
         setAlumniBalance(res.data.alumniBalance)
+        setCompleteFetching(true)
     }).catch((error) => {
       console.error(error)
     })
