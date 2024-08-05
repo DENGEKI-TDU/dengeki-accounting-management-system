@@ -42,7 +42,7 @@ export default async function handle(
                   where:{
                     year:year
                   },
-                  orderBy:{date:"asc"}
+                  orderBy:[{date:"asc"},{income:"desc"},{outcome:"desc"},{id:"asc"}]
                 });
                 let response:String[] = []
                 for(let i=0;i<result.length;i++){
