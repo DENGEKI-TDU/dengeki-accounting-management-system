@@ -4,7 +4,7 @@ import axios from "axios";
 export default async function handle(
   req: {
     body: {
-			id: number;
+	  id: number;
       date: string;
       type: string;
       typeAlphabet: string;
@@ -19,6 +19,7 @@ export default async function handle(
 	  income: number;
 	  outcome:number;
 	  from:string;
+	  to:string;
     };
   },
   res: {
@@ -35,7 +36,7 @@ export default async function handle(
     }) => void;
   }
 ) {
-  const { id, date, type, typeAlphabet, subType, fixture, value, year, inputPass, oneTimeToken, hostname, mode, income, outcome, from } = req.body;
+  const { id, date, type, typeAlphabet, subType, fixture, value, year, inputPass, oneTimeToken, hostname, mode, income, outcome, from, to } = req.body;
   
   let isAdmin = false;
   let isUser = false;
@@ -142,7 +143,8 @@ export default async function handle(
 									id: Number(id),
 							},
 					})
-					const result = await prisma.aid.create({
+					if(to=="hatosai"){
+						const result = await prisma.hatosaiAccount.create({
 							data:{
 									date: response!.date,
 									year: response!.year,
@@ -153,8 +155,62 @@ export default async function handle(
 									outcome: response!.outcome,
 									typeAlphabet: response!.typeAlphabet,
 							}
+						})
+						res.json(result)
+					}
+					if(to=="alumni"){
+						const result = await prisma.alumniAccount.create({
+							data:{
+									date: response!.date,
+									year: response!.year,
+									type: response!.type,
+									subtype: response!.subtype,
+									fixture: response!.fixture,
+									income: response!.income,
+									outcome: response!.outcome,
+									typeAlphabet: response!.typeAlphabet,
+							}
+						})
+						res.json(result)
+					}
+					if(to=="clubsupport"){
+						const result = await prisma.clubsupportAccount.create({
+							data:{
+									date: response!.date,
+									year: response!.year,
+									type: response!.type,
+									subtype: response!.subtype,
+									fixture: response!.fixture,
+									income: response!.income,
+									outcome: response!.outcome,
+									typeAlphabet: response!.typeAlphabet,
+							}
+						})
+						res.json(result)
+					}
+					if(to=="aid"){
+						const result = await prisma.aid.create({
+							data:{
+									date: response!.date,
+									year: response!.year,
+									type: response!.type,
+									subtype: response!.subtype,
+									fixture: response!.fixture,
+									income: response!.income,
+									outcome: response!.outcome,
+									typeAlphabet: response!.typeAlphabet,
+							}
+						})
+						res.json(result)
+					}
+				}
+				if(mode=="delete"){
+					const result = await prisma.mainAccount.delete({
+						where:{
+							id:id
+						}
 					})
-					res.json(result);
+					res.json(result)
 				}
 			}
 			if(from == "hatosai"){
@@ -217,7 +273,8 @@ export default async function handle(
 									id: Number(id),
 							},
 					})
-					const result = await prisma.aid.create({
+					if(to=="main"){
+						const result = await prisma.mainAccount.create({
 							data:{
 									date: response!.date,
 									year: response!.year,
@@ -228,8 +285,62 @@ export default async function handle(
 									outcome: response!.outcome,
 									typeAlphabet: response!.typeAlphabet,
 							}
+						})
+						res.json(result)
+					}
+					if(to=="alumni"){
+						const result = await prisma.alumniAccount.create({
+							data:{
+									date: response!.date,
+									year: response!.year,
+									type: response!.type,
+									subtype: response!.subtype,
+									fixture: response!.fixture,
+									income: response!.income,
+									outcome: response!.outcome,
+									typeAlphabet: response!.typeAlphabet,
+							}
+						})
+						res.json(result)
+					}
+					if(to=="clubsupport"){
+						const result = await prisma.clubsupportAccount.create({
+							data:{
+									date: response!.date,
+									year: response!.year,
+									type: response!.type,
+									subtype: response!.subtype,
+									fixture: response!.fixture,
+									income: response!.income,
+									outcome: response!.outcome,
+									typeAlphabet: response!.typeAlphabet,
+							}
+						})
+						res.json(result)
+					}
+					if(to=="aid"){
+						const result = await prisma.aid.create({
+							data:{
+									date: response!.date,
+									year: response!.year,
+									type: response!.type,
+									subtype: response!.subtype,
+									fixture: response!.fixture,
+									income: response!.income,
+									outcome: response!.outcome,
+									typeAlphabet: response!.typeAlphabet,
+							}
+						})
+						res.json(result)
+					}
+				}
+				if(mode=="delete"){
+					const result = await prisma.hatosaiAccount.delete({
+						where:{
+							id:id
+						}
 					})
-					res.json(result);
+					res.json(result)
 				}
 			}
 			if(from == "clubsupport"){
@@ -292,7 +403,8 @@ export default async function handle(
 									id: Number(id),
 							},
 					})
-					const result = await prisma.aid.create({
+					if(to=="hatosai"){
+						const result = await prisma.hatosaiAccount.create({
 							data:{
 									date: response!.date,
 									year: response!.year,
@@ -303,8 +415,62 @@ export default async function handle(
 									outcome: response!.outcome,
 									typeAlphabet: response!.typeAlphabet,
 							}
+						})
+						res.json(result)
+					}
+					if(to=="alumni"){
+						const result = await prisma.alumniAccount.create({
+							data:{
+									date: response!.date,
+									year: response!.year,
+									type: response!.type,
+									subtype: response!.subtype,
+									fixture: response!.fixture,
+									income: response!.income,
+									outcome: response!.outcome,
+									typeAlphabet: response!.typeAlphabet,
+							}
+						})
+						res.json(result)
+					}
+					if(to=="main"){
+						const result = await prisma.mainAccount.create({
+							data:{
+									date: response!.date,
+									year: response!.year,
+									type: response!.type,
+									subtype: response!.subtype,
+									fixture: response!.fixture,
+									income: response!.income,
+									outcome: response!.outcome,
+									typeAlphabet: response!.typeAlphabet,
+							}
+						})
+						res.json(result)
+					}
+					if(to=="aid"){
+						const result = await prisma.aid.create({
+							data:{
+									date: response!.date,
+									year: response!.year,
+									type: response!.type,
+									subtype: response!.subtype,
+									fixture: response!.fixture,
+									income: response!.income,
+									outcome: response!.outcome,
+									typeAlphabet: response!.typeAlphabet,
+							}
+						})
+						res.json(result)
+					}
+				}
+				if(mode=="delete"){
+					const result = await prisma.clubsupportAccount.delete({
+						where:{
+							id:id
+						}
 					})
-					res.json(result);
+					res.json(result)
 				}
 			}
 			if(from == "alumni"){
@@ -367,7 +533,8 @@ export default async function handle(
 									id: Number(id),
 							},
 					})
-					const result = await prisma.aid.create({
+					if(to=="hatosai"){
+						const result = await prisma.hatosaiAccount.create({
 							data:{
 									date: response!.date,
 									year: response!.year,
@@ -378,8 +545,62 @@ export default async function handle(
 									outcome: response!.outcome,
 									typeAlphabet: response!.typeAlphabet,
 							}
+						})
+						res.json(result)
+					}
+					if(to=="main"){
+						const result = await prisma.mainAccount.create({
+							data:{
+									date: response!.date,
+									year: response!.year,
+									type: response!.type,
+									subtype: response!.subtype,
+									fixture: response!.fixture,
+									income: response!.income,
+									outcome: response!.outcome,
+									typeAlphabet: response!.typeAlphabet,
+							}
+						})
+						res.json(result)
+					}
+					if(to=="clubsupport"){
+						const result = await prisma.clubsupportAccount.create({
+							data:{
+									date: response!.date,
+									year: response!.year,
+									type: response!.type,
+									subtype: response!.subtype,
+									fixture: response!.fixture,
+									income: response!.income,
+									outcome: response!.outcome,
+									typeAlphabet: response!.typeAlphabet,
+							}
+						})
+						res.json(result)
+					}
+					if(to=="aid"){
+						const result = await prisma.aid.create({
+							data:{
+									date: response!.date,
+									year: response!.year,
+									type: response!.type,
+									subtype: response!.subtype,
+									fixture: response!.fixture,
+									income: response!.income,
+									outcome: response!.outcome,
+									typeAlphabet: response!.typeAlphabet,
+							}
+						})
+						res.json(result)
+					}
+				}
+				if(mode=="delete"){
+					const result = await prisma.alumniAccount.delete({
+						where:{
+							id:id
+						}
 					})
-					res.json(result);
+					res.json(result)
 				}
 			}
 		} else {
