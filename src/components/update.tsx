@@ -36,7 +36,7 @@ const Update: React.FC<{ update: updateAccount,from:string }> = ({ update,from }
 	const toast = useToast()
 	const toastIdRef:any = useRef()
 	const { isOpen, onOpen, onClose } = useDisclosure()
-	const cancelRef = useRef()
+	const cancelRef = useRef<HTMLButtonElement>(null)
 	const types: string[] = [
 		"大道具",
 		"小道具",
