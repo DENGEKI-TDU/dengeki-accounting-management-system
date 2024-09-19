@@ -83,7 +83,19 @@ export default async function handle(
             alumniOutcome += alumniResult[i].outcome
           }
           var alumniBalance = alumniIncome-alumniOutcome
-          res.status(200).json({"income":income,"outcome":outcome,"balance":balance,"hatosaiIncome":hatoyamaIncome,"hatosaiOutcome":hatoyamaOutcome,"hatosaiBalance":hatoyamaBalance,"csIncome":csIncome,"csOutcome":csOutcome,"csBalance":csBalance,"alumniIncome":alumniIncome,"alumniOutcome":alumniOutcome,"alumniBalance":alumniBalance});
+          const aidResult = await prisma.aid.findMany({
+            where:{
+              year:year
+            }
+          })
+          let aidIncome:number = 0;
+          let aidOutcome: number = 0;
+          for(var i=0;i<aidResult.length;i++){
+            aidIncome += aidResult[i].income
+            aidOutcome += aidResult[i].outcome
+          }
+          var aidBalance = aidIncome-aidOutcome
+          res.status(200).json({"income":income,"outcome":outcome,"balance":balance,"hatosaiIncome":hatoyamaIncome,"hatosaiOutcome":hatoyamaOutcome,"hatosaiBalance":hatoyamaBalance,"csIncome":csIncome,"csOutcome":csOutcome,"csBalance":csBalance,"alumniIncome":alumniIncome,"alumniOutcome":alumniOutcome,"alumniBalance":alumniBalance,"aidIncome":aidIncome,"aidOutcome":aidOutcome,"aidBalance":aidBalance});
         }
         else {
           res.status(403).end()

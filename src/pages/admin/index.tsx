@@ -21,6 +21,9 @@ export default function Home() {
   const [alumniIncome,setAlumniIncome] = useState(0)
   const [alumniOutcome,setAlumniOutcome] = useState(0)
   const [alumniBalance,setAlumniBalance] = useState(0)
+  const [aidIncome,setAidIncome] = useState(0)
+  const [aidOutcome,setAidOutcome] = useState(0)
+  const [aidBalance,setAidBalance] = useState(0)
   const [completeFetching,setCompleteFetching] = useState(false)
   const [allowAccess,setAllowAccess] = useState(false)
   const path = router.pathname;
@@ -66,6 +69,9 @@ export default function Home() {
         setAlumniIncome(res.data.alumniIncome)
         setAlumniOutcome(res.data.alumniOutcome)
         setAlumniBalance(res.data.alumniBalance)
+        setAidIncome(res.data.aidIncome)
+        setAidOutcome(res.data.aidOutcome)
+        setAidBalance(res.data.aidBalance)
         setCompleteFetching(true)
     }).catch((error) => {
       console.error(error)
@@ -166,6 +172,24 @@ export default function Home() {
                     <Text>現在の校友会費収支</Text>
                     {completeFetching ? 
                       <Text>収入:{alumniIncome}円、支出:{alumniOutcome}円、残高:{(alumniBalance>=0)?<>{alumniBalance}</>:<Text as="span" color="red" fontWeight={"extrabold"}>{alumniBalance}</Text>}円</Text>
+                      :
+                      <Text><Spinner
+                      thickness='2px'
+                      speed='0.65s'
+                      emptyColor='#FE6FFD'
+                      color='#69F0FD'
+                      size="sm"
+                      marginRight={"5px"}
+                      />
+                      取得中</Text>
+                    }
+                    </VStack>
+                  </Box>
+                  <Box margin="5px" border="1px solid #ff3399" borderRadius={"lg"}>
+                    <VStack margin={"5px"}>
+                    <Text>現在の共済金収支</Text>
+                    {completeFetching ? 
+                      <Text>収入:{aidIncome}円、支出:{aidOutcome}円、残高:{(aidBalance>=0)?<>{aidBalance}</>:<Text as="span" color="red" fontWeight={"extrabold"}>{aidBalance}</Text>}円</Text>
                       :
                       <Text><Spinner
                       thickness='2px'
