@@ -98,33 +98,47 @@ export function UseLoginState(
 
   const getAuth = async () => {
     const token = localStorage.getItem(STORAGE_TOKEN)
-    if(token){
-      const body = {
-        token,
-        mode:"get"
-      }
-      const response = await fetch("/api/auth",{
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify(body)
-      });
-      await response.json().then((data) => {
-        if(data){
-          if(data.limit >= new Date()){
-            localStorage.clear;
-            setIsUserInternal(false)
-            setIsAdminInternal(false)
-          } else {
-            setIsUserInternal(data.isUser)
-            setIsAdminInternal(data.isAdmin)
-          }
-        }
-        setSessionStatus(true)
-      });
-    } else {
-      setIsUserInternal(false)
-      setIsAdminInternal(false)
+    const sessionLimit = sessionStorage.getItem("sessionLimit")
+    const sessionUser = sessionStorage.getItem("userName")
+    if(token && sessionLimit && new Date(sessionLimit)>new Date() && sessionUser){
+      setIsUserInternal(sessionUser == "user")
+      setIsAdminInternal(sessionUser == "admin")
       setSessionStatus(true)
+    }
+    else {
+      if(token){
+        const body = {
+          token,
+          mode:"get"
+        }
+        const response = await fetch("/api/auth",{
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify(body)
+        });
+        await response.json().then((data) => {
+          if(data){
+            if(data.limit >= new Date()){
+              localStorage.clear;
+              sessionStorage.clear;
+              setIsUserInternal(false)
+              setIsAdminInternal(false)
+            } else {
+              setIsUserInternal(data.isUser)
+              setIsAdminInternal(data.isAdmin)
+              if(data.isAdmin || data.isUser){
+                sessionStorage.setItem("sessionLimit",String(new Date(new Date().getFullYear(),new Date().getMonth(),new Date().getDate(),new Date().getHours()+1,new Date().getMinutes())))
+                sessionStorage.setItem("userName",(data.isAdmin?"admin":"user"))
+              }
+            }
+          }
+          setSessionStatus(true)
+        });
+      } else {
+        setIsUserInternal(false)
+        setIsAdminInternal(false)
+        setSessionStatus(true)
+      }
     }
   }
 
@@ -154,7 +168,9 @@ export function UseLoginState(
   const Logout = useCallback(() => {
     const sessionToken = localStorage.getItem(STORAGE_TOKEN)
     logoutAuth(sessionToken!)
-    localStorage.removeItem(STORAGE_TOKEN);
+    localStorage.clear;
+    sessionStorage.clear;
+    setIsAdminInternal(false)
     setIsUserInternal(false);
     toast({
       title: "ログアウトしました",
