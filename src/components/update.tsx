@@ -293,8 +293,8 @@ const Update: React.FC<{ update: updateAccount,from:string }> = ({ update,from }
 						<Select defaultValue={from} onChange={(e) => setTo(e.target.value)}>
 							<option value="main">本予算</option>
 							<option value="hatoyama">鳩山祭援助金</option>
-							<option value="alumni">後援会費</option>
-							<option value="clubsupport">校友会費</option>
+							<option value="clubsupport">後援会費</option>
+							<option value="alumni">校友会費</option>
 							<option value="aid">共済金</option>
 						</Select>
 						<Tooltip label="編集を保存">
