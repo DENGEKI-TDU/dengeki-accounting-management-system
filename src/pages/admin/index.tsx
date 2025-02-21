@@ -55,7 +55,7 @@ export default function Home() {
   async function getEarngings(sessionToken: string) {
     let year = new Date().getFullYear();
     if (new Date().getMonth() + 1 < 4) {
-      year - 1;
+      year -= 1;
     }
     const sendYear = String(year);
     const body = {
