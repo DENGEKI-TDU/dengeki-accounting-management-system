@@ -57,7 +57,6 @@ export default function Home() {
     if (new Date().getMonth() + 1 < 4) {
       year -= 1;
     }
-    console.log(year);
     const sendYear = String(year);
     const body = {
       year: sendYear,
