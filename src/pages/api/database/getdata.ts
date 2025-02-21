@@ -7,7 +7,7 @@ export default async function handle(
 ) {
   const result = await prisma.accessHistory.update({
     where: {
-      id: 1
+      id: 1,
     },
     data: {
       accessDate: new Date(),
