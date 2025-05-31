@@ -22,6 +22,7 @@ import axios from "axios";
 
 export default function Home() {
   const [isAdmin, isUser, status, Login, Logout] = UseLoginState(false);
+  const [getName, setGetName] = useState("");
   const [date, setDate] = useState("");
   const [value, setValue] = useState(0);
   const [fixture, setFixture] = useState("");
@@ -56,6 +57,8 @@ export default function Home() {
       year +
       "\n金額 : ¥" +
       value +
+      "\n受領者 : " +
+      getName +
       "\n収入事由 : " +
       fixture +
       "\nメモ : " +
@@ -191,6 +194,10 @@ export default function Home() {
                   <NumberDecrementStepper />
                 </NumberInputStepper>
               </NumberInput>
+            </FormControl>
+            <FormControl>
+              <FormLabel>受領者</FormLabel>
+              <Input onChange={(e) => setGetName(e.target.value)} />
             </FormControl>
             <FormControl>
               <FormLabel>収入事由</FormLabel>

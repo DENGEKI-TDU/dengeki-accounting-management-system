@@ -22,6 +22,7 @@ import axios from "axios";
 
 export default function Home() {
   const [isAdmin, isUser, status, Login, Logout] = UseLoginState(false);
+  const [getName, setGetName] = useState("");
   const [date, setDate] = useState("");
   const [value, setValue] = useState(0);
   const [fixture, setFixture] = useState("");
@@ -48,7 +49,6 @@ export default function Home() {
       duration: 15000,
       isClosable: true,
     });
-
     const valueContent: string =
       "# 収入報告\n取得日 : " +
       date +
@@ -56,6 +56,8 @@ export default function Home() {
       year +
       "\n金額 : ¥" +
       value +
+      "\n受領者 : " +
+      getName +
       "\n収入事由 : " +
       fixture +
       "\nメモ : " +
@@ -193,6 +195,10 @@ export default function Home() {
               </NumberInput>
             </FormControl>
             <FormControl>
+              <FormLabel>受領者</FormLabel>
+              <Input onChange={(e) => setGetName(e.target.value)} />
+            </FormControl>
+            <FormControl>
               <FormLabel>収入事由</FormLabel>
               <Input onChange={(e) => setFixture(e.target.value)} />
             </FormControl>
@@ -200,7 +206,7 @@ export default function Home() {
               <FormLabel>メモ</FormLabel>
               <Textarea onChange={(e) => setMemo(e.target.value)} />
             </FormControl>
-            {date != "" && value != 0 && fixture != "" ? (
+            {date != "" && value != 0 && fixture != "" && getName != "" ? (
               <Input
                 type="submit"
                 value="提出"
