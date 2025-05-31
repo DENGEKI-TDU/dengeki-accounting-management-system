@@ -1,4 +1,4 @@
-import { UseLoginState } from "@/hooks/UseLoginState";
+import { DengekiSSO } from "@/hooks/UseLoginState";
 import {
   Container,
   FormControl,
@@ -19,9 +19,17 @@ import {
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import axios from "axios";
+import { isAdminAtom } from "@/lib/jotai/isAdminAtom";
+import { isLoginAtom } from "@/lib/jotai/isLoginAtom";
+import { loginNameAtom } from "@/lib/jotai/loginNameAtom";
+import { useAtomValue } from "jotai";
 
 export default function Home() {
-  const [isAdmin, isUser, status, Login, Logout] = UseLoginState(false);
+  // const [isAdmin, isUser, status, Login, Logout] = UseLoginState(false);
+  const { session, login, logout } = DengekiSSO();
+  const userName = useAtomValue(loginNameAtom);
+  const isLogin = useAtomValue(isLoginAtom);
+  const isAdmin = useAtomValue(isAdminAtom);
   const [date, setDate] = useState("");
   const [getName, setGetName] = useState("");
   const [value, setValue] = useState(0);
@@ -29,6 +37,7 @@ export default function Home() {
   const [memo, setMemo] = useState("");
   const [year, setYear] = useState("");
   const [inputPass, setInputPass] = useState("");
+  const [pending, setPending] = useState(false);
   const toast = useToast();
   const router = useRouter();
   const toastIdRef: any = useRef();
@@ -38,8 +47,14 @@ export default function Home() {
     http = "https";
   }
   useEffect(() => {
-    setInputPass(localStorage.getItem("storage_token")!);
+    // setInputPass(localStorage.getItem("storage_token")!);
+    session().then(() => {
+      setPending(false);
+    });
   }, []);
+  useEffect(() => {
+    setGetName(userName);
+  }, [userName]);
 
   const onsubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -162,7 +177,7 @@ export default function Home() {
         });
       });
   };
-  if (status && (isAdmin || isUser)) {
+  if (!pending && isLogin) {
     return (
       <>
         <Container>
@@ -195,10 +210,24 @@ export default function Home() {
                 </NumberInputStepper>
               </NumberInput>
             </FormControl>
-            <FormControl>
-              <FormLabel>受領者</FormLabel>
-              <Input onChange={(e) => setGetName(e.target.value)} />
-            </FormControl>
+            {getName != "" && getName.startsWith("dengeki") ? (
+              <FormControl>
+                <FormLabel>購入者</FormLabel>
+                <Input
+                  onChange={(e) => setGetName(e.target.value)}
+                  value={getName}
+                />
+              </FormControl>
+            ) : (
+              <FormControl>
+                <FormLabel>購入者</FormLabel>
+                <Input
+                  onChange={(e) => setGetName(e.target.value)}
+                  value={getName}
+                  disabled={true}
+                />
+              </FormControl>
+            )}
             <FormControl>
               <FormLabel>収入事由</FormLabel>
               <Input onChange={(e) => setFixture(e.target.value)} />
@@ -222,23 +251,13 @@ export default function Home() {
   } else {
     return (
       <>
-        {status ? (
+        {!pending ? (
           <>
             <VStack>
               <Heading>ログインしてください。</Heading>
               <Button
                 onClick={() => {
-                  router.push(
-                    {
-                      pathname:
-                        http +
-                        "://" +
-                        process.env.NEXT_PUBLIC_SSO_DOMAIN +
-                        "/login",
-                      query: { locate: "accounting", path: path },
-                    },
-                    "http:/localhost:3000/login"
-                  );
+                  router.push("/login");
                 }}
               >
                 ログイン

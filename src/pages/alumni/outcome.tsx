@@ -24,11 +24,15 @@ import { Pagination, Navigation } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation"; // スタイルをインポート
 import "swiper/css/pagination"; // スタイルをインポート
-import { UseLoginState } from "@/hooks/UseLoginState";
+import { DengekiSSO } from "@/hooks/UseLoginState";
 import Router, { useRouter } from "next/router";
 import { supabase } from "../../../utils/supabase/supabase";
 import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
+import { isAdminAtom } from "@/lib/jotai/isAdminAtom";
+import { isLoginAtom } from "@/lib/jotai/isLoginAtom";
+import { loginNameAtom } from "@/lib/jotai/loginNameAtom";
+import { useAtomValue } from "jotai";
 
 const Home: NextPage = () => {
   const toast = useToast();
@@ -42,7 +46,11 @@ const Home: NextPage = () => {
   const [memo, setMemo] = useState("");
   const [year, setYear] = useState("");
   const [images, setImages] = useState<Blob[]>([]);
-  const [isAdmin, isUser, status, Login, Logout] = UseLoginState(false);
+  const { session, login, logout } = DengekiSSO();
+  const userName = useAtomValue(loginNameAtom);
+  const isLogin = useAtomValue(isLoginAtom);
+  const isAdmin = useAtomValue(isAdminAtom);
+  const [pending, setPending] = useState(true);
   const [inputPass, setInputPass] = useState("");
   const path = router.pathname;
   let http = "http";
@@ -52,33 +60,14 @@ const Home: NextPage = () => {
   const public_url = process.env.NEXT_PUBLIC_SUPABASE_PUBLIC_URL;
   const toastIdRef: any = useRef();
   useEffect(() => {
-    setInputPass(localStorage.getItem("storage_token")!);
+    session().then(() => {
+      setPending(false);
+      setName(userName);
+    });
   }, []);
-  const listAllImage = async () => {
-    const tempUrlList: string[] = [];
-    const { data, error } = await supabase.storage
-      .from("dengeki-receipt")
-      .list("img", {
-        limit: 100,
-        offset: 0,
-        sortBy: { column: "created_at", order: "desc" },
-      });
-    if (error) {
-      return;
-    }
-
-    for (let index = 0; index < data.length; index++) {
-      if (data[index].name != ".emptyFolderPlaceholder") {
-        tempUrlList.push(data[index].name);
-      }
-    }
-  };
-
   useEffect(() => {
-    (async () => {
-      await listAllImage();
-    })();
-  }, []);
+    setName(userName);
+  }, [userName]);
 
   const [file, setFile] = useState<File>();
   const handleChangeFile = (e: any) => {
@@ -151,7 +140,6 @@ const Home: NextPage = () => {
                     return;
                   }
                   setFile(undefined);
-                  await listAllImage();
                   const valueContent: string =
                     "# 支出報告\n購入日時 : " +
                     date +
@@ -256,7 +244,7 @@ const Home: NextPage = () => {
         });
       });
   };
-  if (status && (isAdmin || isUser)) {
+  if (!pending && isLogin) {
     return (
       <Container pt="10">
         <Heading>後援会費支出報告フォーム</Heading>
@@ -354,10 +342,21 @@ const Home: NextPage = () => {
               </NumberInputStepper>
             </NumberInput>
           </FormControl>
-          <FormControl>
-            <FormLabel>購入者</FormLabel>
-            <Input onChange={(e) => setName(e.target.value)} />
-          </FormControl>
+          {name != "" && name.startsWith("dengeki") ? (
+            <FormControl>
+              <FormLabel>購入者</FormLabel>
+              <Input onChange={(e) => setName(e.target.value)} value={name} />
+            </FormControl>
+          ) : (
+            <FormControl>
+              <FormLabel>購入者</FormLabel>
+              <Input
+                onChange={(e) => setName(e.target.value)}
+                value={name}
+                disabled={true}
+              />
+            </FormControl>
+          )}
           <FormControl>
             <FormLabel htmlFor="postImages">レシート画像</FormLabel>
             <Input

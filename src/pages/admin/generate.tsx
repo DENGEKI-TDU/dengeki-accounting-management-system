@@ -1,4 +1,7 @@
-import { UseLoginState } from "@/hooks/UseLoginState";
+import { DengekiSSO } from "@/hooks/UseLoginState";
+import { isAdminAtom } from "@/lib/jotai/isAdminAtom";
+import { isLoginAtom } from "@/lib/jotai/isLoginAtom";
+import { loginNameAtom } from "@/lib/jotai/loginNameAtom";
 import {
   Button,
   FormControl,
@@ -11,12 +14,17 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import axios from "axios";
+import { useAtomValue } from "jotai";
 import { useRouter } from "next/router";
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 const ExcelJS = require("exceljs");
 
 export default function Home() {
-  const [isAdmin, isUser, status, Login, Logout] = UseLoginState(false);
+  const { session, login, logout } = DengekiSSO();
+  const userName = useAtomValue(loginNameAtom);
+  const isLogin = useAtomValue(isLoginAtom);
+  const isAdmin = useAtomValue(isAdminAtom);
+  const [pending, setPending] = useState(true);
   const toast = useToast();
   const router = useRouter();
   const [year, setYear] = useState("");
@@ -30,6 +38,11 @@ export default function Home() {
   if (process.env.NODE_ENV == "production") {
     http = "https";
   }
+  useEffect(() => {
+    session().then(() => {
+      setPending(false);
+    });
+  }, []);
   function generate() {
     toastIdRef.current = toast({
       title: "生成中",
@@ -159,7 +172,7 @@ export default function Home() {
 
   return (
     <>
-      {status && (isAdmin || isUser) ? (
+      {!pending && isLogin ? (
         <>
           {isAdmin ? (
             <VStack>
@@ -195,7 +208,7 @@ export default function Home() {
         </>
       ) : (
         <>
-          {status ? (
+          {!pending ? (
             <>
               <VStack>
                 <Heading>ログインしてください。</Heading>

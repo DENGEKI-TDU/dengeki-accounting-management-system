@@ -17,9 +17,14 @@ import {
 import { GetServerSideProps, GetStaticProps } from "next";
 import prisma from "@/lib/prisma";
 import Update from "../../components/update";
-import { UseLoginState } from "@/hooks/UseLoginState";
+import { DengekiSSO } from "@/hooks/UseLoginState";
 import { useRouter } from "next/router";
 import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { isAdminAtom } from "@/lib/jotai/isAdminAtom";
+import { isLoginAtom } from "@/lib/jotai/isLoginAtom";
+import { loginNameAtom } from "@/lib/jotai/loginNameAtom";
+import { useAtomValue } from "jotai";
 
 export async function getServerSideProps(context: any) {
   const from = context.query.from;
@@ -135,16 +140,25 @@ const Home: React.FC<updateAccount> = (props) => {
   const from = serachParams.get("from");
   const fromType = ["main", "hatosai", "clubsupport", "alumni"];
   const fromName = ["本予算", "鳩山祭援助金", "後援会費", "校友会費"];
-  const [isAdmin, isUser, status, Login, Logout] = UseLoginState(false);
+  const { session, login, logout } = DengekiSSO();
+  const userName = useAtomValue(loginNameAtom);
+  const isLogin = useAtomValue(isLoginAtom);
+  const isAdmin = useAtomValue(isAdminAtom);
+  const [pending, setPending] = useState(true);
   const router = useRouter();
   const path = router.pathname;
   let http = "http";
   if (process.env.NODE_ENV == "production") {
     http = "https";
   }
+  useEffect(() => {
+    session().then(() => {
+      setPending(false);
+    });
+  }, []);
   return (
     <>
-      {status && (isAdmin || isUser) ? (
+      {!pending && isLogin ? (
         <>
           {isAdmin ? (
             <Center width="100%">
@@ -213,23 +227,13 @@ const Home: React.FC<updateAccount> = (props) => {
         </>
       ) : (
         <>
-          {status ? (
+          {!pending ? (
             <>
               <VStack>
                 <Heading>ログインしてください。</Heading>
                 <Button
                   onClick={() => {
-                    router.push(
-                      {
-                        pathname:
-                          http +
-                          "://" +
-                          process.env.NEXT_PUBLIC_SSO_DOMAIN +
-                          "/login",
-                        query: { locate: "accounting", path: path },
-                      },
-                      "http:/localhost:3000/login"
-                    );
+                    router.push("/login");
                   }}
                 >
                   ログイン

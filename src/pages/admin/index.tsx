@@ -8,14 +8,22 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import Link from "next/link";
-import { UseLoginState } from "@/hooks/UseLoginState";
+import { DengekiSSO } from "@/hooks/UseLoginState";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { WarningIcon } from "@chakra-ui/icons";
 import axios from "axios";
+import { isAdminAtom } from "@/lib/jotai/isAdminAtom";
+import { isLoginAtom } from "@/lib/jotai/isLoginAtom";
+import { loginNameAtom } from "@/lib/jotai/loginNameAtom";
+import { useAtomValue } from "jotai";
 
 export default function Home() {
-  const [isAdmin, isUser, status, Login, Logout] = UseLoginState(false);
+  const { session, login, logout } = DengekiSSO();
+  const userName = useAtomValue(loginNameAtom);
+  const isLogin = useAtomValue(isLoginAtom);
+  const isAdmin = useAtomValue(isAdminAtom);
+  const [pending, setPending] = useState(true);
   const router = useRouter();
   const [income, setIncome] = useState(0);
   const [outcome, setOutcome] = useState(0);
@@ -52,22 +60,15 @@ export default function Home() {
       });
   };
 
-  async function getEarngings(sessionToken: string) {
+  async function getEarngings() {
     let year = new Date().getFullYear();
     if (new Date().getMonth() + 1 < 4) {
       year -= 1;
     }
     const sendYear = String(year);
-    const body = {
-      year: sendYear,
-      inputPass: "from-admin-page",
-      sessionToken,
-    };
     axios
       .post("/api/database/earnings", {
         year: sendYear,
-        inputPass: "from-admin-page",
-        sessionToken,
       })
       .then((res) => {
         setIncome(res.data.income);
@@ -93,16 +94,18 @@ export default function Home() {
   }
   useEffect(() => {
     getIP();
-    const sessionToken = localStorage.getItem("storage_token")!;
-    getEarngings(sessionToken);
+    session().then(() => {
+      setPending(false);
+    });
+    getEarngings();
   }, []);
   return (
     <>
-      {status && (isAdmin || isUser) ? (
+      {!pending && isLogin ? (
         <VStack>
           <Text>Log in as : {isAdmin ? "管理者" : "一般ユーザー"}</Text>
           <Text fontSize={"2xl"}>管理者用ページホーム</Text>
-          {isAdmin || isUser ? (
+          {isLogin ? (
             <>
               {isAdmin ? (
                 <>
@@ -357,22 +360,12 @@ export default function Home() {
                 <Heading>一般ユーザーの権限では使用できません。</Heading>
               )}
 
-              <Button onClick={Logout}>ログアウト</Button>
+              <Button onClick={logout}>ログアウト</Button>
             </>
           ) : (
             <Button
               onClick={() => {
-                router.push(
-                  {
-                    pathname:
-                      http +
-                      "://" +
-                      process.env.NEXT_PUBLIC_SSO_DOMAIN +
-                      "/login",
-                    query: { locate: "accounting", path: path },
-                  },
-                  "http:/localhost:3000/login"
-                );
+                router.push("/login");
               }}
             >
               ログイン
@@ -381,23 +374,13 @@ export default function Home() {
         </VStack>
       ) : (
         <>
-          {status ? (
+          {!pending ? (
             <>
               <VStack>
                 <Heading>ログインしてください。</Heading>
                 <Button
                   onClick={() => {
-                    router.push(
-                      {
-                        pathname:
-                          http +
-                          "://" +
-                          process.env.NEXT_PUBLIC_SSO_DOMAIN +
-                          "/login",
-                        query: { locate: "accounting", path: path },
-                      },
-                      "http:/localhost:3000/login"
-                    );
+                    router.push("/login");
                   }}
                 >
                   ログイン

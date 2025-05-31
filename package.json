@@ -22,6 +22,7 @@
     "formidable": "^3.5.1",
     "framer-motion": "^11.0.3",
     "fs": "^0.0.1-security",
+    "jotai": "^2.12.5",
     "next": "^14.2.5",
     "react": "^18",
     "react-dom": "^18",
