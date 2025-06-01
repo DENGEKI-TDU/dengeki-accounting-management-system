@@ -8,14 +8,22 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import Link from "next/link";
-import { UseLoginState } from "@/hooks/UseLoginState";
+import { DengekiSSO } from "@/hooks/UseLoginState";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { WarningIcon } from "@chakra-ui/icons";
 import axios from "axios";
+import { isAdminAtom } from "@/lib/jotai/isAdminAtom";
+import { isLoginAtom } from "@/lib/jotai/isLoginAtom";
+import { loginNameAtom } from "@/lib/jotai/loginNameAtom";
+import { useAtomValue } from "jotai";
 
 export default function Home() {
-  const [isAdmin, isUser, status, Login, Logout] = UseLoginState(false);
+  const { session, login, logout } = DengekiSSO();
+  const userName = useAtomValue(loginNameAtom);
+  const isLogin = useAtomValue(isLoginAtom);
+  const isAdmin = useAtomValue(isAdminAtom);
+  const [pending, setPending] = useState(true);
   const router = useRouter();
   const [income, setIncome] = useState(0);
   const [outcome, setOutcome] = useState(0);
@@ -33,41 +41,16 @@ export default function Home() {
   const [aidOutcome, setAidOutcome] = useState(0);
   const [aidBalance, setAidBalance] = useState(0);
   const [completeFetching, setCompleteFetching] = useState(false);
-  const [allowAccess, setAllowAccess] = useState(false);
-  const path = router.pathname;
-  let http = "http";
-  if (process.env.NODE_ENV == "production") {
-    http = "https";
-  }
 
-  const getIP = () => {
-    axios
-      .get("https://ipapi.co/json")
-      .then((getHost) => {
-        const allowHOST = process.env.NEXT_PUBLIC_ALLOW_HOSTNAME!;
-        setAllowAccess(getHost.data.ip.includes(allowHOST));
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-  };
-
-  async function getEarngings(sessionToken: string) {
+  async function getEarngings() {
     let year = new Date().getFullYear();
     if (new Date().getMonth() + 1 < 4) {
       year -= 1;
     }
     const sendYear = String(year);
-    const body = {
-      year: sendYear,
-      inputPass: "from-admin-page",
-      sessionToken,
-    };
     axios
       .post("/api/database/earnings", {
         year: sendYear,
-        inputPass: "from-admin-page",
-        sessionToken,
       })
       .then((res) => {
         setIncome(res.data.income);
@@ -92,287 +75,249 @@ export default function Home() {
       });
   }
   useEffect(() => {
-    getIP();
-    const sessionToken = localStorage.getItem("storage_token")!;
-    getEarngings(sessionToken);
+    session().then(() => {
+      setPending(false);
+    });
+    getEarngings();
   }, []);
   return (
     <>
-      {status && (isAdmin || isUser) ? (
+      {!pending && isLogin ? (
         <VStack>
-          <Text>Log in as : {isAdmin ? "管理者" : "一般ユーザー"}</Text>
+          <Text>Log in as : {userName}</Text>
           <Text fontSize={"2xl"}>管理者用ページホーム</Text>
-          {isAdmin || isUser ? (
+          {isLogin ? (
             <>
               {isAdmin ? (
                 <>
-                  {allowAccess ? (
-                    <>
-                      <Box
-                        borderRadius={"lg"}
-                        bgColor={"green"}
-                        color={"white"}
-                        fontWeight={"bold"}
-                      >
-                        <Text margin={"5px"}>access : ALLOW</Text>
-                      </Box>
-                      <Link href="/admin/generate">
-                        <Box borderBottom="1px solid #fc8819">excel出力</Box>
-                      </Link>
-                      <Link href={"/admin/edit?from=main"}>
-                        <Box borderBottom="1px solid #fc8819">
-                          本予算帳簿データ編集
-                        </Box>
-                      </Link>
-                      <Link href={"/admin/edit?from=hatosai"}>
-                        <Box borderBottom="1px solid #fc8819">
-                          鳩祭援助金帳簿データ編集
-                        </Box>
-                      </Link>
-                      <Link href={"/admin/edit?from=clubsupport"}>
-                        <Box borderBottom="1px solid #fc8819">
-                          後援会費関連帳簿データ編集
-                        </Box>
-                      </Link>
-                      <Link href={"/admin/edit?from=alumni"}>
-                        <Box borderBottom="1px solid #fc8819">
-                          校友会費関連帳簿データ編集
-                        </Box>
-                      </Link>
-                      <Box>
-                        <Box
-                          margin="5px"
-                          border="1px solid #fc8819"
-                          borderRadius={"lg"}
-                        >
-                          <VStack margin={"5px"}>
-                            <Text>現在の本予算収支</Text>
-                            {completeFetching ? (
-                              <Text>
-                                収入:{income}円、支出:{outcome}円、残高:
-                                {balance >= 0 ? (
-                                  <>{balance}</>
-                                ) : (
-                                  <Text
-                                    as="span"
-                                    color="red"
-                                    fontWeight={"extrabold"}
-                                  >
-                                    {balance}
-                                  </Text>
-                                )}
-                                円
-                              </Text>
+                  <Link href="/admin/generate">
+                    <Box borderBottom="1px solid #fc8819">excel出力</Box>
+                  </Link>
+                  <Link href={"/admin/edit?from=main"}>
+                    <Box borderBottom="1px solid #fc8819">
+                      本予算帳簿データ編集
+                    </Box>
+                  </Link>
+                  <Link href={"/admin/edit?from=hatosai"}>
+                    <Box borderBottom="1px solid #fc8819">
+                      鳩祭援助金帳簿データ編集
+                    </Box>
+                  </Link>
+                  <Link href={"/admin/edit?from=clubsupport"}>
+                    <Box borderBottom="1px solid #fc8819">
+                      後援会費関連帳簿データ編集
+                    </Box>
+                  </Link>
+                  <Link href={"/admin/edit?from=alumni"}>
+                    <Box borderBottom="1px solid #fc8819">
+                      校友会費関連帳簿データ編集
+                    </Box>
+                  </Link>
+                  <Box>
+                    <Box
+                      margin="5px"
+                      border="1px solid #fc8819"
+                      borderRadius={"lg"}
+                    >
+                      <VStack margin={"5px"}>
+                        <Text>現在の本予算収支</Text>
+                        {completeFetching ? (
+                          <Text>
+                            収入:{income}円、支出:{outcome}円、残高:
+                            {balance >= 0 ? (
+                              <>{balance}</>
                             ) : (
-                              <Text>
-                                <Spinner
-                                  thickness="2px"
-                                  speed="0.65s"
-                                  emptyColor="#FE6FFD"
-                                  color="#69F0FD"
-                                  size="sm"
-                                  marginRight={"5px"}
-                                />
-                                取得中
+                              <Text
+                                as="span"
+                                color="red"
+                                fontWeight={"extrabold"}
+                              >
+                                {balance}
                               </Text>
                             )}
-                          </VStack>
-                        </Box>
-                        <Box
-                          margin="5px"
-                          border="1px solid #1e90ff"
-                          borderRadius={"lg"}
-                        >
-                          <VStack margin={"5px"}>
-                            <Text>現在の鳩山祭援助金収支</Text>
-                            {completeFetching ? (
-                              <Text>
-                                収入:{hatosaiIncome}円、支出:{hatosaiOutcome}
-                                円、残高:
-                                {hatosaiBalance >= 0 ? (
-                                  <>{hatosaiBalance}</>
-                                ) : (
-                                  <Text
-                                    as="span"
-                                    color="red"
-                                    fontWeight={"extrabold"}
-                                  >
-                                    {hatosaiBalance}
-                                  </Text>
-                                )}
-                                円
-                              </Text>
+                            円
+                          </Text>
+                        ) : (
+                          <Text>
+                            <Spinner
+                              thickness="2px"
+                              speed="0.65s"
+                              emptyColor="#FE6FFD"
+                              color="#69F0FD"
+                              size="sm"
+                              marginRight={"5px"}
+                            />
+                            取得中
+                          </Text>
+                        )}
+                      </VStack>
+                    </Box>
+                    <Box
+                      margin="5px"
+                      border="1px solid #1e90ff"
+                      borderRadius={"lg"}
+                    >
+                      <VStack margin={"5px"}>
+                        <Text>現在の鳩山祭援助金収支</Text>
+                        {completeFetching ? (
+                          <Text>
+                            収入:{hatosaiIncome}円、支出:{hatosaiOutcome}
+                            円、残高:
+                            {hatosaiBalance >= 0 ? (
+                              <>{hatosaiBalance}</>
                             ) : (
-                              <Text>
-                                <Spinner
-                                  thickness="2px"
-                                  speed="0.65s"
-                                  emptyColor="#FE6FFD"
-                                  color="#69F0FD"
-                                  size="sm"
-                                  marginRight={"5px"}
-                                />
-                                取得中
+                              <Text
+                                as="span"
+                                color="red"
+                                fontWeight={"extrabold"}
+                              >
+                                {hatosaiBalance}
                               </Text>
                             )}
-                          </VStack>
-                        </Box>
-                        <Box
-                          margin="5px"
-                          border="1px solid #32cd32"
-                          borderRadius={"lg"}
-                        >
-                          <VStack margin={"5px"}>
-                            <Text>現在の後援会費収支</Text>
-                            {completeFetching ? (
-                              <Text>
-                                収入:{csIncome}円、支出:{csOutcome}円、残高:
-                                {csBalance >= 0 ? (
-                                  <>{csBalance}</>
-                                ) : (
-                                  <Text
-                                    as="span"
-                                    color="red"
-                                    fontWeight={"extrabold"}
-                                  >
-                                    {csBalance}
-                                  </Text>
-                                )}
-                                円
-                              </Text>
+                            円
+                          </Text>
+                        ) : (
+                          <Text>
+                            <Spinner
+                              thickness="2px"
+                              speed="0.65s"
+                              emptyColor="#FE6FFD"
+                              color="#69F0FD"
+                              size="sm"
+                              marginRight={"5px"}
+                            />
+                            取得中
+                          </Text>
+                        )}
+                      </VStack>
+                    </Box>
+                    <Box
+                      margin="5px"
+                      border="1px solid #32cd32"
+                      borderRadius={"lg"}
+                    >
+                      <VStack margin={"5px"}>
+                        <Text>現在の後援会費収支</Text>
+                        {completeFetching ? (
+                          <Text>
+                            収入:{csIncome}円、支出:{csOutcome}円、残高:
+                            {csBalance >= 0 ? (
+                              <>{csBalance}</>
                             ) : (
-                              <Text>
-                                <Spinner
-                                  thickness="2px"
-                                  speed="0.65s"
-                                  emptyColor="#FE6FFD"
-                                  color="#69F0FD"
-                                  size="sm"
-                                  marginRight={"5px"}
-                                />
-                                取得中
+                              <Text
+                                as="span"
+                                color="red"
+                                fontWeight={"extrabold"}
+                              >
+                                {csBalance}
                               </Text>
                             )}
-                          </VStack>
-                        </Box>
-                        <Box
-                          margin="5px"
-                          border="1px solid #0000cd"
-                          borderRadius={"lg"}
-                        >
-                          <VStack margin={"5px"}>
-                            <Text>現在の校友会費収支</Text>
-                            {completeFetching ? (
-                              <Text>
-                                収入:{alumniIncome}円、支出:{alumniOutcome}
-                                円、残高:
-                                {alumniBalance >= 0 ? (
-                                  <>{alumniBalance}</>
-                                ) : (
-                                  <Text
-                                    as="span"
-                                    color="red"
-                                    fontWeight={"extrabold"}
-                                  >
-                                    {alumniBalance}
-                                  </Text>
-                                )}
-                                円
-                              </Text>
+                            円
+                          </Text>
+                        ) : (
+                          <Text>
+                            <Spinner
+                              thickness="2px"
+                              speed="0.65s"
+                              emptyColor="#FE6FFD"
+                              color="#69F0FD"
+                              size="sm"
+                              marginRight={"5px"}
+                            />
+                            取得中
+                          </Text>
+                        )}
+                      </VStack>
+                    </Box>
+                    <Box
+                      margin="5px"
+                      border="1px solid #0000cd"
+                      borderRadius={"lg"}
+                    >
+                      <VStack margin={"5px"}>
+                        <Text>現在の校友会費収支</Text>
+                        {completeFetching ? (
+                          <Text>
+                            収入:{alumniIncome}円、支出:{alumniOutcome}
+                            円、残高:
+                            {alumniBalance >= 0 ? (
+                              <>{alumniBalance}</>
                             ) : (
-                              <Text>
-                                <Spinner
-                                  thickness="2px"
-                                  speed="0.65s"
-                                  emptyColor="#FE6FFD"
-                                  color="#69F0FD"
-                                  size="sm"
-                                  marginRight={"5px"}
-                                />
-                                取得中
+                              <Text
+                                as="span"
+                                color="red"
+                                fontWeight={"extrabold"}
+                              >
+                                {alumniBalance}
                               </Text>
                             )}
-                          </VStack>
-                        </Box>
-                        <Box
-                          margin="5px"
-                          border="1px solid #ff3399"
-                          borderRadius={"lg"}
-                        >
-                          <VStack margin={"5px"}>
-                            <Text>現在の共済金収支</Text>
-                            {completeFetching ? (
-                              <Text>
-                                収入:{aidIncome}円、支出:{aidOutcome}円、残高:
-                                {aidBalance >= 0 ? (
-                                  <>{aidBalance}</>
-                                ) : (
-                                  <Text
-                                    as="span"
-                                    color="red"
-                                    fontWeight={"extrabold"}
-                                  >
-                                    {aidBalance}
-                                  </Text>
-                                )}
-                                円
-                              </Text>
+                            円
+                          </Text>
+                        ) : (
+                          <Text>
+                            <Spinner
+                              thickness="2px"
+                              speed="0.65s"
+                              emptyColor="#FE6FFD"
+                              color="#69F0FD"
+                              size="sm"
+                              marginRight={"5px"}
+                            />
+                            取得中
+                          </Text>
+                        )}
+                      </VStack>
+                    </Box>
+                    <Box
+                      margin="5px"
+                      border="1px solid #ff3399"
+                      borderRadius={"lg"}
+                    >
+                      <VStack margin={"5px"}>
+                        <Text>現在の共済金収支</Text>
+                        {completeFetching ? (
+                          <Text>
+                            収入:{aidIncome}円、支出:{aidOutcome}円、残高:
+                            {aidBalance >= 0 ? (
+                              <>{aidBalance}</>
                             ) : (
-                              <Text>
-                                <Spinner
-                                  thickness="2px"
-                                  speed="0.65s"
-                                  emptyColor="#FE6FFD"
-                                  color="#69F0FD"
-                                  size="sm"
-                                  marginRight={"5px"}
-                                />
-                                取得中
+                              <Text
+                                as="span"
+                                color="red"
+                                fontWeight={"extrabold"}
+                              >
+                                {aidBalance}
                               </Text>
                             )}
-                          </VStack>
-                        </Box>
-                      </Box>
-                    </>
-                  ) : (
-                    <>
-                      <Box
-                        borderRadius={"lg"}
-                        bgColor={"red"}
-                        color={"white"}
-                        fontWeight={"extrabold"}
-                      >
-                        <Text margin={"5px"}>
-                          <WarningIcon boxSize={3.5} marginRight={"3px"} />
-                          access : DENIED.
-                        </Text>
-                      </Box>
-                      <Text color="red" fontWeight={"extrabold"}>
-                        管理者ページでの操作には学内インターネットへの接続が必須です。
-                      </Text>
-                    </>
-                  )}
+                            円
+                          </Text>
+                        ) : (
+                          <Text>
+                            <Spinner
+                              thickness="2px"
+                              speed="0.65s"
+                              emptyColor="#FE6FFD"
+                              color="#69F0FD"
+                              size="sm"
+                              marginRight={"5px"}
+                            />
+                            取得中
+                          </Text>
+                        )}
+                      </VStack>
+                    </Box>
+                  </Box>
                 </>
               ) : (
                 <Heading>一般ユーザーの権限では使用できません。</Heading>
               )}
 
-              <Button onClick={Logout}>ログアウト</Button>
+              <Button onClick={logout}>ログアウト</Button>
             </>
           ) : (
             <Button
               onClick={() => {
-                router.push(
-                  {
-                    pathname:
-                      http +
-                      "://" +
-                      process.env.NEXT_PUBLIC_SSO_DOMAIN +
-                      "/login",
-                    query: { locate: "accounting", path: path },
-                  },
-                  "http:/localhost:3000/login"
-                );
+                router.push("/login");
               }}
             >
               ログイン
@@ -381,23 +326,13 @@ export default function Home() {
         </VStack>
       ) : (
         <>
-          {status ? (
+          {!pending ? (
             <>
               <VStack>
                 <Heading>ログインしてください。</Heading>
                 <Button
                   onClick={() => {
-                    router.push(
-                      {
-                        pathname:
-                          http +
-                          "://" +
-                          process.env.NEXT_PUBLIC_SSO_DOMAIN +
-                          "/login",
-                        query: { locate: "accounting", path: path },
-                      },
-                      "http:/localhost:3000/login"
-                    );
+                    router.push("/login");
                   }}
                 >
                   ログイン

@@ -1,184 +1,91 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { createHash, randomUUID } from "crypto";
 import { useToast } from "@chakra-ui/react";
+import { useSetAtom } from "jotai";
+import { isLoginAtom } from "@/lib/jotai/isLoginAtom";
+import { isAdminAtom } from "@/lib/jotai/isAdminAtom";
+import { loginNameAtom } from "@/lib/jotai/loginNameAtom";
 import { useRouter } from "next/router";
 
-const STORAGE_TOKEN = "storage_token";
-
-const encryptSha256 = (str: string) => {
-  const hash = createHash("sha256");
-  hash.update(str);
-  return hash.digest().toString("base64");
-};
-
-export function UseLoginState(
-  defaultValue: boolean
-): [
-  isUser: boolean,
-  isAdmin: boolean,
-  status: boolean,
-  Login: (ID: string, TOKEN: string, LocalIP: string) => void,
-  Logout: () => void
-] {
-  const [isUserInternal, setIsUserInternal] = useState(defaultValue);
-  const [isAdminInternal,setIsAdminInternal] = useState(defaultValue)
-
+export const DengekiSSO = () => {
   const toast = useToast();
   const router = useRouter();
-  const toastIdRef:any = useRef()
-  const [sessionStatus,setSessionStatus] = useState(false)
-
-  async function logoutAuth(tokens:string){
-    const body = {
-      tokens,
-      mode:"logout"
-    }
-    await fetch("/api/auth",{
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    })
-  }
-
-  async function loginAuth(id:string,pass:string,token:string,hostname:string){
-    toastIdRef.current = toast({
-      title: "ログイン中",
-      status: "loading",
-      duration: 5000,
-      isClosable: true,
+  const setUsetName = useSetAtom(loginNameAtom);
+  const setIsLogin = useSetAtom(isLoginAtom);
+  const setIsAdmin = useSetAtom(isAdminAtom);
+  const session = async () => {
+    console.log("SSO Session Function");
+    await fetch("/api/session/getSession").then(async (res) => {
+      const response = await res.json();
+      console.log(response.name);
+      setUsetName(response.name);
+      setIsLogin(response.isLogin);
+      if (response.isLogin) {
+        setIsAdmin(response.isAdmin || response.isDev || response.isTreasurer);
+      }
     });
-    const authBody = {
-      hostname
-    }
-    const oneTimePass = await fetch("/api/auth/generatePass",{
-      method:"POST",
-      headers: {"Content-Type":"application/json"},
-      body: JSON.stringify(authBody)
-    })
-    const passResult = await oneTimePass.json()
-    const oneTimeToken = passResult.token
-    const body = {
-      id,
-      pass,
-      token,
-      oneTimeToken,
-      hostname,
-      mode:"login"
-    }
-    const response = await fetch("/api/auth",{
+  };
+  const login = async ({
+    name,
+    password,
+    locate,
+  }: {
+    name: string;
+    password: string;
+    locate: string | null;
+  }) => {
+    toast({
+      title: "ログイン中",
+      description: "ログイン中です......",
+      duration: 10000,
+      status: "loading",
+    });
+    await fetch("/api/session/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    })
-    await response.json().then((result) => {
-      if(toastIdRef.current){
-        toast.close(toastIdRef.current)
-      }
-      if(result.status == "success"){
-        localStorage.setItem(STORAGE_TOKEN,token);
-        toast({
-          title: "ログイン完了",
-          description:"ログイン日時：" + new Date(),
-          status: "success",
-          duration: 2500,
-          isClosable: true,
-        });
-        router.push("/")
-      } else {
-        toast({
-          title: "ログインエラー",
-          description:"ID又はパスワードが異なります。",
-          status: "error",
-          duration: 2500,
-          isClosable: true,
-        });
-      }
-    })
-  }
-
-  const getAuth = async () => {
-    const token = localStorage.getItem(STORAGE_TOKEN)
-    const sessionLimit = sessionStorage.getItem("sessionLimit")
-    const sessionUser = sessionStorage.getItem("userName")
-    if(token && sessionLimit && new Date(sessionLimit)>new Date() && sessionUser){
-      setIsUserInternal(sessionUser == "user")
-      setIsAdminInternal(sessionUser == "admin")
-      setSessionStatus(true)
-    }
-    else {
-      if(token){
-        const body = {
-          token,
-          mode:"get"
-        }
-        const response = await fetch("/api/auth",{
-          method: "POST",
-          headers: {"Content-Type": "application/json"},
-          body: JSON.stringify(body)
-        });
-        await response.json().then((data) => {
-          if(data){
-            if(data.limit >= new Date()){
-              localStorage.clear;
-              sessionStorage.clear;
-              setIsUserInternal(false)
-              setIsAdminInternal(false)
+      body: JSON.stringify({ name: name, password: password }),
+    }).then(async () => {
+      await fetch("/api/session/getSession").then(async (res) => {
+        const response = await res.json();
+        if (response.status == "failed") {
+          alert("failed!");
+          toast({
+            title: "ログイン失敗",
+            description:
+              "ログインに失敗しました。ID又はパスワードを確認してください。",
+            status: "success",
+            duration: 3000,
+          });
+        } else {
+          setIsLogin(response.isLogin);
+          setUsetName(response.name);
+          toast.closeAll();
+          if (response.isLogin) {
+            toast({
+              title: "ログイン成功",
+              description: "ログインに成功しました。リダイレクトします。",
+              status: "success",
+              duration: 3000,
+            });
+            setIsAdmin(
+              response.isAdmin || response.isDev || response.isTreasurer
+            );
+            if (locate) {
+              router.push(locate);
             } else {
-              setIsUserInternal(data.isUser)
-              setIsAdminInternal(data.isAdmin)
-              if(data.isAdmin || data.isUser){
-                sessionStorage.setItem("sessionLimit",String(new Date(new Date().getFullYear(),new Date().getMonth(),new Date().getDate(),new Date().getHours()+1,new Date().getMinutes())))
-                sessionStorage.setItem("userName",(data.isAdmin?"admin":"user"))
-              }
+              router.push("/");
             }
           }
-          setSessionStatus(true)
-        });
-      } else {
-        setIsUserInternal(false)
-        setIsAdminInternal(false)
-        setSessionStatus(true)
-      }
-    }
-  }
+        }
+      });
+    });
+  };
+  const logout = async () => {
+    await fetch("/api/session/logout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    });
 
-  useEffect(() => {
-    getAuth()
-  }, [setIsUserInternal]);
-
-  const Login = useCallback(
-    (id: string, pass: string, lIP: string) => {
-      const hashPass = encryptSha256(pass);
-      const uuidToken = crypto.randomUUID()
-      const allow = process.env.NEXT_PUBLIC_ALLOW_HOSTNAME!
-      if (lIP.includes(allow)) {
-        loginAuth(id,hashPass,uuidToken,lIP)
-      } else {
-        toast({
-          title: "認証エラー",
-          description: `ログインには学内ネットワークへの接続が必要です。`,
-          status: "error",
-          duration: 2500,
-          isClosable: true,
-        });
-      }
-    },
-    []
-  );
-  const Logout = useCallback(() => {
-    const sessionToken = localStorage.getItem(STORAGE_TOKEN)
-    logoutAuth(sessionToken!)
-    localStorage.clear;
-    sessionStorage.clear;
-    setIsAdminInternal(false)
-    setIsUserInternal(false);
-    toast({
-      title: "ログアウトしました",
-      status: "success",
-      duration: 2500,
-      isClosable: true,
-    })
-    router.reload()
-  }, []);
-  return [isAdminInternal,isUserInternal,sessionStatus, Login, Logout];
-}
+    setIsLogin(false);
+    setIsAdmin(false);
+  };
+  return { session, login, logout };
+};

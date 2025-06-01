@@ -1,4 +1,4 @@
-import { UseLoginState } from "@/hooks/UseLoginState";
+import { DengekiSSO } from "@/hooks/UseLoginState";
 import {
   Container,
   FormControl,
@@ -19,27 +19,38 @@ import {
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import axios from "axios";
+import { isLoginAtom } from "@/lib/jotai/isLoginAtom";
+import { isAdminAtom } from "@/lib/jotai/isAdminAtom";
+import { loginNameAtom } from "@/lib/jotai/loginNameAtom";
+import { useAtomValue } from "jotai";
 
 export default function Home() {
-  const [isAdmin, isUser, status, Login, Logout] = UseLoginState(false);
+  const { session, login, logout } = DengekiSSO();
+  const userName = useAtomValue(loginNameAtom);
+  const isLogin = useAtomValue(isLoginAtom);
+  const isAdmin = useAtomValue(isAdminAtom);
   const [getName, setGetName] = useState("");
   const [date, setDate] = useState("");
   const [value, setValue] = useState(0);
   const [fixture, setFixture] = useState("");
   const [memo, setMemo] = useState("");
   const [year, setYear] = useState("");
-  const [inputPass, setInputPass] = useState("");
+  const [pending, setPending] = useState(true);
+  const [memberList, setMemberList] = useState<string[]>([]);
   const toast = useToast();
   const router = useRouter();
   const toastIdRef: any = useRef();
-  const path = router.pathname;
-  let http = "http";
-  if (process.env.NODE_ENV == "production") {
-    http = "https";
-  }
   useEffect(() => {
-    setInputPass(localStorage.getItem("storage_token")!);
+    session().then(() => {
+      axios.get("/api/session/withPast").then((res) => {
+        setMemberList(res.data.data);
+        setPending(false);
+      });
+    });
   }, []);
+  useEffect(() => {
+    setGetName(userName);
+  }, [userName]);
 
   const onsubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -69,84 +80,46 @@ export default function Home() {
       mode: "main",
     };
     axios
-      .get("https://ipapi.co/json")
-      .then((getHost) => {
-        const hostname = getHost.data.ip;
+      .post("/api/database/post-earning", {
+        date,
+        fixture,
+        value,
+        year,
+        mode: "income",
+        from: "hatosai",
+      })
+      .then(async () => {
+        const username = "収入報告くん";
         axios
-          .post("/api/auth/generatePass", {
-            hostname,
+          .post("/api/discord/send", {
+            username,
+            valueContent,
+            mode: "hatosai",
           })
-          .then((oneTimePass) => {
-            const oneTimeToken = oneTimePass.data.token;
-
-            axios
-              .post("/api/database/post-earning", {
-                date,
-                fixture,
-                value,
-                year,
-                inputPass,
-                oneTimeToken,
-                hostname,
-                mode: "income",
-                from: "hatosai",
-              })
-              .then(async () => {
-                const username = "収入報告くん";
-                axios
-                  .post("/api/discord/send", {
-                    username,
-                    valueContent,
-                    mode: "hatosai",
-                  })
-                  .then(() => {
-                    if (toastIdRef.current) {
-                      toast.close(toastIdRef.current);
-                    }
-                    toast({
-                      title: "アップロード完了",
-                      description:
-                        "アップロードが完了しました。アップロード日時：" + date,
-                      status: "success",
-                      duration: 2500,
-                      isClosable: true,
-                    });
-                    router.push("/");
-                  })
-                  .catch(() => {
-                    if (toastIdRef.current) {
-                      toast.close(toastIdRef.current);
-                    }
-                    toast({
-                      title: "discord error",
-                      status: "error",
-                      duration: 2500,
-                      isClosable: true,
-                    });
-                  });
-              })
-              .catch(() => {
-                if (toastIdRef.current) {
-                  toast.close(toastIdRef.current);
-                }
-                toast({
-                  title: "db post error",
-                  status: "error",
-                  duration: 2500,
-                  isClosable: true,
-                });
-              })
-              .catch(() => {
-                if (toastIdRef.current) {
-                  toast.close(toastIdRef.current);
-                }
-                toast({
-                  title: "token generate error",
-                  status: "error",
-                  duration: 2500,
-                  isClosable: true,
-                });
-              });
+          .then(() => {
+            if (toastIdRef.current) {
+              toast.close(toastIdRef.current);
+            }
+            toast({
+              title: "アップロード完了",
+              description:
+                "アップロードが完了しました。アップロード日時：" + date,
+              status: "success",
+              duration: 2500,
+              isClosable: true,
+            });
+            router.push("/");
+          })
+          .catch(() => {
+            if (toastIdRef.current) {
+              toast.close(toastIdRef.current);
+            }
+            toast({
+              title: "discord error",
+              status: "error",
+              duration: 2500,
+              isClosable: true,
+            });
           });
       })
       .catch(() => {
@@ -154,14 +127,14 @@ export default function Home() {
           toast.close(toastIdRef.current);
         }
         toast({
-          title: "IPアドレス取得エラー",
+          title: "db post error",
           status: "error",
           duration: 2500,
           isClosable: true,
         });
       });
   };
-  if (status && (isAdmin || isUser)) {
+  if (!pending && isLogin) {
     return (
       <>
         <Container>
@@ -194,10 +167,39 @@ export default function Home() {
                 </NumberInputStepper>
               </NumberInput>
             </FormControl>
-            <FormControl>
-              <FormLabel>受領者</FormLabel>
-              <Input onChange={(e) => setGetName(e.target.value)} />
-            </FormControl>
+            {getName != "" && !memberList!.includes(userName) ? (
+              <FormControl>
+                <FormLabel>購入者</FormLabel>
+                {memberList ? (
+                  <Select
+                    onChange={(e) => setGetName(e.target.value)}
+                    placeholder="選択してください"
+                  >
+                    {memberList.map((memberListContent) => {
+                      return (
+                        <option value={memberListContent}>
+                          {memberListContent}
+                        </option>
+                      );
+                    })}
+                  </Select>
+                ) : (
+                  <Input
+                    onChange={(e) => setGetName(e.target.value)}
+                    value={getName}
+                  />
+                )}
+              </FormControl>
+            ) : (
+              <FormControl>
+                <FormLabel>購入者</FormLabel>
+                <Input
+                  onChange={(e) => setGetName(e.target.value)}
+                  value={getName}
+                  disabled={true}
+                />
+              </FormControl>
+            )}
             <FormControl>
               <FormLabel>収入事由</FormLabel>
               <Input onChange={(e) => setFixture(e.target.value)} />
@@ -221,23 +223,13 @@ export default function Home() {
   } else {
     return (
       <>
-        {status ? (
+        {!pending ? (
           <>
             <VStack>
               <Heading>ログインしてください。</Heading>
               <Button
                 onClick={() => {
-                  router.push(
-                    {
-                      pathname:
-                        http +
-                        "://" +
-                        process.env.NEXT_PUBLIC_SSO_DOMAIN +
-                        "/login",
-                      query: { locate: "accounting", path: path },
-                    },
-                    "http:/localhost:3000/login"
-                  );
+                  router.push("/login");
                 }}
               >
                 ログイン

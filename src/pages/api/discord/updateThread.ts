@@ -1,36 +1,18 @@
+import { checkJWT } from "@/lib/jwt";
 import prisma from "@/lib/prisma";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 export default async function handle(
-  req: {
-    body: {
-      threadID: string;
-      inputPass: string;
-    };
-  },
+  req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const { threadID, inputPass } = req.body;
-  let isAdmin = false;
-  let isUser = false;
-  const sessionToken = inputPass;
-  try {
-    const data = await prisma.tokens.findFirst({
-      where: {
-        tokens: sessionToken,
-      },
-    });
-
-    if (data) {
-      if (data.limit > new Date()) {
-        isUser = data.isUser;
-        isAdmin = data.isAdmin;
-      }
-    }
-  } catch (error) {
-    console.error(error);
-  }
-  if (isAdmin || isUser) {
+  const { threadID } = req.body;
+  const cookies = req.headers.cookie || "";
+  const jwt = cookies
+    .split("; ")
+    .find((row) => row.startsWith("token="))
+    ?.split("=")[1];
+  if (jwt != "" && (await checkJWT(jwt!)).isAdmin) {
     const result = await prisma.threadID.update({
       where: {
         id: 1,

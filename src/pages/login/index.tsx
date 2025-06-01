@@ -1,30 +1,95 @@
-import { useEffect } from "react";
-import { HStack, Spinner, Text } from "@chakra-ui/react";
-import { useRouter } from "next/router";
+import {
+  Box,
+  Button,
+  Center,
+  FormControl,
+  FormLabel,
+  FormErrorMessage,
+  FormHelperText,
+  VStack,
+  Input,
+  InputGroup,
+  InputRightElement,
+  Heading,
+  Text,
+  Link,
+} from "@chakra-ui/react";
+import { useEffect, useState } from "react";
+import { DengekiSSO } from "@/hooks/UseLoginState";
+import { useSearchParams } from "next/navigation";
+import Router, { useRouter, usePathname } from "next/navigation";
+import React from "react";
+import { isAdminAtom } from "@/lib/jotai/isAdminAtom";
+import { isLoginAtom } from "@/lib/jotai/isLoginAtom";
+import { loginNameAtom } from "@/lib/jotai/loginNameAtom";
+import { useAtomValue } from "jotai";
 
-export default function Home() {
-  const router = useRouter();
+export default function LoginForm() {
+  const serceParams = useSearchParams();
+  const pageLocate = serceParams.get("pagelocate");
+
+  const [show, setShow] = React.useState(false);
+  const handleClick = () => setShow(!show);
+
+  const { session, login, logout } = DengekiSSO();
+  const isLogin = useAtomValue(isLoginAtom);
+  const [id, setId] = useState("");
+  const [pass, setPass] = useState("");
 
   useEffect(() => {
-    if (router.isReady) {
-      const token = router.query.token;
-      const path = router.query.path;
-      if (token != "") {
-        localStorage.setItem("storage_token", String(token));
-      }
-      if (path) {
-        router.push(String(path));
-      } else {
-        router.push("/");
-      }
-    }
-  }, [router]);
+    session();
+  }, []);
+
   return (
     <>
-      <HStack>
-        <Spinner />
-        <Text>ログイン認証中</Text>
-      </HStack>
+      {isLogin ? (
+        <>
+          <Heading>ログイン済みです。</Heading>
+          <Text>
+            <Link href="/" color={"#fc8819"}>
+              トップページ
+            </Link>
+            に進む
+          </Text>
+        </>
+      ) : (
+        <VStack w="100%">
+          <Center top={10} w={"50%"}>
+            <VStack>
+              <FormControl>
+                <FormLabel>ID</FormLabel>
+                <Input
+                  variant="flushed"
+                  type="id"
+                  onChange={(e) => setId(e.target.value)}
+                />
+              </FormControl>
+              <FormControl>
+                <FormLabel>Pass Word</FormLabel>
+                <InputGroup>
+                  <Input
+                    variant="flushed"
+                    type={show ? "text" : "password"}
+                    onChange={(e) => setPass(e.target.value)}
+                  />
+                  <InputRightElement width="4.5rem">
+                    <Button h="1.75rem" size="sm" onClick={handleClick}>
+                      {show ? "Hide" : "Show"}
+                    </Button>
+                  </InputRightElement>
+                </InputGroup>
+              </FormControl>
+              <Button
+                onClick={() =>
+                  login({ name: id, password: pass, locate: pageLocate })
+                }
+              >
+                login
+              </Button>
+            </VStack>
+          </Center>
+        </VStack>
+      )}
     </>
   );
 }

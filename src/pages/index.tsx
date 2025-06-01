@@ -1,21 +1,31 @@
 import { Box, Button, Heading, Text, VStack } from "@chakra-ui/react";
 import Link from "next/link";
-import { UseLoginState } from "@/hooks/UseLoginState";
+import { DengekiSSO } from "@/hooks/UseLoginState";
 import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
+import { isAdminAtom } from "@/lib/jotai/isAdminAtom";
+import { isLoginAtom } from "@/lib/jotai/isLoginAtom";
+import { loginNameAtom } from "@/lib/jotai/loginNameAtom";
+import { useAtomValue } from "jotai";
 
 export default function Home() {
-  const [isAdmin, isUser, status, Login, Logout] = UseLoginState(false);
+  // const [isAdmin, isUser, status, Login, Logout] = UseLoginState(false);
+  const { session, login, logout } = DengekiSSO();
+  const [pending, setPending] = useState(true);
+  const userName = useAtomValue(loginNameAtom);
+  const isLogin = useAtomValue(isLoginAtom);
+  const isAdmin = useAtomValue(isAdminAtom);
   const router = useRouter();
-  const path = router.pathname;
-  let http = "http";
-  if (process.env.NODE_ENV == "production") {
-    http = "https";
-  }
+  useEffect(() => {
+    session().then(() => {
+      setPending(false);
+    });
+  });
   return (
     <>
-      {status && (isAdmin || isUser) ? (
+      {!pending && (isAdmin || isLogin) ? (
         <VStack>
-          <Text>Log in as : {isAdmin ? "管理者" : "一般ユーザー"}</Text>
+          <Text>Log in as : {userName}</Text>
           <Text fontSize={"2xl"}>ホーム</Text>
           <Link href={"/income"}>
             <Box borderBottom="1px solid #fc8819">本予算収入報告</Box>
@@ -33,27 +43,17 @@ export default function Home() {
               <Box borderBottom="1px solid #fc8819">管理者用ページ</Box>
             </Link>
           ) : null}
-          <Button onClick={Logout}>ログアウト</Button>
+          <Button onClick={logout}>ログアウト</Button>
         </VStack>
       ) : (
         <>
-          {status ? (
+          {!pending ? (
             <>
               <VStack>
                 <Heading>ログインしてください。</Heading>
                 <Button
                   onClick={() => {
-                    router.push(
-                      {
-                        pathname:
-                          http +
-                          "://" +
-                          process.env.NEXT_PUBLIC_SSO_DOMAIN +
-                          "/login",
-                        query: { locate: "accounting", path: path },
-                      },
-                      "http:/localhost:3000/login"
-                    );
+                    router.push("/login");
                   }}
                 >
                   ログイン

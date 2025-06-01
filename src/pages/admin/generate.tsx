@@ -1,4 +1,7 @@
-import { UseLoginState } from "@/hooks/UseLoginState";
+import { DengekiSSO } from "@/hooks/UseLoginState";
+import { isAdminAtom } from "@/lib/jotai/isAdminAtom";
+import { isLoginAtom } from "@/lib/jotai/isLoginAtom";
+import { loginNameAtom } from "@/lib/jotai/loginNameAtom";
 import {
   Button,
   FormControl,
@@ -11,12 +14,17 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import axios from "axios";
+import { useAtomValue } from "jotai";
 import { useRouter } from "next/router";
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 const ExcelJS = require("exceljs");
 
 export default function Home() {
-  const [isAdmin, isUser, status, Login, Logout] = UseLoginState(false);
+  const { session, login, logout } = DengekiSSO();
+  const userName = useAtomValue(loginNameAtom);
+  const isLogin = useAtomValue(isLoginAtom);
+  const isAdmin = useAtomValue(isAdminAtom);
+  const [pending, setPending] = useState(true);
   const toast = useToast();
   const router = useRouter();
   const [year, setYear] = useState("");
@@ -25,11 +33,11 @@ export default function Home() {
   const jpAccoutnType = ["本予算", "鳩山祭", "後援会費", "校友会費"];
   const accountIndex = ["main", "hatosai", "clubsupport", "alumni"];
   const toastIdRef: any = useRef();
-  const path = router.pathname;
-  let http = "http";
-  if (process.env.NODE_ENV == "production") {
-    http = "https";
-  }
+  useEffect(() => {
+    session().then(() => {
+      setPending(false);
+    });
+  }, []);
   function generate() {
     toastIdRef.current = toast({
       title: "生成中",
@@ -81,76 +89,54 @@ export default function Home() {
     ];
     // 行を定義
     axios
-      .get("https://ipapi.co/json")
-      .then((getHost) => {
-        const hostname = getHost.data.ip;
-        axios
-          .post("/api/auth/generatePass", {
-            hostname,
-          })
-          .then((getToken) => {
-            const oneTimeToken = getToken.data.token;
-            const inputPass = localStorage.getItem("storage_token");
-            axios
-              .post("/api/database/generate", {
-                year,
-                inputPass,
-                oneTimeToken,
-                hostname,
-                from,
-              })
-              .then(async (response) => {
-                const result = response.data;
-                var earning: number = 0;
-                for (var i = 0; i < result.data.length; i++) {
-                  earning += result.data[i].income;
-                  earning -= result.data[i].outcome;
-                  const earning_string = "\\" + earning.toLocaleString();
-                  let income: string = "";
-                  if (result.data[i].income != 0) {
-                    income = "\\" + result.data[i].income.toLocaleString();
-                  }
-                  let outcome: string = "";
-                  if (result.data[i].outcome != 0) {
-                    outcome = "\\" + result.data[i].outcome.toLocaleString();
-                    if (outcome.length > 3) {
-                    }
-                  }
-                  worksheet.addRow({
-                    month: new Date(result.data[i].date).getMonth() + 1,
-                    date: new Date(result.data[i].date).getDate(),
-                    fixture: result.data[i].fixture,
-                    indexNumber: "",
-                    mainType: result.data[i].typeAlphabet,
-                    subType: result.data[i].subtype,
-                    income: income,
-                    outcome: outcome,
-                    earnings: earning_string,
-                  });
-                }
-                // UInt8Arrayを生成
-                const uint8Array = await workbook.xlsx.writeBuffer();
-                // Blob
-                const blob = new Blob([uint8Array], {
-                  type: "application/octet-binary",
-                });
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = `演劇部${
-                  accoutnType[accountIndex.indexOf(from)]
-                }決算_${year}.xlsx`;
-                a.click();
-                // ダウンロード後は不要なのでaタグを除去
-                a.remove();
-              })
-              .catch((error) => {
-                console.error(error);
-              });
-          })
-          .catch((error) => {
-            console.error(error);
+      .post("/api/database/generate", {
+        year,
+        from,
+      })
+      .then(async (response) => {
+        const result = response.data;
+        var earning: number = 0;
+        for (var i = 0; i < result.data.length; i++) {
+          earning += result.data[i].income;
+          earning -= result.data[i].outcome;
+          const earning_string = "\\" + earning.toLocaleString();
+          let income: string = "";
+          if (result.data[i].income != 0) {
+            income = "\\" + result.data[i].income.toLocaleString();
+          }
+          let outcome: string = "";
+          if (result.data[i].outcome != 0) {
+            outcome = "\\" + result.data[i].outcome.toLocaleString();
+            if (outcome.length > 3) {
+            }
+          }
+          worksheet.addRow({
+            month: new Date(result.data[i].date).getMonth() + 1,
+            date: new Date(result.data[i].date).getDate(),
+            fixture: result.data[i].fixture,
+            indexNumber: "",
+            mainType: result.data[i].typeAlphabet,
+            subType: result.data[i].subtype,
+            income: income,
+            outcome: outcome,
+            earnings: earning_string,
           });
+        }
+        // UInt8Arrayを生成
+        const uint8Array = await workbook.xlsx.writeBuffer();
+        // Blob
+        const blob = new Blob([uint8Array], {
+          type: "application/octet-binary",
+        });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `演劇部${
+          accoutnType[accountIndex.indexOf(from)]
+        }決算_${year}.xlsx`;
+        a.click();
+        // ダウンロード後は不要なのでaタグを除去
+        a.remove();
       })
       .catch((error) => {
         console.error(error);
@@ -159,7 +145,7 @@ export default function Home() {
 
   return (
     <>
-      {status && (isAdmin || isUser) ? (
+      {!pending && isLogin ? (
         <>
           {isAdmin ? (
             <VStack>
@@ -195,23 +181,13 @@ export default function Home() {
         </>
       ) : (
         <>
-          {status ? (
+          {!pending ? (
             <>
               <VStack>
                 <Heading>ログインしてください。</Heading>
                 <Button
                   onClick={() => {
-                    router.push(
-                      {
-                        pathname:
-                          http +
-                          "://" +
-                          process.env.NEXT_PUBLIC_SSO_DOMAIN +
-                          "/login",
-                        query: { locate: "accounting", path: path },
-                      },
-                      "http:/localhost:3000/login"
-                    );
+                    router.push("/login");
                   }}
                 >
                   ログイン
