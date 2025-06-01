@@ -48,11 +48,11 @@ const Home: NextPage = () => {
   const [images, setImages] = useState<Blob[]>([]);
   // const [isAdmin, isUser, status, Login, Logout] = UseLoginState(false);
   const { session, login, logout } = DengekiSSO();
-  const [inputPass, setInputPass] = useState("");
   const [pending, setPending] = useState(false);
   const userName = useAtomValue(loginNameAtom);
   const isLogin = useAtomValue(isLoginAtom);
   const isAdmin = useAtomValue(isAdminAtom);
+  const [memberList, setMemberList] = useState<string[]>([]);
   const path = router.pathname;
   const public_url = process.env.NEXT_PUBLIC_SUPABASE_PUBLIC_URL;
   const toastIdRef: any = useRef();
@@ -62,7 +62,10 @@ const Home: NextPage = () => {
   }
   useEffect(() => {
     session().then(() => {
-      setPending(false);
+      axios.get("/api/session/withPast").then((res) => {
+        setMemberList(res.data.data);
+        setPending(false);
+      });
     });
   }, []);
   useEffect(() => {
@@ -101,143 +104,104 @@ const Home: NextPage = () => {
 
     const typeAlphabet = alphabet[types.indexOf(type)];
     axios
-      .get("https://ipapi.co/json")
-      .then((getHost) => {
-        const hostname = getHost.data.ip;
-        axios
-          .post("/api/auth/generatePass", {
-            hostname,
-          })
-          .then((oneTimePass) => {
-            const oneTimeToken = oneTimePass.data.token;
-
-            axios
-              .post("/api/database/post-earning", {
-                date,
-                type,
-                typeAlphabet,
-                subType,
-                fixture,
-                value,
-                year,
-                inputPass,
-                oneTimeToken,
-                hostname,
-                mode: "outcome",
-                from: "main",
-              })
-              .then(async () => {
-                if (file!!.type.match("image.*")) {
-                  const fileExtension = file!!.name.split(".").pop();
-                  const uuid = uuidv4();
-                  const inputFileName = `image/${year}/${uuid}.${fileExtension}`;
-                  const ImageURL = public_url + inputFileName;
-                  const { error } = await supabase.storage
-                    .from("dengeki-receipt")
-                    .upload(inputFileName, file!!);
-                  if (error) {
-                    alert("エラーが発生しました：" + error.message);
-                    return;
-                  }
-                  setFile(undefined);
-                  const valueContent: string =
-                    "# 支出報告\n購入日時 : " +
-                    date +
-                    "\n会計年度 : " +
-                    year +
-                    "\n分類 : " +
-                    type +
-                    "\n分類番号 : " +
-                    typeAlphabet +
-                    subType +
-                    "\n金額 : ¥" +
-                    value +
-                    "\n購入者 : " +
-                    name +
-                    "\n備品名 : " +
-                    fixture +
-                    "\nメモ : " +
-                    memo +
-                    "\n[レシート画像URL](" +
-                    ImageURL +
-                    ")";
-                  const username = "支出報告くん";
-                  axios
-                    .post("/api/discord/send", {
-                      username,
-                      valueContent,
-                      mode: "main",
-                    })
-                    .then(() => {
-                      if (toastIdRef.current) {
-                        toast.close(toastIdRef.current);
-                      }
-                      toast({
-                        title: "アップロード完了",
-                        description:
-                          "アップロードが完了しました。アップロード日時：" +
-                          date,
-                        status: "success",
-                        duration: 2500,
-                        isClosable: true,
-                      });
-                      router.push("/");
-                    })
-                    .catch(() => {
-                      if (toastIdRef.current) {
-                        toast.close(toastIdRef.current);
-                      }
-                      toast({
-                        title: "discord error",
-                        status: "error",
-                        duration: 2500,
-                        isClosable: true,
-                      });
-                    });
-                } else {
-                  if (toastIdRef.current) {
-                    toast.close(toastIdRef.current);
-                  }
-                  toast({
-                    title: "画像形式エラー",
-                    description: "画像ファイル以外はアップロードできません。",
-                    status: "error",
-                    duration: 2500,
-                    isClosable: true,
-                  });
-                  router.reload();
-                }
-              })
-              .catch(() => {
-                if (toastIdRef.current) {
-                  toast.close(toastIdRef.current);
-                }
-                toast({
-                  title: "db post error",
-                  status: "error",
-                  duration: 2500,
-                  isClosable: true,
-                });
-              })
-              .catch(() => {
-                if (toastIdRef.current) {
-                  toast.close(toastIdRef.current);
-                }
-                toast({
-                  title: "token generate error",
-                  status: "error",
-                  duration: 2500,
-                  isClosable: true,
-                });
+      .post("/api/database/post-earning", {
+        date,
+        type,
+        typeAlphabet,
+        subType,
+        fixture,
+        value,
+        year,
+        mode: "outcome",
+        from: "main",
+      })
+      .then(async () => {
+        if (file!!.type.match("image.*")) {
+          const fileExtension = file!!.name.split(".").pop();
+          const uuid = uuidv4();
+          const inputFileName = `image/${year}/${uuid}.${fileExtension}`;
+          const ImageURL = public_url + inputFileName;
+          const { error } = await supabase.storage
+            .from("dengeki-receipt")
+            .upload(inputFileName, file!!);
+          if (error) {
+            alert("エラーが発生しました：" + error.message);
+            return;
+          }
+          setFile(undefined);
+          const valueContent: string =
+            "# 支出報告\n購入日時 : " +
+            date +
+            "\n会計年度 : " +
+            year +
+            "\n分類 : " +
+            type +
+            "\n分類番号 : " +
+            typeAlphabet +
+            subType +
+            "\n金額 : ¥" +
+            value +
+            "\n購入者 : " +
+            name +
+            "\n備品名 : " +
+            fixture +
+            "\nメモ : " +
+            memo +
+            "\n[レシート画像URL](" +
+            ImageURL +
+            ")";
+          const username = "支出報告くん";
+          axios
+            .post("/api/discord/send", {
+              username,
+              valueContent,
+              mode: "main",
+            })
+            .then(() => {
+              if (toastIdRef.current) {
+                toast.close(toastIdRef.current);
+              }
+              toast({
+                title: "アップロード完了",
+                description:
+                  "アップロードが完了しました。アップロード日時：" + date,
+                status: "success",
+                duration: 2500,
+                isClosable: true,
               });
+              router.push("/");
+            })
+            .catch(() => {
+              if (toastIdRef.current) {
+                toast.close(toastIdRef.current);
+              }
+              toast({
+                title: "discord error",
+                status: "error",
+                duration: 2500,
+                isClosable: true,
+              });
+            });
+        } else {
+          if (toastIdRef.current) {
+            toast.close(toastIdRef.current);
+          }
+          toast({
+            title: "画像形式エラー",
+            description: "画像ファイル以外はアップロードできません。",
+            status: "error",
+            duration: 2500,
+            isClosable: true,
           });
+          router.reload();
+        }
       })
       .catch(() => {
         if (toastIdRef.current) {
           toast.close(toastIdRef.current);
         }
         toast({
-          title: "IPアドレス取得エラー",
+          title: "db post error",
           status: "error",
           duration: 2500,
           isClosable: true,
@@ -270,7 +234,7 @@ const Home: NextPage = () => {
             <FormLabel>分類</FormLabel>
             <Select
               onChange={(e) => setType(e.target.value)}
-              placeholder="選択してください。"
+              placeholder="選択してください"
             >
               <option value={"大道具"}>大道具</option>
               <option value={"小道具"}>小道具</option>
@@ -285,7 +249,7 @@ const Home: NextPage = () => {
             <FormLabel>分類詳細</FormLabel>
             <Select
               onChange={(e) => setSubType(e.target.value)}
-              placeholder="選択してください。"
+              placeholder="選択してください"
             >
               {type == "大道具" ? (
                 <>
@@ -342,10 +306,25 @@ const Home: NextPage = () => {
               </NumberInputStepper>
             </NumberInput>
           </FormControl>
-          {name != "" && name.startsWith("dengeki") ? (
+          {name != "" && !memberList!.includes(userName) ? (
             <FormControl>
               <FormLabel>購入者</FormLabel>
-              <Input onChange={(e) => setName(e.target.value)} value={name} />
+              {memberList ? (
+                <Select
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="選択してください"
+                >
+                  {memberList.map((memberListContent) => {
+                    return (
+                      <option value={memberListContent}>
+                        {memberListContent}
+                      </option>
+                    );
+                  })}
+                </Select>
+              ) : (
+                <Input onChange={(e) => setName(e.target.value)} value={name} />
+              )}
             </FormControl>
           ) : (
             <FormControl>

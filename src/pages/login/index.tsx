@@ -25,26 +25,11 @@ import { loginNameAtom } from "@/lib/jotai/loginNameAtom";
 import { useAtomValue } from "jotai";
 
 export default function LoginForm() {
-  const router = useRouter();
   const serceParams = useSearchParams();
   const pageLocate = serceParams.get("pagelocate");
-  const [ip, setIp] = useState("");
-  const [host, setHost] = useState("");
-  const [locate, setLocate] = useState("");
 
   const [show, setShow] = React.useState(false);
   const handleClick = () => setShow(!show);
-
-  const ipUrl = "https://ipinfo.io/json";
-  const getIp = async () => {
-    await fetch(ipUrl).then(async (response) => {
-      await response.json().then((data) => {
-        setIp(data.ip);
-        setHost(data.hostname);
-        setLocate(`${data.city},${data.region},${data.country}`);
-      });
-    });
-  };
 
   const { session, login, logout } = DengekiSSO();
   const isLogin = useAtomValue(isLoginAtom);
@@ -68,7 +53,7 @@ export default function LoginForm() {
           </Text>
         </>
       ) : (
-        <VStack>
+        <VStack w="100%">
           <Center top={10} w={"50%"}>
             <VStack>
               <FormControl>

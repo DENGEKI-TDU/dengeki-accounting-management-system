@@ -1,6 +1,5 @@
 import prisma from "@/lib/prisma";
 import { NextApiRequest, NextApiResponse } from "next";
-import axios from "axios";
 import { checkJWT } from "@/lib/jwt";
 
 export default async function handle(
@@ -77,6 +76,6 @@ export default async function handle(
       res.status(200).json({ data: result });
     }
   } else {
-    res.status(403).json({ msg: "Query error" });
+    res.status(403).end();
   }
 }

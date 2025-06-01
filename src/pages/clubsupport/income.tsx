@@ -36,19 +36,16 @@ export default function Home() {
   const [fixture, setFixture] = useState("");
   const [memo, setMemo] = useState("");
   const [year, setYear] = useState("");
-  const [inputPass, setInputPass] = useState("");
+  const [memberList, setMemberList] = useState<string[]>([]);
   const toast = useToast();
   const router = useRouter();
   const toastIdRef: any = useRef();
-  const path = router.pathname;
-  let http = "http";
-  if (process.env.NODE_ENV == "production") {
-    http = "https";
-  }
   useEffect(() => {
     session().then(() => {
-      setPending(false);
-      setGetName(userName);
+      axios.get("/api/session/withPast").then((res) => {
+        setMemberList(res.data.data);
+        setPending(false);
+      });
     });
   }, []);
   useEffect(() => {
@@ -84,84 +81,46 @@ export default function Home() {
       mode: "main",
     };
     axios
-      .get("https://ipapi.co/json")
-      .then((getHost) => {
-        const hostname = getHost.data.ip;
+      .post("/api/database/post-earning", {
+        date,
+        fixture,
+        value,
+        year,
+        mode: "income",
+        from: "clubsupport",
+      })
+      .then(async () => {
+        const username = "収入報告くん";
         axios
-          .post("/api/auth/generatePass", {
-            hostname,
+          .post("/api/discord/send", {
+            username,
+            valueContent,
+            mode: "clubsupport",
           })
-          .then((oneTimePass) => {
-            const oneTimeToken = oneTimePass.data.token;
-
-            axios
-              .post("/api/database/post-earning", {
-                date,
-                fixture,
-                value,
-                year,
-                inputPass,
-                oneTimeToken,
-                hostname,
-                mode: "income",
-                from: "clubsupport",
-              })
-              .then(async () => {
-                const username = "収入報告くん";
-                axios
-                  .post("/api/discord/send", {
-                    username,
-                    valueContent,
-                    mode: "clubsupport",
-                  })
-                  .then(() => {
-                    if (toastIdRef.current) {
-                      toast.close(toastIdRef.current);
-                    }
-                    toast({
-                      title: "アップロード完了",
-                      description:
-                        "アップロードが完了しました。アップロード日時：" + date,
-                      status: "success",
-                      duration: 2500,
-                      isClosable: true,
-                    });
-                    router.push("/");
-                  })
-                  .catch(() => {
-                    if (toastIdRef.current) {
-                      toast.close(toastIdRef.current);
-                    }
-                    toast({
-                      title: "discord error",
-                      status: "error",
-                      duration: 2500,
-                      isClosable: true,
-                    });
-                  });
-              })
-              .catch(() => {
-                if (toastIdRef.current) {
-                  toast.close(toastIdRef.current);
-                }
-                toast({
-                  title: "db post error",
-                  status: "error",
-                  duration: 2500,
-                  isClosable: true,
-                });
-              })
-              .catch(() => {
-                if (toastIdRef.current) {
-                  toast.close(toastIdRef.current);
-                }
-                toast({
-                  title: "token generate error",
-                  status: "error",
-                  duration: 2500,
-                  isClosable: true,
-                });
-              });
+          .then(() => {
+            if (toastIdRef.current) {
+              toast.close(toastIdRef.current);
+            }
+            toast({
+              title: "アップロード完了",
+              description:
+                "アップロードが完了しました。アップロード日時：" + date,
+              status: "success",
+              duration: 2500,
+              isClosable: true,
+            });
+            router.push("/");
+          })
+          .catch(() => {
+            if (toastIdRef.current) {
+              toast.close(toastIdRef.current);
+            }
+            toast({
+              title: "discord error",
+              status: "error",
+              duration: 2500,
+              isClosable: true,
+            });
           });
       })
       .catch(() => {
@@ -169,7 +128,7 @@ export default function Home() {
           toast.close(toastIdRef.current);
         }
         toast({
-          title: "IPアドレス取得エラー",
+          title: "db post error",
           status: "error",
           duration: 2500,
           isClosable: true,
@@ -209,17 +168,32 @@ export default function Home() {
                 </NumberInputStepper>
               </NumberInput>
             </FormControl>
-            {getName != "" && getName.startsWith("dengeki") ? (
+            {getName != "" && !memberList!.includes(userName) ? (
               <FormControl>
-                <FormLabel>受領者</FormLabel>
-                <Input
-                  onChange={(e) => setGetName(e.target.value)}
-                  value={getName}
-                />
+                <FormLabel>購入者</FormLabel>
+                {memberList ? (
+                  <Select
+                    onChange={(e) => setGetName(e.target.value)}
+                    placeholder="選択してください"
+                  >
+                    {memberList.map((memberListContent) => {
+                      return (
+                        <option value={memberListContent}>
+                          {memberListContent}
+                        </option>
+                      );
+                    })}
+                  </Select>
+                ) : (
+                  <Input
+                    onChange={(e) => setGetName(e.target.value)}
+                    value={getName}
+                  />
+                )}
               </FormControl>
             ) : (
               <FormControl>
-                <FormLabel>受領者</FormLabel>
+                <FormLabel>購入者</FormLabel>
                 <Input
                   onChange={(e) => setGetName(e.target.value)}
                   value={getName}
@@ -256,17 +230,7 @@ export default function Home() {
               <Heading>ログインしてください。</Heading>
               <Button
                 onClick={() => {
-                  router.push(
-                    {
-                      pathname:
-                        http +
-                        "://" +
-                        process.env.NEXT_PUBLIC_SSO_DOMAIN +
-                        "/login",
-                      query: { locate: "accounting", path: path },
-                    },
-                    "http:/localhost:3000/login"
-                  );
+                  router.push("/login");
                 }}
               >
                 ログイン

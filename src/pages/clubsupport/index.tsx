@@ -15,11 +15,6 @@ export default function Home() {
   const isAdmin = useAtomValue(isAdminAtom);
   const [pending, setPending] = useState(true);
   const router = useRouter();
-  const path = router.pathname;
-  let http = "http";
-  if (process.env.NODE_ENV == "production") {
-    http = "https";
-  }
   useEffect(() => {
     session().then(() => {
       setPending(false);
@@ -41,23 +36,13 @@ export default function Home() {
         </VStack>
       ) : (
         <>
-          {status ? (
+          {!pending ? (
             <>
               <VStack>
                 <Heading>ログインしてください。</Heading>
                 <Button
                   onClick={() => {
-                    router.push(
-                      {
-                        pathname:
-                          http +
-                          "://" +
-                          process.env.NEXT_PUBLIC_SSO_DOMAIN +
-                          "/login",
-                        query: { locate: "accounting", path: path },
-                      },
-                      "http:/localhost:3000/login"
-                    );
+                    router.push("/login");
                   }}
                 >
                   ログイン

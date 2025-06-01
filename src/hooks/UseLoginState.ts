@@ -19,7 +19,7 @@ export const DengekiSSO = () => {
       setUsetName(response.name);
       setIsLogin(response.isLogin);
       if (response.isLogin) {
-        setIsAdmin(response.isAdmin || response.isDev);
+        setIsAdmin(response.isAdmin || response.isDev || response.isTreasurer);
       }
     });
   };
@@ -42,8 +42,7 @@ export const DengekiSSO = () => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name: name, password: password }),
-    }).then(async (res) => {
-      const response = await res.json();
+    }).then(async () => {
       await fetch("/api/session/getSession").then(async (res) => {
         const response = await res.json();
         if (response.status == "failed") {

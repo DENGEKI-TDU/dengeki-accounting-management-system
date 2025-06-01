@@ -36,20 +36,17 @@ export default function Home() {
   const [fixture, setFixture] = useState("");
   const [memo, setMemo] = useState("");
   const [year, setYear] = useState("");
-  const [inputPass, setInputPass] = useState("");
+  const [memberList, setMemberList] = useState<string[]>([]);
   const [pending, setPending] = useState(false);
   const toast = useToast();
   const router = useRouter();
   const toastIdRef: any = useRef();
-  const path = router.pathname;
-  let http = "http";
-  if (process.env.NODE_ENV == "production") {
-    http = "https";
-  }
   useEffect(() => {
-    // setInputPass(localStorage.getItem("storage_token")!);
     session().then(() => {
-      setPending(false);
+      axios.get("/api/session/withPast").then((res) => {
+        setMemberList(res.data.data);
+        setPending(false);
+      });
     });
   }, []);
   useEffect(() => {
@@ -78,91 +75,47 @@ export default function Home() {
       fixture +
       "\nメモ : " +
       memo;
-    const username = "収入報告くん";
-    const discordData = {
-      username,
-      valueContent,
-      mode: "main",
-    };
     axios
-      .get("https://ipapi.co/json")
-      .then((getHost) => {
-        const hostname = getHost.data.ip;
+      .post("/api/database/post-earning", {
+        date,
+        fixture,
+        value,
+        year,
+        mode: "income",
+        from: "main",
+      })
+      .then(async () => {
+        const username = "収入報告くん";
         axios
-          .post("/api/auth/generatePass", {
-            hostname,
+          .post("/api/discord/send", {
+            username,
+            valueContent,
+            mode: "main",
           })
-          .then((oneTimePass) => {
-            const oneTimeToken = oneTimePass.data.token;
-
-            axios
-              .post("/api/database/post-earning", {
-                date,
-                fixture,
-                value,
-                year,
-                inputPass,
-                oneTimeToken,
-                hostname,
-                mode: "income",
-                from: "main",
-              })
-              .then(async () => {
-                const username = "収入報告くん";
-                axios
-                  .post("/api/discord/send", {
-                    username,
-                    valueContent,
-                    mode: "main",
-                  })
-                  .then(() => {
-                    if (toastIdRef.current) {
-                      toast.close(toastIdRef.current);
-                    }
-                    toast({
-                      title: "アップロード完了",
-                      description:
-                        "アップロードが完了しました。アップロード日時：" + date,
-                      status: "success",
-                      duration: 2500,
-                      isClosable: true,
-                    });
-                    router.push("/");
-                  })
-                  .catch(() => {
-                    if (toastIdRef.current) {
-                      toast.close(toastIdRef.current);
-                    }
-                    toast({
-                      title: "discord error",
-                      status: "error",
-                      duration: 2500,
-                      isClosable: true,
-                    });
-                  });
-              })
-              .catch(() => {
-                if (toastIdRef.current) {
-                  toast.close(toastIdRef.current);
-                }
-                toast({
-                  title: "db post error",
-                  status: "error",
-                  duration: 2500,
-                  isClosable: true,
-                });
-              })
-              .catch(() => {
-                if (toastIdRef.current) {
-                  toast.close(toastIdRef.current);
-                }
-                toast({
-                  title: "token generate error",
-                  status: "error",
-                  duration: 2500,
-                  isClosable: true,
-                });
-              });
+          .then(() => {
+            if (toastIdRef.current) {
+              toast.close(toastIdRef.current);
+            }
+            toast({
+              title: "アップロード完了",
+              description:
+                "アップロードが完了しました。アップロード日時：" + date,
+              status: "success",
+              duration: 2500,
+              isClosable: true,
+            });
+            router.push("/");
+          })
+          .catch(() => {
+            if (toastIdRef.current) {
+              toast.close(toastIdRef.current);
+            }
+            toast({
+              title: "discord error",
+              status: "error",
+              duration: 2500,
+              isClosable: true,
+            });
           });
       })
       .catch(() => {
@@ -170,7 +123,7 @@ export default function Home() {
           toast.close(toastIdRef.current);
         }
         toast({
-          title: "IPアドレス取得エラー",
+          title: "db post error",
           status: "error",
           duration: 2500,
           isClosable: true,
@@ -210,13 +163,29 @@ export default function Home() {
                 </NumberInputStepper>
               </NumberInput>
             </FormControl>
-            {getName != "" && getName.startsWith("dengeki") ? (
+
+            {getName != "" && !memberList!.includes(userName) ? (
               <FormControl>
                 <FormLabel>購入者</FormLabel>
-                <Input
-                  onChange={(e) => setGetName(e.target.value)}
-                  value={getName}
-                />
+                {memberList ? (
+                  <Select
+                    onChange={(e) => setGetName(e.target.value)}
+                    placeholder="選択してください"
+                  >
+                    {memberList.map((memberListContent) => {
+                      return (
+                        <option value={memberListContent}>
+                          {memberListContent}
+                        </option>
+                      );
+                    })}
+                  </Select>
+                ) : (
+                  <Input
+                    onChange={(e) => setGetName(e.target.value)}
+                    value={getName}
+                  />
+                )}
               </FormControl>
             ) : (
               <FormControl>

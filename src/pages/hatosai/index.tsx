@@ -16,11 +16,6 @@ export default function Home() {
   const isAdmin = useAtomValue(isAdminAtom);
   const [pending, setPending] = useState(true);
   const router = useRouter();
-  const path = router.pathname;
-  let http = "http";
-  if (process.env.NODE_ENV == "production") {
-    http = "https";
-  }
   useEffect(() => {
     session().then(() => {
       setPending(false);
@@ -43,7 +38,7 @@ export default function Home() {
           </>
         ) : (
           <>
-            {status ? (
+            {!pending ? (
               <>
                 <VStack>
                   <Heading>ログインしてください。</Heading>

@@ -16,11 +16,6 @@ export default function Home() {
   const isLogin = useAtomValue(isLoginAtom);
   const isAdmin = useAtomValue(isAdminAtom);
   const router = useRouter();
-  const path = router.pathname;
-  let http = "http";
-  if (process.env.NODE_ENV == "production") {
-    http = "https";
-  }
   useEffect(() => {
     session().then(() => {
       setPending(false);
