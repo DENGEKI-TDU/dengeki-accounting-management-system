@@ -4,6 +4,7 @@ import { isLoginAtom } from "@/lib/jotai/isLoginAtom";
 import { isAdminAtom } from "@/lib/jotai/isAdminAtom";
 import { loginNameAtom } from "@/lib/jotai/loginNameAtom";
 import { useRouter } from "next/router";
+import { dev } from "@/lib/Dev";
 
 export const DengekiSSO = () => {
   const toast = useToast();
@@ -12,10 +13,10 @@ export const DengekiSSO = () => {
   const setIsLogin = useSetAtom(isLoginAtom);
   const setIsAdmin = useSetAtom(isAdminAtom);
   const session = async () => {
-    console.log("SSO Session Function");
+    dev.log("SSO Session Function");
     await fetch("/api/session/getSession").then(async (res) => {
       const response = await res.json();
-      console.log(response.name);
+      dev.log(response.name);
       setUsetName(response.name);
       setIsLogin(response.isLogin);
       if (response.isLogin) {

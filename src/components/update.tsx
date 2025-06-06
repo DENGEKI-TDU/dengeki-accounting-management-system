@@ -21,6 +21,7 @@ import { useState, useRef } from "react";
 import { EditIcon, CheckIcon, CloseIcon, DeleteIcon } from "@chakra-ui/icons";
 import { useRouter } from "next/router";
 import axios from "axios";
+import { dev } from "@/lib/Dev";
 
 type updateAccount = {
   id: number;
@@ -101,7 +102,7 @@ const Update: React.FC<{ update: updateAccount; from: string }> = ({
           router.push("/admin/edit?from=" + from);
         })
         .catch((error) => {
-          console.error(error);
+          dev.error(error);
         });
     } else if (from != to) {
       toastIdRef.current = toast({
@@ -151,7 +152,7 @@ const Update: React.FC<{ update: updateAccount; from: string }> = ({
             });
         })
         .catch((error) => {
-          console.error(error);
+          dev.error(error);
         });
     }
   }
@@ -203,7 +204,7 @@ const Update: React.FC<{ update: updateAccount; from: string }> = ({
           });
       })
       .catch((error) => {
-        console.error(error);
+        dev.error(error);
       });
   }
 

@@ -71,7 +71,7 @@ export default function Home() {
         setCompleteFetching(true);
       })
       .catch((error) => {
-        console.error(error);
+        dev.error(error);
       });
   }
   useEffect(() => {
