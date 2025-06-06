@@ -17,6 +17,7 @@ import { isAdminAtom } from "@/lib/jotai/isAdminAtom";
 import { isLoginAtom } from "@/lib/jotai/isLoginAtom";
 import { loginNameAtom } from "@/lib/jotai/loginNameAtom";
 import { useAtomValue } from "jotai";
+import { dev } from "@/lib/Dev";
 
 export default function Home() {
   const { session, login, logout } = DengekiSSO();
@@ -71,7 +72,7 @@ export default function Home() {
         setCompleteFetching(true);
       })
       .catch((error) => {
-        console.error(error);
+        dev.error(error);
       });
   }
   useEffect(() => {

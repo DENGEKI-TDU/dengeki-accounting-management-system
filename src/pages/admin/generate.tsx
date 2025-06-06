@@ -1,4 +1,5 @@
 import { DengekiSSO } from "@/hooks/UseLoginState";
+import { dev } from "@/lib/Dev";
 import { isAdminAtom } from "@/lib/jotai/isAdminAtom";
 import { isLoginAtom } from "@/lib/jotai/isLoginAtom";
 import { loginNameAtom } from "@/lib/jotai/loginNameAtom";
@@ -139,7 +140,7 @@ export default function Home() {
         a.remove();
       })
       .catch((error) => {
-        console.error(error);
+        dev.error(error);
       });
   }
 

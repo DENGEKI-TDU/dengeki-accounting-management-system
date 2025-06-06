@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import prisma from "@/lib/prisma";
 import { supabase } from "../../../../utils/supabase/supabase";
 import { checkJWT } from "@/lib/jwt";
+import { dev } from "@/lib/Dev";
 
 type Data = {
   msg?: string;
@@ -56,7 +57,7 @@ export default async function handle(
           .from("accouting_queue")
           .insert(queueValue);
         if (error) {
-          console.error(new Date(), error);
+          dev.error(new Date(), error);
         }
       } else {
         const queueValue = {
@@ -75,7 +76,7 @@ export default async function handle(
           .from("accouting_queue")
           .insert(queueValue);
         if (error) {
-          console.error(new Date(), error);
+          dev.error(new Date(), error);
         }
       }
       res.status(200).json({ msg: "success!!" });
@@ -83,6 +84,6 @@ export default async function handle(
       res.status(403).end();
     }
   } catch (error) {
-    console.error(error);
+    dev.error(error);
   }
 }
