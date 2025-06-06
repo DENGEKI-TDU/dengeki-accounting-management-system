@@ -11,7 +11,7 @@ export default async function handler(
   res: NextApiResponse
 ) {
   const { name, password } = req.body;
-  const fetchResponse = await fetch("https://sso-express.vercel.app/login/", {
+  const fetchResponse = await fetch("https://sso.dengeki-fox.net/login/", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ name: name, password: password }),
