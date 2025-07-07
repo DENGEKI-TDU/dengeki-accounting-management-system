@@ -35,7 +35,7 @@ export const DengekiSSO = () => {
   }) => {
     toast({
       title: "ログイン中",
-      description: "ログイン中です......",
+      description: `${name}としてログイン中です......`,
       duration: 10000,
       status: "loading",
     });
@@ -47,7 +47,6 @@ export const DengekiSSO = () => {
       await fetch("/api/session/getSession").then(async (res) => {
         const response = await res.json();
         if (response.status == "failed") {
-          alert("failed!");
           toast({
             title: "ログイン失敗",
             description:
@@ -62,7 +61,7 @@ export const DengekiSSO = () => {
           if (response.isLogin) {
             toast({
               title: "ログイン成功",
-              description: "ログインに成功しました。リダイレクトします。",
+              description: "ログインに成功しました。",
               status: "success",
               duration: 3000,
             });
