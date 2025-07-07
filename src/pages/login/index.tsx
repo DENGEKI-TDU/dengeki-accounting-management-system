@@ -17,11 +17,8 @@ import {
 import { useEffect, useState } from "react";
 import { DengekiSSO } from "@/hooks/UseLoginState";
 import { useSearchParams } from "next/navigation";
-import Router, { useRouter, usePathname } from "next/navigation";
 import React from "react";
-import { isAdminAtom } from "@/lib/jotai/isAdminAtom";
 import { isLoginAtom } from "@/lib/jotai/isLoginAtom";
-import { loginNameAtom } from "@/lib/jotai/loginNameAtom";
 import { useAtomValue } from "jotai";
 
 export default function LoginForm() {
@@ -60,12 +57,11 @@ export default function LoginForm() {
                 <FormLabel>ID</FormLabel>
                 <Input
                   variant="flushed"
-                  type="id"
                   onChange={(e) => setId(e.target.value)}
                 />
               </FormControl>
               <FormControl>
-                <FormLabel>Pass Word</FormLabel>
+                <FormLabel>Password</FormLabel>
                 <InputGroup>
                   <Input
                     variant="flushed"
