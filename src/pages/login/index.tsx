@@ -58,6 +58,8 @@ export default function LoginForm() {
                 <Input
                   variant="flushed"
                   onChange={(e) => setId(e.target.value)}
+                  autoComplete="username"
+                  required
                 />
               </FormControl>
               <FormControl>
@@ -67,6 +69,8 @@ export default function LoginForm() {
                     variant="flushed"
                     type={show ? "text" : "password"}
                     onChange={(e) => setPass(e.target.value)}
+                    autoComplete="current-password"
+                    required
                   />
                   <InputRightElement width="4.5rem">
                     <Button h="1.75rem" size="sm" onClick={handleClick}>
