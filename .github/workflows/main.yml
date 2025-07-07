@@ -1,0 +1,21 @@
+name: sync from beleth
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # 毎日 0時(UTC) に実行
+  workflow_dispatch: # 手動実行も可能
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: チェックアウト
+        uses: actions/checkout@v4
+
+      - name: フォーク元と同期
+        uses: tgymnich/fork-sync@v1.9
+        with:
+          owner: kimshun0213kr
+          repo: dengeki-accounting-management-system
+          base: main
+          head: main
