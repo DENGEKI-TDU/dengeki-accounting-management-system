@@ -196,12 +196,13 @@ const Home: NextPage = () => {
           router.reload();
         }
       })
-      .catch(() => {
+      .catch((error) => {
         if (toastIdRef.current) {
           toast.close(toastIdRef.current);
         }
         toast({
           title: "db post error",
+          description: error,
           status: "error",
           duration: 2500,
           isClosable: true,
@@ -420,3 +421,4 @@ const Home: NextPage = () => {
   }
 };
 export default Home;
+
