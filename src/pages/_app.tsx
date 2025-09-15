@@ -1,3 +1,7 @@
+import { DengekiSSO } from "@/hooks/UseLoginState";
+import { isAdminAtom } from "@/lib/jotai/isAdminAtom";
+import { isLoginAtom } from "@/lib/jotai/isLoginAtom";
+import { loginNameAtom } from "@/lib/jotai/loginNameAtom";
 import "@/styles/globals.css";
 import {
   Box,
@@ -7,11 +11,25 @@ import {
   Text,
   VStack,
   Image,
+  Button,
 } from "@chakra-ui/react";
+import { useAtomValue } from "jotai";
 import type { AppProps } from "next/app";
 import Link from "next/link";
+import router from "next/router";
+import { useState, useEffect } from "react";
 
 export default function App({ Component, pageProps }: AppProps) {
+  const { session, login, logout } = DengekiSSO();
+  const userName = useAtomValue(loginNameAtom);
+  const isLogin = useAtomValue(isLoginAtom);
+  const isAdmin = useAtomValue(isAdminAtom);
+  const [pending, setPending] = useState(true);
+  useEffect(() => {
+    session().then(() => {
+      setPending(false);
+    });
+  }, []);
   return (
     <>
       <ChakraProvider>
@@ -36,7 +54,17 @@ export default function App({ Component, pageProps }: AppProps) {
           </Link>
         </Box>
         <Center marginTop={"20px"}>
-          <Component {...pageProps} />
+          <VStack w="100%">
+            {!pending && isLogin ? (
+              <>
+                <Text>
+                  Login as : {userName}
+                  {isAdmin ? "(管理者)" : "(一般ユーザー)"}
+                </Text>
+              </>
+            ) : null}
+            <Component {...pageProps} />
+          </VStack>
         </Center>
       </ChakraProvider>
     </>

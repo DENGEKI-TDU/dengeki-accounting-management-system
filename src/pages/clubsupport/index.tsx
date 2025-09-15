@@ -24,7 +24,6 @@ export default function Home() {
     <>
       {!pending && isLogin ? (
         <VStack>
-          <Text>Log in as : {userName}</Text>
           <Text fontSize={"2xl"}>後援会費収支申請ホーム</Text>
           <Link href={"/clubsupport/income"}>
             <Box borderBottom="1px solid #fc8819">収入報告</Box>
