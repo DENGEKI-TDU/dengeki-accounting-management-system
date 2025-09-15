@@ -85,7 +85,6 @@ export default function Home() {
     <>
       {!pending && isLogin ? (
         <VStack>
-          <Text>Log in as : {userName}</Text>
           <Text fontSize={"2xl"}>管理者用ページホーム</Text>
           {isLogin ? (
             <>
@@ -112,6 +111,11 @@ export default function Home() {
                   <Link href={"/admin/edit?from=alumni"}>
                     <Box borderBottom="1px solid #fc8819">
                       校友会費関連帳簿データ編集
+                    </Box>
+                  </Link>
+                  <Link href={"/admin/discord"}>
+                    <Box borderBottom="1px solid #fc8819">
+                      discordスレッドID編集
                     </Box>
                   </Link>
                   <Box>
