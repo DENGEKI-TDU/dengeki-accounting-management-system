@@ -24,7 +24,6 @@ export default function Home() {
     <>
       {!pending && isLogin ? (
         <VStack>
-          <Text>Log in as : {userName}</Text>
           <Text fontSize={"2xl"}>本予算を除く予算申請ページ</Text>
           <Link href={"/hatosai"}>
             <Box borderBottom="1px solid #fc8819">鳩山祭関連</Box>

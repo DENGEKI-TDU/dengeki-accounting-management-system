@@ -12,16 +12,51 @@ export default async function handle(
     .split("; ")
     .find((row) => row.startsWith("token="))
     ?.split("=")[1];
-  if (jwt != "" && (await checkJWT(jwt!)).isAdmin) {
-    const result = await prisma.threadID.update({
-      where: {
-        id: 1,
-      },
-      data: {
-        threadID: threadID,
-      },
-    });
-    res.status(200).json(result?.threadID);
+  console.log(threadID);
+  if (
+    jwt != "" &&
+    ((await checkJWT(jwt!)).isAdmin ||
+      (await checkJWT(jwt!)).isDev ||
+      (await checkJWT(jwt!)).isTreasurer)
+  ) {
+    try {
+      await prisma.threadID.updateMany({
+        where: {
+          mode: "main",
+        },
+        data: {
+          threadID: threadID.main,
+        },
+      });
+      await prisma.threadID.updateMany({
+        where: {
+          mode: "hatosai",
+        },
+        data: {
+          threadID: threadID.hatosai,
+        },
+      });
+      await prisma.threadID.updateMany({
+        where: {
+          mode: "alumni",
+        },
+        data: {
+          threadID: threadID.alumni,
+        },
+      });
+      await prisma.threadID.updateMany({
+        where: {
+          mode: "clubsupport",
+        },
+        data: {
+          threadID: threadID.clubSupport,
+        },
+      });
+      res.status(200).end();
+    } catch (error) {
+      console.error(error);
+      res.status(403).json(error);
+    }
   } else {
     res.status(403).end();
   }
