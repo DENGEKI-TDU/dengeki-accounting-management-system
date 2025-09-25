@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = env("ACCOUNT_DB_URL")
 }
 
 model mainAccount {
@@ -100,4 +100,18 @@ model oneTimeToken {
   id           Int @id @default(autoincrement())
   token        String
   limit        DateTime
+}
+
+model accounting_queue {
+  id          Int @id @default(autoincrement())
+  created_at  DateTime
+  income      Int
+  outcome     Int
+  hasApproved Boolean
+  hasPayment  Boolean
+  hasGetReceipt Boolean
+  name        String
+  type        String
+  link        String
+  from        String
 }
