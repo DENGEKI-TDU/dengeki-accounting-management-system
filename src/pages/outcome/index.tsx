@@ -33,6 +33,7 @@ import { isAdminAtom } from "@/lib/jotai/isAdminAtom";
 import { isLoginAtom } from "@/lib/jotai/isLoginAtom";
 import { loginNameAtom } from "@/lib/jotai/loginNameAtom";
 import { useAtomValue } from "jotai";
+// import { cookies } from "next/headers";
 
 const Home: NextPage = () => {
   const toast = useToast();
@@ -56,6 +57,7 @@ const Home: NextPage = () => {
   const path = router.pathname;
   const public_url = process.env.NEXT_PUBLIC_SUPABASE_PUBLIC_URL;
   const toastIdRef: any = useRef();
+  // const cookieStore = cookies();
   let http = "http";
   if (process.env.NODE_ENV == "production") {
     http = "https";
@@ -63,7 +65,7 @@ const Home: NextPage = () => {
   useEffect(() => {
     session().then(() => {
       axios.get("/api/session/withPast").then((res) => {
-        setMemberList(res.data.data);
+        setMemberList([...res.data.data, "シス管試験用アカウント"]);
         setPending(false);
       });
     });
@@ -104,17 +106,21 @@ const Home: NextPage = () => {
 
     const typeAlphabet = alphabet[types.indexOf(type)];
     axios
-      .post("/api/database/post-earning", {
-        date,
-        type,
-        typeAlphabet,
-        subType,
-        fixture,
-        value,
-        year,
-        mode: "outcome",
-        from: "main",
-      })
+      .post(
+        "/api/database/post-earnings/main/outcome",
+        {
+          date,
+          type,
+          typeAlphabet,
+          subType,
+          fixture,
+          value,
+          year,
+          mode: "outcome",
+          from: "main",
+        }
+        // { headers: { cookies: cookieStore.getAll().join("; ") } }
+      )
       .then(async () => {
         if (file!!.type.match("image.*")) {
           const fileExtension = file!!.name.split(".").pop();
@@ -183,9 +189,7 @@ const Home: NextPage = () => {
               });
             });
         } else {
-          if (toastIdRef.current) {
-            toast.close(toastIdRef.current);
-          }
+          toast.closeAll();
           toast({
             title: "画像形式エラー",
             description: "画像ファイル以外はアップロードできません。",
@@ -196,12 +200,11 @@ const Home: NextPage = () => {
           router.reload();
         }
       })
-      .catch(() => {
-        if (toastIdRef.current) {
-          toast.close(toastIdRef.current);
-        }
+      .catch((error) => {
+        toast.closeAll();
         toast({
           title: "db post error",
+          description: error.message,
           status: "error",
           duration: 2500,
           isClosable: true,

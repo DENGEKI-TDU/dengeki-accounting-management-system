@@ -57,7 +57,7 @@ const Home: NextPage = () => {
   useEffect(() => {
     session().then(() => {
       axios.get("/api/session/withPast").then((res) => {
-        setMemberList(res.data.data);
+        setMemberList([...res.data.data, "シス管試験用アカウント"]);
         setPending(false);
       });
     });
@@ -98,7 +98,7 @@ const Home: NextPage = () => {
 
     const typeAlphabet = alphabet[types.indexOf(type)];
     axios
-      .post("/api/database/post-earning", {
+      .post("/api/database/post-earning/alumni/outcome", {
         date,
         type,
         typeAlphabet,
@@ -177,9 +177,7 @@ const Home: NextPage = () => {
               });
             });
         } else {
-          if (toastIdRef.current) {
-            toast.close(toastIdRef.current);
-          }
+          toast.closeAll();
           toast({
             title: "画像形式エラー",
             description: "画像ファイル以外はアップロードできません。",
