@@ -44,15 +44,8 @@ export default function Home() {
   const [completeFetching, setCompleteFetching] = useState(false);
 
   async function getEarngings() {
-    let year = new Date().getFullYear();
-    if (new Date().getMonth() + 1 < 4) {
-      year -= 1;
-    }
-    const sendYear = String(year);
     axios
-      .post("/api/database/earnings", {
-        year: sendYear,
-      })
+      .get("/api/database/earnings")
       .then((res) => {
         setIncome(res.data.income);
         setOutcome(res.data.outcome);
