@@ -101,3 +101,17 @@ model oneTimeToken {
   token        String
   limit        DateTime
 }
+
+model accounting_queue {
+  id          Int @id @default(autoincrement())
+  created_at  DateTime
+  income      Int
+  outcome     Int
+  hasApproved Boolean
+  hasPayment  Boolean
+  hasGetReceipt Boolean
+  name        String
+  type        String
+  link        String
+  from        String
+}
