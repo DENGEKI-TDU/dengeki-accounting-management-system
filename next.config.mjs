@@ -177,6 +177,18 @@ const nextConfig = {
         source: "/api/session/withPast",
         destination: `${domain}/v1/portal/account/getMembers`,
       },
+      {
+        source: "/api/discord/getThreadID",
+        destination: `${domain}/v1/account/discord/getThreadID`,
+      },
+      {
+        source: "/api/discord/send",
+        destination: `${domain}/v1/account/discord/send`,
+      },
+      {
+        source: "/api/discord/updateThread",
+        destination: `${domain}/v1/account/discord/updateThread`,
+      },
     ];
   },
 };

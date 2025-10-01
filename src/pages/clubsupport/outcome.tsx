@@ -92,9 +92,10 @@ const Home: NextPage = () => {
       "音響",
       "庶務",
       "その他",
+      "シス管試験用(一般使用禁止)",
     ];
 
-    const alphabet: string[] = ["A", "B", "C", "D", "E", "F", "X"];
+    const alphabet: string[] = ["A", "B", "C", "D", "E", "F", "X", "Z"];
 
     const typeAlphabet = alphabet[types.indexOf(type)];
     axios
@@ -283,6 +284,9 @@ const Home: NextPage = () => {
                   <option value="1">昨年度庶務代</option>
                   <option value="2">庶務代</option>
                 </>
+              ) : null}
+              {type == "シス管試験用(一般使用禁止" ? (
+                <option value="S">シス管試験</option>
               ) : null}
               <option value="X">その他</option>
               <option value="Z">不明</option>

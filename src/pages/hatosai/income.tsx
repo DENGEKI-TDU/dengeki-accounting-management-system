@@ -169,7 +169,7 @@ export default function Home() {
             </FormControl>
             {getName != "" && !memberList!.includes(userName) ? (
               <FormControl>
-                <FormLabel>購入者</FormLabel>
+                <FormLabel>受領者</FormLabel>
                 {memberList ? (
                   <Select
                     onChange={(e) => setGetName(e.target.value)}
@@ -192,7 +192,7 @@ export default function Home() {
               </FormControl>
             ) : (
               <FormControl>
-                <FormLabel>購入者</FormLabel>
+                <FormLabel>受領者</FormLabel>
                 <Input
                   onChange={(e) => setGetName(e.target.value)}
                   value={getName}
