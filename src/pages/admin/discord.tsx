@@ -139,7 +139,7 @@ export default function main() {
                 isClosable: false,
               });
               axios
-                .post("/api/discord/updateThread", {
+                .put("/api/discord/updateThread", {
                   threadID: {
                     main: mainThread,
                     hatosai: hatosaiThread,

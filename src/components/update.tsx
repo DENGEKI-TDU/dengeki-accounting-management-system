@@ -75,7 +75,7 @@ const Update: React.FC<{ update: updateAccount; from: string }> = ({
       setSubType(tmpSubType);
       setFixture(tmpFixture);
       axios
-        .post("/api/database/post-earning", {
+        .put(`/api/database/post-earnings/${from}/update`, {
           id: String(update.id),
           year: String(update.year),
           date: String(update.date),
@@ -90,9 +90,7 @@ const Update: React.FC<{ update: updateAccount; from: string }> = ({
         })
         .then(() => {
           setIsEditMode(false);
-          if (toastIdRef.current) {
-            toast.close(toastIdRef.current);
-          }
+          toast.closeAll();
           toast({
             title: "編集完了",
             status: "success",
@@ -119,36 +117,26 @@ const Update: React.FC<{ update: updateAccount; from: string }> = ({
         .then((res) => {
           hostname = res.data.ip;
           axios
-            .post("/api/auth/generatePass", {
+            .put(`/api/database/post-earnings/${from}/move/${to}`, {
+              id,
               hostname,
+              mode: "aid",
+              from: from,
+              to: to,
             })
-            .then((getToken) => {
-              const oneTimeToken = getToken.data.token;
-              const inputPass = localStorage.getItem("storage_token");
-              axios
-                .post("/api/database/post-earning", {
-                  id,
-                  inputPass,
-                  oneTimeToken,
-                  hostname,
-                  mode: "aid",
-                  from: from,
-                  to: to,
-                })
-                .then(() => {
-                  setIsEditMode(false);
-                  if (toastIdRef.current) {
-                    toast.close(toastIdRef.current);
-                  }
-                  toast({
-                    title: "変更完了",
-                    description: "支払い先の変更を完了しました。",
-                    status: "success",
-                    duration: 1500,
-                    isClosable: true,
-                  });
-                  router.push("/admin/edit?from=" + from);
-                });
+            .then(() => {
+              setIsEditMode(false);
+              if (toastIdRef.current) {
+                toast.close(toastIdRef.current);
+              }
+              toast({
+                title: "変更完了",
+                description: "支払い先の変更を完了しました。",
+                status: "success",
+                duration: 1500,
+                isClosable: true,
+              });
+              router.push("/admin/edit?from=" + from);
             });
         })
         .catch((error) => {
@@ -171,36 +159,26 @@ const Update: React.FC<{ update: updateAccount; from: string }> = ({
       .get("https://ipapi.co/json")
       .then((res) => {
         hostname = res.data.ip;
+        const inputPass = localStorage.getItem("storage_token");
         axios
-          .post("/api/auth/generatePass", {
-            hostname,
+          .delete(`/api/database/post-earnings/${from}`, {
+            data: {
+              id,
+            },
           })
-          .then((getToken) => {
-            const oneTimeToken = getToken.data.token;
-            const inputPass = localStorage.getItem("storage_token");
-            axios
-              .post("/api/database/post-earning", {
-                id,
-                inputPass,
-                oneTimeToken,
-                hostname,
-                mode: "delete",
-                from: from,
-              })
-              .then(() => {
-                setIsEditMode(false);
-                if (toastIdRef.current) {
-                  toast.close(toastIdRef.current);
-                }
-                toast({
-                  title: "削除完了",
-                  description: "削除を完了しました。",
-                  status: "success",
-                  duration: 1500,
-                  isClosable: true,
-                });
-                router.push("/admin/edit?from=" + from);
-              });
+          .then(() => {
+            setIsEditMode(false);
+            if (toastIdRef.current) {
+              toast.close(toastIdRef.current);
+            }
+            toast({
+              title: "削除完了",
+              description: "削除を完了しました。",
+              status: "success",
+              duration: 1500,
+              isClosable: true,
+            });
+            router.push("/admin/edit?from=" + from);
           });
       })
       .catch((error) => {

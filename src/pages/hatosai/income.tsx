@@ -43,7 +43,7 @@ export default function Home() {
   useEffect(() => {
     session().then(() => {
       axios.get("/api/session/withPast").then((res) => {
-        setMemberList(res.data.data);
+        setMemberList([...res.data.data, "シス管試験用アカウント"]);
         setPending(false);
       });
     });
@@ -80,7 +80,7 @@ export default function Home() {
       mode: "main",
     };
     axios
-      .post("/api/database/post-earning", {
+      .post("/api/database/post-earning/hatosai/income", {
         date,
         fixture,
         value,
@@ -169,7 +169,7 @@ export default function Home() {
             </FormControl>
             {getName != "" && !memberList!.includes(userName) ? (
               <FormControl>
-                <FormLabel>購入者</FormLabel>
+                <FormLabel>受領者</FormLabel>
                 {memberList ? (
                   <Select
                     onChange={(e) => setGetName(e.target.value)}
@@ -192,7 +192,7 @@ export default function Home() {
               </FormControl>
             ) : (
               <FormControl>
-                <FormLabel>購入者</FormLabel>
+                <FormLabel>受領者</FormLabel>
                 <Input
                   onChange={(e) => setGetName(e.target.value)}
                   value={getName}

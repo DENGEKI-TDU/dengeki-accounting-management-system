@@ -58,7 +58,7 @@ const Home: NextPage = () => {
   useEffect(() => {
     session().then(() => {
       axios.get("/api/session/withPast").then((res) => {
-        setMemberList(res.data.data);
+        setMemberList([...res.data.data, "シス管試験用アカウント"]);
         setPending(false);
       });
     });
@@ -93,13 +93,14 @@ const Home: NextPage = () => {
       "音響",
       "庶務",
       "その他",
+      "シス管試験用(一般使用禁止)",
     ];
 
-    const alphabet: string[] = ["A", "B", "C", "D", "E", "F", "X"];
+    const alphabet: string[] = ["A", "B", "C", "D", "E", "F", "X", "Z"];
 
     const typeAlphabet = alphabet[types.indexOf(type)];
     axios
-      .post("/api/database/post-earning", {
+      .post("/api/database/post-earning/hatosai/outcome", {
         date,
         type,
         typeAlphabet,
@@ -178,9 +179,7 @@ const Home: NextPage = () => {
               });
             });
         } else {
-          if (toastIdRef.current) {
-            toast.close(toastIdRef.current);
-          }
+          toast.closeAll();
           toast({
             title: "画像形式エラー",
             description: "画像ファイル以外はアップロードできません。",
@@ -286,6 +285,9 @@ const Home: NextPage = () => {
                   <option value="1">昨年度庶務代</option>
                   <option value="2">庶務代</option>
                 </>
+              ) : null}
+              {type == "シス管試験用(一般使用禁止" ? (
+                <option value="S">シス管試験</option>
               ) : null}
               <option value="X">その他</option>
               <option value="Z">不明</option>
