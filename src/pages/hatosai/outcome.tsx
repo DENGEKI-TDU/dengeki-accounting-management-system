@@ -46,7 +46,6 @@ const Home: NextPage = () => {
   const [memo, setMemo] = useState("");
   const [year, setYear] = useState("");
   const [images, setImages] = useState<Blob[]>([]);
-  // const [isAdmin, isUser, status, Login, Logout] = UseLoginState(false);
   const { session, login, logout } = DengekiSSO();
   const userName = useAtomValue(loginNameAtom);
   const isLogin = useAtomValue(isLoginAtom);
@@ -111,7 +110,8 @@ const Home: NextPage = () => {
         mode: "outcome",
         from: "hatosai",
       })
-      .then(async () => {
+      .then(async (result) => {
+        console.log(result.data.accountID);
         if (file!!.type.match("image.*")) {
           const fileExtension = file!!.name.split(".").pop();
           const uuid = uuidv4();
@@ -152,6 +152,7 @@ const Home: NextPage = () => {
               username,
               valueContent,
               mode: "hatosai",
+              accountID: result.data.id,
             })
             .then(() => {
               if (toastIdRef.current) {
@@ -212,6 +213,11 @@ const Home: NextPage = () => {
             <NumberInput
               min={new Date().getFullYear() - 2}
               onChange={(e) => setYear(String(Number(e)))}
+              defaultValue={
+                new Date().getFullYear() < 3
+                  ? new Date().getFullYear() - 1
+                  : new Date().getFullYear()
+              }
             >
               <NumberInputField />
               <NumberInputStepper>
@@ -236,6 +242,9 @@ const Home: NextPage = () => {
               <option value={"照明"}>照明</option>
               <option value={"音響"}>音響</option>
               <option value={"庶務"}>庶務</option>
+              <option value={"シス管試験用(一般使用禁止)"}>
+                シス管試験用(一般使用禁止)
+              </option>
               <option value={"その他"}>その他</option>
             </Select>
           </FormControl>
@@ -286,7 +295,7 @@ const Home: NextPage = () => {
                   <option value="2">庶務代</option>
                 </>
               ) : null}
-              {type == "シス管試験用(一般使用禁止" ? (
+              {type == "シス管試験用(一般使用禁止)" ? (
                 <option value="S">シス管試験</option>
               ) : null}
               <option value="X">その他</option>
