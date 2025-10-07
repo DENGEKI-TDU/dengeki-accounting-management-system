@@ -20,7 +20,7 @@ export default function Home() {
   const domain =
     process.env.NODE_ENV === "production"
       ? "https://portal.dengeki-fox.net"
-      : "http://localhost:3004";
+      : "http://localhost:3005";
   useEffect(() => {
     session().then(() => {
       axios
