@@ -10,6 +10,10 @@ const nextConfig = {
     }
     return [
       {
+        source: "/api/redirect/getToken",
+        destination: `${domain}/redirect/getToken`,
+      },
+      {
         source: "/api/database/earnings",
         destination: `${domain}/v1/account/database/earnings`,
       },

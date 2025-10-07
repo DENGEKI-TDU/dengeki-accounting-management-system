@@ -7,18 +7,29 @@ import { isAdminAtom } from "@/lib/jotai/isAdminAtom";
 import { isLoginAtom } from "@/lib/jotai/isLoginAtom";
 import { loginNameAtom } from "@/lib/jotai/loginNameAtom";
 import { useAtomValue } from "jotai";
+import axios from "axios";
 
 export default function Home() {
-  // const [isAdmin, isUser, status, Login, Logout] = UseLoginState(false);
   const { session, login, logout } = DengekiSSO();
   const [pending, setPending] = useState(true);
   const userName = useAtomValue(loginNameAtom);
   const isLogin = useAtomValue(isLoginAtom);
   const isAdmin = useAtomValue(isAdminAtom);
+  const [token, setToken] = useState<string>();
   const router = useRouter();
+  const domain =
+    process.env.NODE_ENV === "production"
+      ? "https://portal.dengeki-fox.net"
+      : "http://localhost:3004";
   useEffect(() => {
     session().then(() => {
-      setPending(false);
+      axios
+        .post("/api/redirect/getToken", { redirectTo: "/accounting_queue" })
+        .then(async (res) => {
+          console.log(res.data.token);
+          setToken(res.data.token);
+          setPending(false);
+        });
     });
   });
   return (
@@ -36,6 +47,9 @@ export default function Home() {
             <Box borderBottom="1px solid #fc8819">
               本予算以外の収支報告ページ
             </Box>
+          </Link>
+          <Link href={`${domain}/redirect?token=${token}`} target="_break">
+            <Box borderBottom="1px solid #fc8819">会計の申請状況確認ページ</Box>
           </Link>
           {isAdmin ? (
             <Link href="/admin">
