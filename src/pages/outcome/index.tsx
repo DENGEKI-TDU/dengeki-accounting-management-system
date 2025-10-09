@@ -45,7 +45,11 @@ const Home: NextPage = () => {
   const [name, setName] = useState("");
   const [fixture, setFixture] = useState("");
   const [memo, setMemo] = useState("");
-  const [year, setYear] = useState("");
+  const [year, setYear] = useState(
+    new Date().getFullYear() < 3
+      ? String(new Date().getFullYear() - 1)
+      : String(new Date().getFullYear())
+  );
   const [images, setImages] = useState<Blob[]>([]);
   // const [isAdmin, isUser, status, Login, Logout] = UseLoginState(false);
   const { session, login, logout } = DengekiSSO();
@@ -122,7 +126,8 @@ const Home: NextPage = () => {
         }
         // { headers: { cookies: cookieStore.getAll().join("; ") } }
       )
-      .then(async () => {
+      .then(async (result) => {
+        console.log(result.data);
         if (file!!.type.match("image.*")) {
           const fileExtension = file!!.name.split(".").pop();
           const uuid = uuidv4();
@@ -163,6 +168,7 @@ const Home: NextPage = () => {
               username,
               valueContent,
               mode: "main",
+              accountID: result.data.id,
             })
             .then(() => {
               if (toastIdRef.current) {
@@ -222,6 +228,11 @@ const Home: NextPage = () => {
             <NumberInput
               min={new Date().getFullYear() - 2}
               onChange={(e) => setYear(String(Number(e)))}
+              defaultValue={
+                new Date().getFullYear() < 3
+                  ? new Date().getFullYear() - 1
+                  : new Date().getFullYear()
+              }
             >
               <NumberInputField />
               <NumberInputStepper>
@@ -246,6 +257,9 @@ const Home: NextPage = () => {
               <option value={"照明"}>照明</option>
               <option value={"音響"}>音響</option>
               <option value={"庶務"}>庶務</option>
+              <option value={"シス管試験用(一般使用禁止)"}>
+                シス管試験用(一般使用禁止)
+              </option>
               <option value={"その他"}>その他</option>
             </Select>
           </FormControl>
@@ -296,7 +310,7 @@ const Home: NextPage = () => {
                   <option value="2">庶務代</option>
                 </>
               ) : null}
-              {type == "シス管試験用(一般使用禁止" ? (
+              {type == "シス管試験用(一般使用禁止)" ? (
                 <option value="S">シス管試験</option>
               ) : null}
               <option value="X">その他</option>
@@ -427,4 +441,3 @@ const Home: NextPage = () => {
   }
 };
 export default Home;
-

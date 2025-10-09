@@ -84,13 +84,15 @@ export default function Home() {
         mode: "income",
         from: "main",
       })
-      .then(async () => {
+      .then(async (result) => {
+        console.log(result.data.accountID);
         const username = "収入報告くん";
         axios
           .post("/api/discord/send", {
             username,
             valueContent,
             mode: "main",
+            accountID: result.data.id,
           })
           .then(() => {
             if (toastIdRef.current) {
