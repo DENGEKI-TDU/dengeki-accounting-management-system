@@ -9,24 +9,24 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@chakra-ui/icons": "^2.1.1",
-    "@chakra-ui/react": "^2.8.2",
-    "@emotion/react": "^11.11.3",
-    "@emotion/styled": "^11.11.0",
-    "@prisma/client": "^5.16.1",
+    "@chakra-ui/icons": "^2.2.6",
+    "@chakra-ui/react": "^2.10.9",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@prisma/client": "^5.22.0",
     "@supabase/ssr": "latest",
     "@supabase/supabase-js": "latest",
-    "@types/formidable": "^3.4.5",
-    "axios": "^1.7.2",
+    "@types/formidable": "^3.4.6",
+    "axios": "^1.12.2",
     "exceljs": "^4.4.0",
-    "formidable": "^3.5.1",
-    "framer-motion": "^11.0.3",
-    "fs": "^0.0.1-security",
-    "jotai": "^2.12.5",
-    "next": "^14.2.5",
+    "formidable": "^3.5.4",
+    "framer-motion": "^11.18.2",
+    "fs": "^0.0.2",
+    "jotai": "^2.15.0",
+    "next": "^14.2.33",
     "react": "^18",
     "react-dom": "^18",
-    "swiper": "^11.0.6",
+    "swiper": "^11.2.10",
     "uuid": "^9.0.1"
   },
   "devDependencies": {
@@ -34,7 +34,7 @@
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "@types/uuid": "^9.0.8",
-    "prisma": "^5.16.1",
+    "prisma": "^5.22.0",
     "typescript": "^5"
   }
 }
