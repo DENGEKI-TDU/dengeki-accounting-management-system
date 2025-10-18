@@ -15,7 +15,7 @@ export default function Home() {
   const userName = useAtomValue(loginNameAtom);
   const isLogin = useAtomValue(isLoginAtom);
   const isAdmin = useAtomValue(isAdminAtom);
-  const [token, setToken] = useState<string>();
+  const [redirectLink, setRedirectLink] = useState<string>("");
   const router = useRouter();
   const domain =
     process.env.NODE_ENV === "production"
@@ -23,15 +23,19 @@ export default function Home() {
       : "http://localhost:3005";
   useEffect(() => {
     session().then(() => {
+      setPending(false);
+    });
+  }, []);
+  useEffect(() => {
+    if (isLogin) {
       axios
         .post("/api/redirect/getToken", { redirectTo: "/accounting_queue" })
         .then(async (res) => {
           console.log(res.data.token);
-          setToken(res.data.token);
-          setPending(false);
+          setRedirectLink(`${domain}/redirect?token=${res.data.token}`);
         });
-    });
-  });
+    }
+  }, [isLogin]);
   return (
     <>
       {!pending && (isAdmin || isLogin) ? (
@@ -48,9 +52,13 @@ export default function Home() {
               本予算以外の収支報告ページ
             </Box>
           </Link>
-          <Link href={`${domain}/redirect?token=${token}`} target="_break">
-            <Box borderBottom="1px solid #fc8819">会計の申請状況確認ページ</Box>
-          </Link>
+          {redirectLink != "" ? (
+            <Link href={redirectLink} target="_break">
+              <Box borderBottom="1px solid #fc8819">
+                会計の申請状況確認ページ
+              </Box>
+            </Link>
+          ) : null}
           {isAdmin ? (
             <Link href="/admin">
               <Box borderBottom="1px solid #fc8819">管理者用ページ</Box>
