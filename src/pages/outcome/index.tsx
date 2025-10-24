@@ -350,21 +350,6 @@ const Home: NextPage = () => {
             </>}
           </FormControl>
           <FormControl>
-            <FormLabel>購入者</FormLabel>
-            {name != "" && memberList.includes(userName) ? 
-            <Input value={name} disabled />
-            : <>
-            <Select onChange={(e) => setName(e.target.value)}>
-              <option defaultChecked>選択してください</option>
-              {memberList.map((memberListComponent) => {
-                return(
-                  <option value={memberListComponent} defaultValue={"購入者を選択してください"}>{memberListComponent}</option>
-                )
-              })}
-            </Select>
-            </>}
-          </FormControl>
-          <FormControl>
             <FormLabel htmlFor="postImages">レシート画像</FormLabel>
             <Input
               type="file"
