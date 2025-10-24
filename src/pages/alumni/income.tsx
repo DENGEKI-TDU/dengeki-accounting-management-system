@@ -41,11 +41,18 @@ export default function Home() {
   const router = useRouter();
   const toastIdRef: any = useRef();
   useEffect(() => {
-    session().then(() => {
-      axios.get("/api/session/withPast").then((res) => {
-        setMemberList([...res.data.data, "シス管試験用アカウント"]);
+    session().then(async() => {
+      try{
+        const res = await axios.get("/api/session/withPast")
+        setMemberList(res.data.data)
+        if(res.status != 403){
+          setMemberList([...res.data.data, "シス管試験用アカウント"]);
+        }
+      } catch(error){
+        console.log(error)
+      }
         setPending(false);
-      });
+      ;
     });
   }, []);
   useEffect(() => {
@@ -163,39 +170,22 @@ export default function Home() {
                 </NumberInputStepper>
               </NumberInput>
             </FormControl>
-            {getName != "" && !memberList!.includes(userName) ? (
-              <FormControl>
-                <FormLabel>受領者</FormLabel>
-                {memberList ? (
-                  <Select
-                    onChange={(e) => setGetName(e.target.value)}
-                    placeholder="選択してください"
-                  >
-                    {memberList.map((memberListContent) => {
-                      return (
-                        <option value={memberListContent}>
-                          {memberListContent}
-                        </option>
-                      );
-                    })}
-                  </Select>
-                ) : (
-                  <Input
-                    onChange={(e) => setGetName(e.target.value)}
-                    value={getName}
-                  />
-                )}
-              </FormControl>
-            ) : (
-              <FormControl>
-                <FormLabel>受領者</FormLabel>
-                <Input
-                  onChange={(e) => setGetName(e.target.value)}
-                  value={getName}
-                  disabled={true}
-                />
-              </FormControl>
-            )}
+            
+          <FormControl>
+            <FormLabel>受領者</FormLabel>
+            {getName != "" && memberList.includes(userName) ? 
+            <Input value={getName} disabled />
+            : <>
+            <Select onChange={(e) => setGetName(e.target.value)}>
+              <option defaultChecked>選択してください</option>
+              {memberList.map((memberListComponent) => {
+                return(
+                  <option value={memberListComponent} defaultValue={"購入者を選択してください"}>{memberListComponent}</option>
+                )
+              })}
+            </Select>
+            </>}
+          </FormControl>
             <FormControl>
               <FormLabel>収入事由</FormLabel>
               <Input onChange={(e) => setFixture(e.target.value)} />

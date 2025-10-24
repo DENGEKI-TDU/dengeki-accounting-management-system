@@ -31,11 +31,9 @@ export default function Home() {
           <Link href={"/clubsupport"}>
             <Box borderBottom="1px solid #fc8819">後援会費関連</Box>
           </Link>
-          {isAdmin ? (
-            <Link href="/alumni">
-              <Box borderBottom="1px solid #fc8819">校友会費関連</Box>
-            </Link>
-          ) : null}
+          <Link href="/alumni">
+            <Box borderBottom="1px solid #fc8819">校友会費関連</Box>
+          </Link>
           <Button onClick={logout}>ログアウト</Button>
         </VStack>
       ) : (
