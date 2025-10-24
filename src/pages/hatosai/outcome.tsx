@@ -55,11 +55,18 @@ const Home: NextPage = () => {
   const public_url = process.env.NEXT_PUBLIC_SUPABASE_PUBLIC_URL;
   const toastIdRef: any = useRef();
   useEffect(() => {
-    session().then(() => {
-      axios.get("/api/session/withPast").then((res) => {
-        setMemberList([...res.data.data, "シス管試験用アカウント"]);
+    session().then(async() => {
+      try{
+        const res = await axios.get("/api/session/withPast")
+        setMemberList(res.data.data)
+        if(res.status != 403){
+          setMemberList([...res.data.data, "シス管試験用アカウント"]);
+        }
+      } catch(error){
+        console.log(error)
+      }
         setPending(false);
-      });
+      ;
     });
   }, []);
   useEffect(() => {
@@ -312,36 +319,21 @@ const Home: NextPage = () => {
               </NumberInputStepper>
             </NumberInput>
           </FormControl>
-          {name != "" && !memberList!.includes(userName) ? (
-            <FormControl>
-              <FormLabel>購入者</FormLabel>
-              {memberList ? (
-                <Select
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="選択してください"
-                >
-                  {memberList.map((memberListContent) => {
-                    return (
-                      <option value={memberListContent}>
-                        {memberListContent}
-                      </option>
-                    );
-                  })}
-                </Select>
-              ) : (
-                <Input onChange={(e) => setName(e.target.value)} value={name} />
-              )}
-            </FormControl>
-          ) : (
-            <FormControl>
-              <FormLabel>購入者</FormLabel>
-              <Input
-                onChange={(e) => setName(e.target.value)}
-                value={name}
-                disabled={true}
-              />
-            </FormControl>
-          )}
+          <FormControl>
+            <FormLabel>購入者</FormLabel>
+            {name != "" && memberList.includes(userName) ? 
+            <Input value={name} disabled />
+            : <>
+            <Select onChange={(e) => setName(e.target.value)}>
+              <option defaultChecked>選択してください</option>
+              {memberList.map((memberListComponent) => {
+                return(
+                  <option value={memberListComponent} defaultValue={"購入者を選択してください"}>{memberListComponent}</option>
+                )
+              })}
+            </Select>
+            </>}
+          </FormControl>
           <FormControl>
             <FormLabel htmlFor="postImages">レシート画像</FormLabel>
             <Input
