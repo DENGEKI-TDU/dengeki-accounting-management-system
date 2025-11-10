@@ -16,6 +16,7 @@ import {
   useToast,
   Button,
   VStack,
+  Text
 } from "@chakra-ui/react";
 import type { NextPage } from "next";
 import { ChangeEvent, FormEvent, useEffect, useRef, useState } from "react";
@@ -44,7 +45,10 @@ const Home: NextPage = () => {
   const [name, setName] = useState("");
   const [fixture, setFixture] = useState("");
   const [memo, setMemo] = useState("");
-  const [year, setYear] = useState("");
+  const [year, setYear] = useState(
+    new Date().getFullYear() < 3
+      ? String(new Date().getFullYear() - 1)
+      : String(new Date().getFullYear()));
   const [images, setImages] = useState<Blob[]>([]);
   const { session, login, logout } = DengekiSSO();
   const userName = useAtomValue(loginNameAtom);
