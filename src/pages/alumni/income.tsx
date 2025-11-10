@@ -81,7 +81,7 @@ export default function Home() {
       "\nメモ : " +
       memo;
     axios
-      .post("/api/database/post-earning/alumni/income", {
+      .post("/api/database/post-earnings/alumni/income", {
         date,
         fixture,
         value,
