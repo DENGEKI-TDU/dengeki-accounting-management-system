@@ -88,7 +88,7 @@ export default function Home() {
       mode: "main",
     };
     axios
-      .post("/api/database/post-earning/clubsupport/income", {
+      .post("/api/database/post-earnings/clubsupport/income", {
         date,
         fixture,
         value,

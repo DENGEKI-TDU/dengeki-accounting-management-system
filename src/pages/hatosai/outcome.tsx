@@ -106,7 +106,7 @@ const Home: NextPage = () => {
 
     const typeAlphabet = alphabet[types.indexOf(type)];
     axios
-      .post("/api/database/post-earning/hatosai/outcome", {
+      .post("/api/database/post-earnings/hatosai/outcome", {
         date,
         type,
         typeAlphabet,
