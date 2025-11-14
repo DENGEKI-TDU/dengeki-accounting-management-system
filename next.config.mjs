@@ -166,6 +166,10 @@ const nextConfig = {
         destination: `${domain}/v1/account/database/post-earnings/clubsupport/move/aid`,
       },
       {
+        source: "/api/database/post-earnings/all",
+        destination: `${domain}/v1/account/database/post-earnings/all`,
+      },
+      {
         source: "/api/session/login",
         destination: `${domain}/v1/session/login`,
       },
