@@ -111,6 +111,11 @@ export default function Home() {
                       discordスレッドID編集
                     </Box>
                   </Link>
+                  <Link href={"/admin/KnapSack"}>
+                    <Box borderBottom="1px solid #fc8819">
+                      KnapSack計算(予算最適振り分け計算)ページ
+                    </Box>
+                  </Link>
                   <Box>
                     <Box
                       margin="5px"
