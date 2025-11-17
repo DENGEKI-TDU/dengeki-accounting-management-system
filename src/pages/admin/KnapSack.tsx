@@ -1,6 +1,5 @@
 import { KnapSackData, KnapSackResultData } from "@/components/knapsack";
 import { knapSackAtom } from "@/lib/jotai/knapSackAtom";
-import { knapSackSelectDataChangedAtom } from "@/lib/jotai/knapSAckSelectDataChanged";
 import { knapSackSelectDateAtom } from "@/lib/jotai/knapSackSelectDateAtom";
 import {
   Box,
@@ -66,7 +65,6 @@ type balanceType = {
 };
 
 const knapsack = (accountDatas: knapSackAccountType[], maxAmount: number) => {
-  console.log("KnapSackを解きます", maxAmount);
   const n = accountDatas.length;
   const dp: number[][] = Array.from({ length: n + 1 }, () =>
     Array(maxAmount + 1).fill(0)
@@ -82,7 +80,6 @@ const knapsack = (accountDatas: knapSackAccountType[], maxAmount: number) => {
     }
   }
   const maxValue = dp[n][maxAmount];
-  console.log("最大価値", maxValue);
   let w = maxAmount;
   const chosenIDs: knapSackAccountType[] = [];
   for (let i = n; i > 0; i--) {
@@ -92,7 +89,6 @@ const knapsack = (accountDatas: knapSackAccountType[], maxAmount: number) => {
       w -= accountDatas[i - 1].outcome;
     }
   }
-  console.log("IDs:", chosenIDs);
   return { result: chosenIDs, value: maxValue };
 };
 
@@ -117,9 +113,6 @@ export default function Home() {
   }>();
   const [knapSackData, setKnapSackData] = useAtom(knapSackAtom);
   const setKnapSackSelectDate = useSetAtom(knapSackSelectDateAtom);
-  const [knapSackSelectDataChanged, setKnapSackSelectDataChanged] = useAtom(
-    knapSackSelectDataChangedAtom
-  );
   const [selectAll, setSelectAll] = useState(false);
   const accountTypes = ["main", "hatosai", "clubsupport", "alumni", "aid"];
   const accountTypeString = [
@@ -135,6 +128,7 @@ export default function Home() {
       setPending(false);
     });
   }, []);
+
   useEffect(() => {
     if (isAdmin) {
       axios
@@ -147,6 +141,14 @@ export default function Home() {
       });
     }
   }, [isAdmin]);
+
+  useEffect(() => {
+    if (knapSackData?.length === allAccounts?.length) {
+      setSelectAll(true);
+    } else {
+      setSelectAll(false);
+    }
+  }, [knapSackData]);
 
   const checkMaxAmount = () => {
     if (knapSackFrom === "main") {
@@ -163,7 +165,6 @@ export default function Home() {
   };
 
   const checkMax = () => {
-    console.log(knapSackMaxAmountType, knapSackFrom, balance);
     if (knapSackMaxAmountType === "all") {
       if (knapSackFrom === "main") {
         return balance?.income;
@@ -194,7 +195,6 @@ export default function Home() {
   const throwKnapSack = () => {
     const maxAmount =
       knapSackMaxAmountType === "custom" ? knapSackMaxAmount : checkMax();
-    console.log(knapSackData, maxAmount);
     if (knapSackData && maxAmount) {
       setKnapSackResult(knapsack(knapSackData, maxAmount));
     } else {
@@ -212,7 +212,7 @@ export default function Home() {
     <>
       {!pending && isLogin ? (
         <>
-          <Text>KnapSack計算ページ</Text>
+          <Heading>KnapSack計算ページ</Heading>
           {isAdmin ? (
             <>
               {allAccounts ? (
@@ -224,21 +224,16 @@ export default function Home() {
                           <Th>
                             <Checkbox
                               onChange={() => {
-                                setSelectAll(!selectAll);
                                 setKnapSackSelectDate(new Date());
                                 if (
                                   knapSackData?.length != allAccounts.length
                                 ) {
                                   setKnapSackData(allAccounts);
-                                  console.log("全選択します");
-                                  setKnapSackSelectDataChanged(false);
                                 } else {
                                   setKnapSackData(null);
-                                  console.log("全解除します");
-                                  setKnapSackSelectDataChanged(true);
                                 }
                               }}
-                              isChecked={!knapSackSelectDataChanged}
+                              isChecked={selectAll}
                             />
                           </Th>
                           <Th>date</Th>
@@ -260,99 +255,127 @@ export default function Home() {
                       </Tbody>
                     </Table>
                   </TableContainer>
-                  <Box w="80%">
-                    <Text w="100%">使用する会計種別・金額を選択</Text>
-                    <HStack w="100%">
-                      <Center w="100%">
-                        <Select
-                          placeholder="会計種別"
-                          onChange={(e) => {
-                            setKnapSackFrom(e.target.value);
-                          }}
-                          w="30%"
-                        >
-                          <option value="main">本予算</option>
-                          <option value="hatosai">鳩山祭</option>
-                          <option value="clubsupport">後援会費</option>
-                          <option value="alumni">校友会費</option>
-                          <option value="aid">共済金</option>
-                        </Select>
-                        <Select
-                          placeholder="金額上限"
-                          onChange={(e) => {
-                            setKnapSackMaxAmountType(e.target.value);
-                          }}
-                          w="30%"
-                        >
-                          <option value="all">収入全て</option>
-                          <option value="balance">残高すべて</option>
-                          <option value="custom">手動指定</option>
-                        </Select>
-                        {knapSackMaxAmountType === "custom" ? (
-                          <Box w="40%">
-                            <Text>金額を入力</Text>
-                            <NumberInput
-                              min={0}
-                              max={checkMaxAmount()}
-                              onChange={(e) => setKnapSackMaxAmount(Number(e))}
-                            >
-                              <NumberInputField />
-                              <NumberInputStepper>
-                                <NumberIncrementStepper />
-                                <NumberDecrementStepper />
-                              </NumberInputStepper>
-                            </NumberInput>
-                          </Box>
-                        ) : null}
-                      </Center>
-                    </HStack>
-                  </Box>
-                  <Button
-                    onClick={() => {
-                      console.log("Selected Data:", knapSackData);
-                      throwKnapSack();
-                    }}
+                  <Box
+                    w="80%"
+                    borderRadius={"md"}
+                    border={"1px solid #fc8819"}
+                    marginBottom={"20px"}
                   >
-                    選択されたデータと
-                    {accountTypeString[accountTypes.indexOf(knapSackFrom)]}の
-                    {knapSackMaxAmountType == "custom"
-                      ? `収入のうち${knapSackMaxAmount}円`
-                      : `${
-                          knapSackMaxAmountType == "all"
-                            ? "収入全て"
-                            : "残高全て"
-                        }`}
-                    でKnapSackを解く！
-                  </Button>
-                  {knapSackResult && knapSackResult.result ? (
-                    <>
-                      <Text>計算結果</Text>
-                      <TableContainer>
-                        <Table>
-                          <Thead>
-                            <Tr>
-                              <Th>date</Th>
-                              <Th>type</Th>
-                              <Th>品目名</Th>
-                              <Th>支出額</Th>
-                              <Th>会計種別</Th>
-                            </Tr>
-                          </Thead>
-                          <Tbody>
-                            {knapSackResult.result.map((result) => (
-                              <>
-                                <KnapSackResultData
-                                  accountData={result}
-                                  key={result.id}
-                                />
-                              </>
-                            ))}
-                          </Tbody>
-                        </Table>
-                      </TableContainer>
-                      <Text>合計 : {knapSackResult.value}円</Text>
-                    </>
-                  ) : null}
+                    <Center w="100%">
+                      <VStack w="100%">
+                        <Text>使用する会計種別・金額を選択</Text>
+                        <HStack w="100%">
+                          <Center w="100%">
+                            <Select
+                              placeholder="会計種別"
+                              onChange={(e) => {
+                                setKnapSackFrom(e.target.value);
+                              }}
+                              w="30%"
+                            >
+                              <option value="main">本予算</option>
+                              <option value="hatosai">鳩山祭</option>
+                              <option value="clubsupport">後援会費</option>
+                              <option value="alumni">校友会費</option>
+                              <option value="aid">共済金</option>
+                            </Select>
+                            <Select
+                              placeholder="金額上限"
+                              onChange={(e) => {
+                                setKnapSackMaxAmountType(e.target.value);
+                              }}
+                              w="30%"
+                            >
+                              <option value="all">収入全て</option>
+                              <option value="balance">残高すべて</option>
+                              <option value="custom">手動指定</option>
+                            </Select>
+                            {knapSackMaxAmountType === "custom" ? (
+                              <Box w="40%">
+                                <Text>金額を入力</Text>
+                                <NumberInput
+                                  min={0}
+                                  max={checkMaxAmount()}
+                                  onChange={(e) =>
+                                    setKnapSackMaxAmount(Number(e))
+                                  }
+                                >
+                                  <NumberInputField />
+                                  <NumberInputStepper>
+                                    <NumberIncrementStepper />
+                                    <NumberDecrementStepper />
+                                  </NumberInputStepper>
+                                </NumberInput>
+                              </Box>
+                            ) : null}
+                          </Center>
+                        </HStack>
+                        <VStack>
+                          {knapSackData &&
+                          knapSackFrom != "" &&
+                          knapSackMaxAmountType != "" ? (
+                            <Button
+                              onClick={() => {
+                                throwKnapSack();
+                              }}
+                              color={"#fc8819"}
+                            >
+                              選択された{knapSackData?.length}件のデータと
+                              {
+                                accountTypeString[
+                                  accountTypes.indexOf(knapSackFrom)
+                                ]
+                              }
+                              の
+                              {knapSackMaxAmountType == "custom"
+                                ? `収入のうち${knapSackMaxAmount}円`
+                                : `${
+                                    knapSackMaxAmountType == "all"
+                                      ? "収入全て"
+                                      : "残高全て"
+                                  }`}
+                              でKnapSackを解く！
+                            </Button>
+                          ) : null}
+                          {knapSackResult && knapSackResult.result ? (
+                            <>
+                              <Text>計算結果</Text>
+                              <TableContainer>
+                                <Table>
+                                  <Thead>
+                                    <Tr>
+                                      <Th>date</Th>
+                                      <Th>type</Th>
+                                      <Th>品目名</Th>
+                                      <Th>支出額</Th>
+                                      <Th>会計種別</Th>
+                                    </Tr>
+                                  </Thead>
+                                  <Tbody>
+                                    {knapSackResult.result.map((result) => (
+                                      <>
+                                        <KnapSackResultData
+                                          accountData={result}
+                                          key={result.id}
+                                        />
+                                      </>
+                                    ))}
+                                  </Tbody>
+                                </Table>
+                              </TableContainer>
+                              <Text
+                                fontSize={"xl"}
+                                fontWeight={"extrabold"}
+                                color={"blue"}
+                              >
+                                合計 : {knapSackResult.value}円
+                              </Text>
+                            </>
+                          ) : null}
+                        </VStack>
+                      </VStack>
+                    </Center>
+                  </Box>
                 </>
               ) : (
                 <div>Loading...</div>
