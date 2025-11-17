@@ -197,6 +197,22 @@ const nextConfig = {
         source: "/api/discord/updateThread",
         destination: `${domain}/v1/account/discord/updateThread`,
       },
+      {
+        source: "/api/database/get/main",
+        destination: `${domain}/v1/account/database/get/main`,
+      },
+      {
+        source: "/api/database/get/hatosai",
+        destination: `${domain}/v1/account/database/get/hatosai`,
+      },
+      {
+        source: "/api/database/get/clubsupport",
+        destination: `${domain}/v1/account/database/get/clubsupport`,
+      },
+      {
+        source: "/api/database/get/alumni",
+        destination: `${domain}/v1/account/database/get/alumni`,
+      },
     ];
   },
 };

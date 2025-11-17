@@ -25,119 +25,22 @@ import { isAdminAtom } from "@/lib/jotai/isAdminAtom";
 import { isLoginAtom } from "@/lib/jotai/isLoginAtom";
 import { loginNameAtom } from "@/lib/jotai/loginNameAtom";
 import { useAtomValue } from "jotai";
-
-export async function getServerSideProps(context: any) {
-  const from = context.query.from;
-  let nowYear = new Date().getFullYear();
-  if (nowYear < 4) {
-    nowYear - 1;
-  }
-  let response = [];
-  if (from == "main") {
-    const result = await prisma.mainAccount.findMany({
-      where: {
-        year: String(nowYear),
-      },
-      orderBy: [{ income: "desc" }, { date: "asc" }],
-    });
-    for (let i = 0; i < result.length; i++) {
-      response.push({
-        id: result[i].id,
-        date: String(result[i].date),
-        year: result[i].year,
-        type: result[i].type,
-        typeAlphabet: result[i].typeAlphabet,
-        subtype: result[i].subtype,
-        fixture: result[i].fixture,
-        income: result[i].income,
-        outcome: result[i].outcome,
-      });
-    }
-  }
-  if (from == "hatosai") {
-    const result = await prisma.hatosaiAccount.findMany({
-      where: {
-        year: String(nowYear),
-      },
-      orderBy: [{ income: "desc" }, { date: "asc" }],
-    });
-    for (let i = 0; i < result.length; i++) {
-      response.push({
-        id: result[i].id,
-        date: String(result[i].date),
-        year: result[i].year,
-        type: result[i].type,
-        typeAlphabet: result[i].typeAlphabet,
-        subtype: result[i].subtype,
-        fixture: result[i].fixture,
-        income: result[i].income,
-        outcome: result[i].outcome,
-      });
-    }
-  }
-  if (from == "clubsupport") {
-    const result = await prisma.clubsupportAccount.findMany({
-      where: {
-        year: String(nowYear),
-      },
-      orderBy: [{ income: "desc" }, { date: "asc" }],
-    });
-    for (let i = 0; i < result.length; i++) {
-      response.push({
-        id: result[i].id,
-        date: String(result[i].date),
-        year: result[i].year,
-        type: result[i].type,
-        typeAlphabet: result[i].typeAlphabet,
-        subtype: result[i].subtype,
-        fixture: result[i].fixture,
-        income: result[i].income,
-        outcome: result[i].outcome,
-      });
-    }
-  }
-  if (from == "alumni") {
-    const result = await prisma.alumniAccount.findMany({
-      where: {
-        year: String(nowYear),
-      },
-      orderBy: [{ income: "desc" }, { date: "asc" }],
-    });
-    for (let i = 0; i < result.length; i++) {
-      response.push({
-        id: result[i].id,
-        date: String(result[i].date),
-        year: result[i].year,
-        type: result[i].type,
-        typeAlphabet: result[i].typeAlphabet,
-        subtype: result[i].subtype,
-        fixture: result[i].fixture,
-        income: result[i].income,
-        outcome: result[i].outcome,
-      });
-    }
-  }
-  return {
-    props: { response },
-  };
-}
+import axios from "axios";
 
 type updateAccount = {
   response: any;
   id: number;
-  year: String;
+  year: string;
   date: Date;
-  type: String;
-  typeAlphabet: String;
-  subtype: String;
-  fixture: String;
+  type: string;
+  typeAlphabet: string;
+  subtype: string;
+  fixture: string;
   income: number;
   outcome: number;
 };
 
 const Home: React.FC<updateAccount> = (props) => {
-  const serachParams = useSearchParams();
-  const from = serachParams.get("from");
   const fromType = ["main", "hatosai", "clubsupport", "alumni"];
   const fromName = ["本予算", "鳩山祭援助金", "後援会費", "校友会費"];
   const { session, login, logout } = DengekiSSO();
@@ -145,19 +48,37 @@ const Home: React.FC<updateAccount> = (props) => {
   const isLogin = useAtomValue(isLoginAtom);
   const isAdmin = useAtomValue(isAdminAtom);
   const [pending, setPending] = useState(true);
+  const [from, setFrom] = useState<string | null>(null);
+  const [accountData, setAccountData] = useState<updateAccount[]>();
   const router = useRouter();
+  const searchParams = useSearchParams();
   useEffect(() => {
     session().then(() => {
       setPending(false);
     });
   }, []);
+  useEffect(() => {
+    console.log(searchParams.get("from"));
+    setFrom(searchParams.get("from"));
+    if (
+      searchParams.get("from") == "main" ||
+      searchParams.get("from") == "hatosai" ||
+      searchParams.get("from") == "clubsupport" ||
+      searchParams.get("from") == "alumni"
+    ) {
+      axios.get(`/api/database/get/${searchParams.get("from")}`).then((res) => {
+        setAccountData(res.data.data);
+      });
+    }
+  }, [searchParams]);
   return (
     <>
       {!pending && isLogin ? (
         <>
           {isAdmin ? (
             <Center width="100%">
-              {from ? (
+              {["main", "hatosai", "alumni", "clubsupport"].includes(from!) &&
+              from ? (
                 <VStack width="100%">
                   <Heading>
                     {fromName[fromType.indexOf(from)]}収支報告編集ページ
@@ -176,25 +97,19 @@ const Home: React.FC<updateAccount> = (props) => {
                         <Th></Th>
                       </Tr>
                     </Thead>
-                    <Tbody>
-                      {props.response.map(
-                        (account: {
-                          id: number;
-                          year: string;
-                          date: Date;
-                          type: string;
-                          typeAlphabet: string;
-                          subtype: string;
-                          fixture: string;
-                          income: number;
-                          outcome: number;
-                        }) => (
+                    {accountData ? (
+                      <Tbody>
+                        {accountData.map((account) => (
                           <Tr key={account.id}>
                             <Update update={account} from={from} />
                           </Tr>
-                        )
-                      )}
-                    </Tbody>
+                        ))}
+                      </Tbody>
+                    ) : (
+                      <>
+                        <Text>データ取得中</Text>
+                      </>
+                    )}
                   </Table>
                 </VStack>
               ) : (
