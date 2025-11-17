@@ -1,5 +1,4 @@
 import { knapSackAtom } from "@/lib/jotai/knapSackAtom";
-import { knapSackSelectDataChangedAtom } from "@/lib/jotai/knapSAckSelectDataChanged";
 import { knapSackSelectDateAtom } from "@/lib/jotai/knapSackSelectDateAtom";
 import { knapSackAccountType } from "@/pages/admin/KnapSack";
 import { Tr, Td, Checkbox } from "@chakra-ui/react";
@@ -22,20 +21,16 @@ export function KnapSackData({
   const [selected, setSelected] = useState(false);
   const [knapSackData, setKnapSackData] = useAtom(knapSackAtom);
   const knapSackSelectDate = useAtomValue(knapSackSelectDateAtom);
-  const setKnapSackSelectDataChanged = useSetAtom(
-    knapSackSelectDataChangedAtom
-  );
   useEffect(() => {
     if (knapSackData?.includes(accountData)) {
       setSelected(true);
     } else {
       setSelected(false);
     }
-    console.log("外部で状態が変化されました");
   }, [knapSackSelectDate]);
+
   const handleSelect = () => {
     if (!selected) {
-      console.log("追加します");
       if (!knapSackData) {
         setKnapSackData([accountData]);
         return;
@@ -43,7 +38,6 @@ export function KnapSackData({
         setKnapSackData([...knapSackData!, accountData]);
       }
     } else {
-      console.log("削除します");
       setKnapSackData(
         knapSackData!.filter((data) => data.id !== accountData.id)
       );
@@ -57,7 +51,6 @@ export function KnapSackData({
           <Checkbox
             onChange={() => {
               setSelected(!selected);
-              setKnapSackSelectDataChanged(true);
               handleSelect();
             }}
             isChecked={selected}
