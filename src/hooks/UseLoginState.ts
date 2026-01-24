@@ -9,15 +9,14 @@ import { dev } from "@/lib/Dev";
 export const DengekiSSO = () => {
   const toast = useToast();
   const router = useRouter();
-  const setUsetName = useSetAtom(loginNameAtom);
+  const setUserName = useSetAtom(loginNameAtom);
   const setIsLogin = useSetAtom(isLoginAtom);
   const setIsAdmin = useSetAtom(isAdminAtom);
   const session = async () => {
     dev.log("SSO Session Function");
     await fetch("/api/session/getSession").then(async (res) => {
       const response = await res.json();
-      dev.log(response.name);
-      setUsetName(response.name);
+      setUserName(response.name);
       setIsLogin(response.isLogin);
       if (response.isLogin) {
         setIsAdmin(response.isAdmin || response.isDev || response.isTreasurer);
@@ -56,7 +55,7 @@ export const DengekiSSO = () => {
           });
         } else {
           setIsLogin(response.isLogin);
-          setUsetName(response.name);
+          setUserName(response.name);
           toast.closeAll();
           if (response.isLogin) {
             toast({
@@ -66,7 +65,7 @@ export const DengekiSSO = () => {
               duration: 3000,
             });
             setIsAdmin(
-              response.isAdmin || response.isDev || response.isTreasurer
+              response.isAdmin || response.isDev || response.isTreasurer,
             );
             if (locate) {
               router.push(locate);
