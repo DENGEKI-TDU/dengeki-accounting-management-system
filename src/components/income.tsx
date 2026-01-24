@@ -31,7 +31,11 @@ export default function IncomeForm({
   const [value, setValue] = useState(0);
   const [fixture, setFixture] = useState("");
   const [memo, setMemo] = useState("");
-  const [year, setYear] = useState("");
+  const [year, setYear] = useState(
+    new Date().getMonth() < 3
+      ? String(new Date().getFullYear() - 1)
+      : String(new Date().getFullYear()),
+  );
   const [memberList, setMemberList] = useState<string[]>([]);
   const toast = useToast();
   const router = useRouter();
@@ -149,6 +153,7 @@ export default function IncomeForm({
           <NumberInput
             min={new Date().getFullYear() - 2}
             onChange={(e) => setYear(String(Number(e)))}
+            defaultValue={year}
           >
             <NumberInputField />
             <NumberInputStepper>
