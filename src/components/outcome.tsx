@@ -42,9 +42,9 @@ export default function Outcome({
   const [fixture, setFixture] = useState("");
   const [memo, setMemo] = useState("");
   const [year, setYear] = useState(
-    new Date().getFullYear() < 3
+    new Date().getMonth() < 3
       ? String(new Date().getFullYear() - 1)
-      : String(new Date().getFullYear())
+      : String(new Date().getFullYear()),
   );
   const [images, setImages] = useState<Blob[]>([]);
   const [memberList, setMemberList] = useState<string[]>([]);
@@ -217,11 +217,7 @@ export default function Outcome({
           <NumberInput
             min={new Date().getFullYear() - 2}
             onChange={(e) => setYear(String(Number(e)))}
-            defaultValue={
-              new Date().getFullYear() < 3
-                ? new Date().getFullYear() - 1
-                : new Date().getFullYear()
-            }
+            defaultValue={year}
           >
             <NumberInputField />
             <NumberInputStepper>
