@@ -47,6 +47,8 @@ export default function IncomeForm({
       setMemberList(res.data.data);
       if (res.status != 403) {
         setMemberList([...res.data.data, "シス管試験用アカウント"]);
+      } else {
+        console.log(res)
       }
     } catch (error) {
       console.log(error);
@@ -142,7 +144,7 @@ export default function IncomeForm({
       <Heading>
         {
           ["本予算", "鳩山祭援助金", "校友会費", "後援会費"][
-            ["main", "hatosai", "alumni", "clubsupport"].indexOf(from)
+          ["main", "hatosai", "alumni", "clubsupport"].indexOf(from)
           ]
         }
         収入報告フォーム
