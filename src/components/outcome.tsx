@@ -50,6 +50,7 @@ export default function Outcome({
   const [memberList, setMemberList] = useState<string[]>([]);
   const public_url = process.env.NEXT_PUBLIC_SUPABASE_PUBLIC_URL;
   const toastIdRef: any = useRef();
+  const [nameFetchFailed, setNameFetchFailed] = useState(false)
 
   const [file, setFile] = useState<File>();
   const handleChangeFile = (e: any) => {
@@ -190,13 +191,13 @@ export default function Outcome({
   };
 
   const getMemberList = async () => {
-    const res = await axios.get("/api/session/withPast");
-    setMemberList(res.data.data);
-    if (res.status != 403) {
+    try {
+      const res = await axios.get("/api/session/withPast");
+      setMemberList(res.data.data);
       setMemberList([...res.data.data, "シス管試験用アカウント"]);
-    }
-    if (res.status == 403) {
-      console.error(res)
+    } catch (error) {
+      console.dir(error)
+      setNameFetchFailed(true)
     }
   };
 
@@ -321,19 +322,23 @@ export default function Outcome({
             <Input value={name} disabled />
           ) : (
             <>
-              <Select onChange={(e) => setName(e.target.value)}>
-                <option defaultChecked>選択してください</option>
-                {memberList.map((memberListComponent) => {
-                  return (
-                    <option
-                      value={memberListComponent}
-                      defaultValue={"購入者を選択してください"}
-                    >
-                      {memberListComponent}
-                    </option>
-                  );
-                })}
-              </Select>
+              {nameFetchFailed ? <>
+                <Input onChange={(e) => { setName(e.target.value) }} />
+              </> :
+                <Select onChange={(e) => setName(e.target.value)}>
+                  <option defaultChecked>選択してください</option>
+                  {memberList.map((memberListComponent) => {
+                    return (
+                      <option
+                        value={memberListComponent}
+                        defaultValue={"購入者を選択してください"}
+                      >
+                        {memberListComponent}
+                      </option>
+                    );
+                  })}
+                </Select>
+              }
             </>
           )}
         </FormControl>
