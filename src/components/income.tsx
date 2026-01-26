@@ -37,6 +37,8 @@ export default function IncomeForm({
       : String(new Date().getFullYear()),
   );
   const [memberList, setMemberList] = useState<string[]>([]);
+  const [nameFetchFailed, setNameFetchFailed] = useState(false)
+
   const toast = useToast();
   const router = useRouter();
   const toastIdRef: any = useRef();
@@ -45,13 +47,10 @@ export default function IncomeForm({
     try {
       const res = await axios.get("/api/session/withPast");
       setMemberList(res.data.data);
-      if (res.status != 403) {
-        setMemberList([...res.data.data, "シス管試験用アカウント"]);
-      } else {
-        console.log(res)
-      }
+      setMemberList([...res.data.data, "シス管試験用アカウント"]);
     } catch (error) {
-      console.log(error);
+      console.dir(error)
+      setNameFetchFailed(true)
     }
   };
 
@@ -184,19 +183,22 @@ export default function IncomeForm({
             <Input value={getName} disabled />
           ) : (
             <>
-              <Select onChange={(e) => setGetName(e.target.value)}>
-                <option defaultChecked>選択してください</option>
-                {memberList.map((memberListComponent) => {
-                  return (
-                    <option
-                      value={memberListComponent}
-                      defaultValue={"購入者を選択してください"}
-                    >
-                      {memberListComponent}
-                    </option>
-                  );
-                })}
-              </Select>
+              {nameFetchFailed ? <>
+                <Input onChange={(e) => { setGetName(e.target.value) }} />
+              </> :
+                <Select onChange={(e) => setGetName(e.target.value)}>
+                  <option defaultChecked>選択してください</option>
+                  {memberList.map((memberListComponent) => {
+                    return (
+                      <option
+                        value={memberListComponent}
+                        defaultValue={"購入者を選択してください"}
+                      >
+                        {memberListComponent}
+                      </option>
+                    );
+                  })}
+                </Select>}
             </>
           )}
         </FormControl>
