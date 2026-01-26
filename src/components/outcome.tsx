@@ -195,6 +195,9 @@ export default function Outcome({
     if (res.status != 403) {
       setMemberList([...res.data.data, "シス管試験用アカウント"]);
     }
+    if (res.status == 403) {
+      console.error(res)
+    }
   };
 
   useEffect(() => {
@@ -206,7 +209,7 @@ export default function Outcome({
       <Heading>
         {
           ["本予算", "鳩山祭援助金", "校友会費", "後援会費"][
-            ["main", "hatosai", "alumni", "clubsupport"].indexOf(from)
+          ["main", "hatosai", "alumni", "clubsupport"].indexOf(from)
           ]
         }
         支出報告フォーム
@@ -354,13 +357,13 @@ export default function Outcome({
           <Textarea onChange={(e) => setMemo(e.target.value)} />
         </FormControl>
         {date != "" &&
-        year != "" &&
-        type != "" &&
-        subType != "" &&
-        value != 0 &&
-        name != "" &&
-        fixture != "" &&
-        file != undefined ? (
+          year != "" &&
+          type != "" &&
+          subType != "" &&
+          value != 0 &&
+          name != "" &&
+          fixture != "" &&
+          file != undefined ? (
           <Input
             type="submit"
             value="提出"
