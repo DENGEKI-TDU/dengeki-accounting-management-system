@@ -90,12 +90,12 @@ export default function Home() {
     ];
     // 行を定義
     axios
-      .post("/api/database/generate", {
+      .post(`/api/database/generate/${from}`, {
         year,
-        from,
       })
       .then(async (response) => {
         const result = response.data;
+        console.log(result);
         var earning: number = 0;
         for (var i = 0; i < result.data.length; i++) {
           earning += result.data[i].income;
