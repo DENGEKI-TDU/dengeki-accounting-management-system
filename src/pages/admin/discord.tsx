@@ -16,7 +16,8 @@ import { useAtomValue } from "jotai";
 import router from "next/router";
 import { useState, useEffect } from "react";
 
-export default function main() {
+// React のコンポーネント名は大文字で始める必要がある(以前は main で、Hooks のルール違反になっていた)
+export default function DiscordThreadSettings() {
   const { session, login, logout } = DengekiSSO();
   const userName = useAtomValue(loginNameAtom);
   const isLogin = useAtomValue(isLoginAtom);
@@ -46,7 +47,6 @@ export default function main() {
       setClubSupportPastThread(res.data.clubsupport);
     });
   }, []);
-  useEffect(() => {}, [mainThread]);
   if (isLogin && isAdmin) {
     return (
       <>

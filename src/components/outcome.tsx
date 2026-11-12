@@ -98,14 +98,14 @@ export default function Outcome({
       })
       .then(async (result) => {
         console.log(result.data.accountID);
-        if (file!!.type.match("image.*")) {
-          const fileExtension = file!!.name.split(".").pop();
+        if (file!.type.match("image.*")) {
+          const fileExtension = file!.name.split(".").pop();
           const uuid = uuidv4();
           const inputFileName = `image/${year}/${from}/${uuid}.${fileExtension}`;
           const ImageURL = public_url + inputFileName;
           const { error } = await supabase.storage
             .from("dengeki-receipt")
-            .upload(inputFileName, file!!);
+            .upload(inputFileName, file!);
           if (error) {
             alert("エラーが発生しました：" + error.message);
             return;
@@ -330,6 +330,7 @@ export default function Outcome({
                   {memberList.map((memberListComponent) => {
                     return (
                       <option
+                        key={memberListComponent}
                         value={memberListComponent}
                         defaultValue={"購入者を選択してください"}
                       >

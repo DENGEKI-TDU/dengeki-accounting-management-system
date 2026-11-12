@@ -96,8 +96,8 @@ export default function Home() {
       .then(async (response) => {
         const result = response.data;
         console.log(result);
-        var earning: number = 0;
-        for (var i = 0; i < result.data.length; i++) {
+        let earning: number = 0;
+        for (let i = 0; i < result.data.length; i++) {
           earning += result.data[i].income;
           earning -= result.data[i].outcome;
           const earning_string = "\\" + earning.toLocaleString();

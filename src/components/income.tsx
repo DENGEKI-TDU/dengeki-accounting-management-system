@@ -191,6 +191,7 @@ export default function IncomeForm({
                   {memberList.map((memberListComponent) => {
                     return (
                       <option
+                        key={memberListComponent}
                         value={memberListComponent}
                         defaultValue={"購入者を選択してください"}
                       >
