@@ -49,7 +49,8 @@ const Update: React.FC<{ update: updateAccount; from: string }> = ({
   const [to, setTo] = useState(from);
   const router = useRouter();
   const toast = useToast();
-  const toastIdRef: any = useRef();
+  // React 19 では useRef に初期値が必須
+  const toastIdRef: any = useRef(undefined);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const cancelRef = useRef<HTMLButtonElement>(null);
   const types: string[] = [

@@ -38,6 +38,10 @@
 
 ### package.json
 
+- **React を 18 → 19 に更新**(`react`・`react-dom`・`@types/react`・`@types/react-dom`)。モノレポで React が2つ読み込まれ、
+  公式サイトなどで `Invalid hook call` が出る原因になっていたため、全アプリの React を 19 に揃えた。
+  React 19 の型に合わせて `useRef()` を `useRef(undefined)` に変更(4か所)。Chakra UI v2 は React 18 以上に対応している。
+
 - 削除: `@prisma/client`・`prisma`・`@supabase/ssr`・`formidable`・`@types/formidable`・`@types/uuid`(uuid 本体に型が含まれる)・
   **`fs`**(Node.js 標準の fs とは別物の、npm 上の中身の無いパッケージ)
 - `@supabase/supabase-js` のバージョン指定 `latest` を `^2.75.0` に固定(`latest` は意図しない大型更新が入るため)

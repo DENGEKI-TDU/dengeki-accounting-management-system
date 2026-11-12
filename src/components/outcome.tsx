@@ -49,7 +49,8 @@ export default function Outcome({
   const [images, setImages] = useState<Blob[]>([]);
   const [memberList, setMemberList] = useState<string[]>([]);
   const public_url = process.env.NEXT_PUBLIC_SUPABASE_PUBLIC_URL;
-  const toastIdRef: any = useRef();
+  // React 19 では useRef に初期値が必須
+  const toastIdRef: any = useRef(undefined);
   const [nameFetchFailed, setNameFetchFailed] = useState(false)
 
   const [file, setFile] = useState<File>();

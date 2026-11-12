@@ -33,7 +33,8 @@ export default function Home() {
   const accoutnType = ["", "鳩山祭", "後援会費", "校友会費"];
   const jpAccoutnType = ["本予算", "鳩山祭", "後援会費", "校友会費"];
   const accountIndex = ["main", "hatosai", "clubsupport", "alumni"];
-  const toastIdRef: any = useRef();
+  // React 19 では useRef に初期値が必須
+  const toastIdRef: any = useRef(undefined);
   useEffect(() => {
     session().then(() => {
       setPending(false);

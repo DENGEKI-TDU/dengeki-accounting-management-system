@@ -41,7 +41,8 @@ export default function IncomeForm({
 
   const toast = useToast();
   const router = useRouter();
-  const toastIdRef: any = useRef();
+  // React 19 では useRef に初期値が必須
+  const toastIdRef: any = useRef(undefined);
 
   const getMemberList = async () => {
     try {
