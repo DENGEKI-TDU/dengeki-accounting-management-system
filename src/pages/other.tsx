@@ -1,61 +1,20 @@
-import { Box, Button, Heading, Text, VStack } from "@chakra-ui/react";
-import Link from "next/link";
+import { Button, Text, VStack } from "@chakra-ui/react";
+import LoginGate from "@/components/session/LoginGate";
+import MenuLink from "@/components/session/MenuLink";
 import { DengekiSSO } from "@/hooks/UseLoginState";
-import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import { isAdminAtom } from "@/lib/jotai/isAdminAtom";
-import { isLoginAtom } from "@/lib/jotai/isLoginAtom";
-import { loginNameAtom } from "@/lib/jotai/loginNameAtom";
-import { useAtomValue } from "jotai";
 
+/** 本予算以外の予算の一覧 */
 export default function Home() {
-  const { session, login, logout } = DengekiSSO();
-  const userName = useAtomValue(loginNameAtom);
-  const isLogin = useAtomValue(isLoginAtom);
-  const isAdmin = useAtomValue(isAdminAtom);
-  const [pending, setPending] = useState(true);
-  const router = useRouter();
-  useEffect(() => {
-    session().then(() => {
-      setPending(false);
-    });
-  }, []);
+  const { logout } = DengekiSSO();
   return (
-    <>
-      {!pending && isLogin ? (
-        <VStack>
-          <Text fontSize={"2xl"}>本予算を除く予算申請ページ</Text>
-          <Link href={"/hatosai"}>
-            <Box borderBottom="1px solid #fc8819">鳩山祭関連</Box>
-          </Link>
-          <Link href={"/clubsupport"}>
-            <Box borderBottom="1px solid #fc8819">後援会費関連</Box>
-          </Link>
-          <Link href="/alumni">
-            <Box borderBottom="1px solid #fc8819">校友会費関連</Box>
-          </Link>
-          <Button onClick={logout}>ログアウト</Button>
-        </VStack>
-      ) : (
-        <>
-          {!pending ? (
-            <>
-              <VStack>
-                <Heading>ログインしてください。</Heading>
-                <Button
-                  onClick={() => {
-                    router.push("/login");
-                  }}
-                >
-                  ログイン
-                </Button>
-              </VStack>
-            </>
-          ) : (
-            <Heading>ログイン状態確認中</Heading>
-          )}
-        </>
-      )}
-    </>
+    <LoginGate>
+      <VStack>
+        <Text fontSize={"2xl"}>本予算を除く予算申請ページ</Text>
+        <MenuLink href="/hatosai">鳩山祭関連</MenuLink>
+        <MenuLink href="/clubsupport">後援会費関連</MenuLink>
+        <MenuLink href="/alumni">校友会費関連</MenuLink>
+        <Button onClick={logout}>ログアウト</Button>
+      </VStack>
+    </LoginGate>
   );
 }

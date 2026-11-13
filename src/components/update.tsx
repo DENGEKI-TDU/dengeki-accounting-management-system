@@ -49,7 +49,8 @@ const Update: React.FC<{ update: updateAccount; from: string }> = ({
   const [to, setTo] = useState(from);
   const router = useRouter();
   const toast = useToast();
-  const toastIdRef: any = useRef();
+  // React 19 では useRef に初期値が必須
+  const toastIdRef: any = useRef(undefined);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const cancelRef = useRef<HTMLButtonElement>(null);
   const types: string[] = [
@@ -111,36 +112,28 @@ const Update: React.FC<{ update: updateAccount; from: string }> = ({
         isClosable: false,
       });
       const id = update.id;
-      let hostname: string;
+      // 以前はここで外部サービス(ipapi.co)に利用者の IP アドレスを問い合わせていたが、
+      // 結果はどこでも使われていなかったため削除した
       axios
-        .get("https://ipapi.co/json")
-        .then((res) => {
-          hostname = res.data.ip;
-          axios
-            .put(`/api/database/post-earnings/${from}/move/${to}`, {
-              id,
-              hostname,
-              mode: "aid",
-              from: from,
-              to: to,
-            })
-            .then(() => {
-              setIsEditMode(false);
-              if (toastIdRef.current) {
-                toast.close(toastIdRef.current);
-              }
-              toast({
-                title: "変更完了",
-                description: "支払い先の変更を完了しました。",
-                status: "success",
-                duration: 1500,
-                isClosable: true,
-              });
-              router.push("/admin/edit?from=" + from);
-            });
+        .put(`/api/database/post-earnings/${from}/move/${to}`, { id })
+        .then(() => {
+          setIsEditMode(false);
+          if (toastIdRef.current) {
+            toast.close(toastIdRef.current);
+          }
+          toast({
+            title: "変更完了",
+            description: "支払い先の変更を完了しました。",
+            status: "success",
+            duration: 1500,
+            isClosable: true,
+          });
+          router.push("/admin/edit?from=" + from);
         })
         .catch((error) => {
           dev.error(error);
+          toast.closeAll();
+          toast({ title: "変更に失敗しました", status: "error", duration: 3000, isClosable: true });
         });
     }
   }
@@ -154,35 +147,33 @@ const Update: React.FC<{ update: updateAccount; from: string }> = ({
       isClosable: false,
     });
     const id = update.id;
-    let hostname: string;
     axios
-      .get("https://ipapi.co/json")
-      .then((res) => {
-        hostname = res.data.ip;
-        const inputPass = localStorage.getItem("storage_token");
-        axios
-          .delete(`/api/database/post-earnings/${from}`, {
-            data: {
-              id,
-            },
-          })
-          .then(() => {
-            setIsEditMode(false);
-            if (toastIdRef.current) {
-              toast.close(toastIdRef.current);
-            }
-            toast({
-              title: "削除完了",
-              description: "削除を完了しました。",
-              status: "success",
-              duration: 1500,
-              isClosable: true,
-            });
-            router.push("/admin/edit?from=" + from);
-          });
+      .delete(`/api/database/post-earnings/${from}`, { data: { id } })
+      .then(() => {
+        setIsEditMode(false);
+        if (toastIdRef.current) {
+          toast.close(toastIdRef.current);
+        }
+        toast({
+          title: "削除完了",
+          description: "削除を完了しました。",
+          status: "success",
+          duration: 1500,
+          isClosable: true,
+        });
+        router.push("/admin/edit?from=" + from);
       })
       .catch((error) => {
         dev.error(error);
+        toast.closeAll();
+        // 処理済み(会計キューに無い)データは削除できない。理由は API の応答に入っている
+        toast({
+          title: "削除に失敗しました",
+          description: error?.response?.data?.message,
+          status: "error",
+          duration: 4000,
+          isClosable: true,
+        });
       });
   }
 
@@ -311,7 +302,7 @@ const Update: React.FC<{ update: updateAccount; from: string }> = ({
                 onChange={(e) => setTo(e.target.value)}
               >
                 <option value="main">本予算</option>
-                <option value="hatoyama">鳩山祭援助金</option>
+                <option value="hatosai">鳩山祭援助金</option>
                 <option value="clubsupport">後援会費</option>
                 <option value="alumni">校友会費</option>
                 <option value="aid">共済金</option>

@@ -14,8 +14,7 @@ import {
   Text,
   Link,
 } from "@chakra-ui/react";
-import { GetServerSideProps, GetStaticProps } from "next";
-import prisma from "@/lib/prisma";
+
 import Update from "../../components/update";
 import { DengekiSSO } from "@/hooks/UseLoginState";
 import { useRouter } from "next/router";

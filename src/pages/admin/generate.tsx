@@ -33,7 +33,8 @@ export default function Home() {
   const accoutnType = ["", "鳩山祭", "後援会費", "校友会費"];
   const jpAccoutnType = ["本予算", "鳩山祭", "後援会費", "校友会費"];
   const accountIndex = ["main", "hatosai", "clubsupport", "alumni"];
-  const toastIdRef: any = useRef();
+  // React 19 では useRef に初期値が必須
+  const toastIdRef: any = useRef(undefined);
   useEffect(() => {
     session().then(() => {
       setPending(false);
@@ -96,8 +97,8 @@ export default function Home() {
       .then(async (response) => {
         const result = response.data;
         console.log(result);
-        var earning: number = 0;
-        for (var i = 0; i < result.data.length; i++) {
+        let earning: number = 0;
+        for (let i = 0; i < result.data.length; i++) {
           earning += result.data[i].income;
           earning -= result.data[i].outcome;
           const earning_string = "\\" + earning.toLocaleString();

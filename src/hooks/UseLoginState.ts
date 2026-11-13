@@ -6,6 +6,13 @@ import { loginNameAtom } from "@/lib/jotai/loginNameAtom";
 import { useRouter } from "next/router";
 import { dev } from "@/lib/Dev";
 
+/**
+ * ログイン後の移動先として安全なパスか(サイト内の "/" で始まるパスだけ許可する)。
+ * `?pagelocate=https://外部サイト` のような指定で外部に飛ばされないようにするため。
+ */
+const isSafeInternalPath = (path: string | null): path is string =>
+  !!path && path.startsWith("/") && !path.startsWith("//") && !path.startsWith("/\\");
+
 export const DengekiSSO = () => {
   const toast = useToast();
   const router = useRouter();
@@ -45,12 +52,16 @@ export const DengekiSSO = () => {
     }).then(async () => {
       await fetch("/api/session/getSession").then(async (res) => {
         const response = await res.json();
-        if (response.status == "failed") {
+        // getSession は失敗時に status を返さず isLogin: false を返すため、isLogin で判定する
+        // (以前は status == "failed" で判定しており、失敗のトーストが一度も出ていなかった)
+        if (!response.isLogin) {
+          toast.closeAll();
           toast({
             title: "ログイン失敗",
             description:
               "ログインに失敗しました。ID又はパスワードを確認してください。",
-            status: "success",
+            // 以前は失敗なのに success(緑色)で表示されていた
+            status: "error",
             duration: 3000,
           });
         } else {
@@ -67,7 +78,7 @@ export const DengekiSSO = () => {
             setIsAdmin(
               response.isAdmin || response.isDev || response.isTreasurer,
             );
-            if (locate) {
+            if (isSafeInternalPath(locate)) {
               router.push(locate);
             } else {
               router.push("/");
